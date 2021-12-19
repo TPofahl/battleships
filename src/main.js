@@ -4,7 +4,7 @@ import GameOver from './scenes/GameOver.js';
 
 export default new Phaser.Game({//config
   type: Phaser.AUTO,
-  width: 512,
+  width: 768,
   height: 736,
   scene: [Game, GameOver],
   physics: {
