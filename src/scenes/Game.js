@@ -33,7 +33,7 @@ export default class Game extends Phaser.Scene{
     let computerBoardStartY = 48;
     let boardCenterX = 0;
     let boardCenterY = 0;
-    let cursor = {onGrid: ""};
+    let cursor = {onGrid: "", onIndex: 0};
 
     //handle starting player cursor position
     if (boardSize % 2 == 0) {
@@ -85,6 +85,8 @@ export default class Game extends Phaser.Scene{
 
     let cursorStartPosition = (playerBoardArray[(playerBoardArray.length / 2) + 5]);
     cursor.onGrid = cursorStartPosition;
+    cursor.onIndex = (playerBoardArray.length / 2) + 5
+    console.log(cursor.onIndex);
     console.log(cursor.onGrid);
 
     const layer0 = this.add.layer();
@@ -93,12 +95,35 @@ export default class Game extends Phaser.Scene{
     layer1.add([playerCursor]);
 
     //keyboard movement
-    this.input.keyboard.on('keydown-W', function () {playerCursor.y -= 32});
-    this.input.keyboard.on('keydown-S', function () {playerCursor.y += 32});
-    this.input.keyboard.on('keydown-A', function () {playerCursor.x -= 32});
+    this.input.keyboard.on('keydown-W', function () {
+      playerCursor.y -= 32
+      cursor.onIndex = cursor.onIndex - 10;
+      let updatedPosition = playerBoardArray[(cursor.onIndex)];
+      cursor.onGrid = updatedPosition;
+      console.log(cursor.onGrid);
+    });
+
+    this.input.keyboard.on('keydown-S', function () {
+      playerCursor.y += 32
+      cursor.onIndex = cursor.onIndex + 10;
+      let updatedPosition = playerBoardArray[(cursor.onIndex)];
+      cursor.onGrid = updatedPosition;
+      console.log(cursor.onGrid);
+    });
+
+    this.input.keyboard.on('keydown-A', function () {
+      playerCursor.x -= 32;
+      cursor.onIndex = cursor.onIndex - 1;
+      let updatedPosition = playerBoardArray[(cursor.onIndex)];
+      cursor.onGrid = updatedPosition;
+      console.log(cursor.onGrid);
+    });
+
     this.input.keyboard.on('keydown-D', function () {
       playerCursor.x += 32;
-      cursor.onGrid = (playerBoardArray[(playerBoardArray.length / 2) + 6]);
+      cursor.onIndex = cursor.onIndex + 1;
+      let updatedPosition = playerBoardArray[(cursor.onIndex)];
+      cursor.onGrid = updatedPosition;
       console.log(cursor.onGrid);
     });
 
