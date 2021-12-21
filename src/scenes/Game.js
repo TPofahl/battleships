@@ -30,6 +30,7 @@ export default class Game extends Phaser.Scene{
     let boardLength = boardSize * 32;//32x32 tiles
     let boardStartX = 112;
     let playerBoardStartY = 400;
+    let playerBoardY = playerBoardStartY;    
     let computerBoardStartY = 48;
     let boardCenterX = 0;
     let boardCenterY = 0;
@@ -96,35 +97,58 @@ export default class Game extends Phaser.Scene{
 
     //keyboard movement
     this.input.keyboard.on('keydown-W', function () {
-      playerCursor.y -= 32
-      cursor.onIndex = cursor.onIndex - 10;
-      let updatedPosition = playerBoardArray[(cursor.onIndex)];
-      cursor.onGrid = updatedPosition;
-      console.log(cursor.onGrid);
+      console.log(playerCursor.y);
+      console.log(playerBoardY);
+      playerCursor.y -= 32;
+      if (playerCursor.y < playerBoardY) {
+        playerCursor.y +=32;
+      } else {
+        cursor.onIndex = cursor.onIndex - 10;
+        let updatedPosition = playerBoardArray[(cursor.onIndex)];
+        cursor.onGrid = updatedPosition;
+        console.log(cursor.onGrid);
+      }
     });
 
     this.input.keyboard.on('keydown-S', function () {
-      playerCursor.y += 32
-      cursor.onIndex = cursor.onIndex + 10;
-      let updatedPosition = playerBoardArray[(cursor.onIndex)];
-      cursor.onGrid = updatedPosition;
-      console.log(cursor.onGrid);
+      console.log(playerCursor.y);
+      console.log(playerBoardY);
+      playerCursor.y += 32;
+      if (playerCursor.y > playerBoardY + (boardLength - 32)) {
+        playerCursor.y -= 32;
+      } else {
+        cursor.onIndex = cursor.onIndex + 10;
+        let updatedPosition = playerBoardArray[(cursor.onIndex)];
+        cursor.onGrid = updatedPosition;
+        console.log(cursor.onGrid);
+      }
     });
 
     this.input.keyboard.on('keydown-A', function () {
+      console.log( playerCursor.x);
       playerCursor.x -= 32;
+      if (playerCursor.x < boardStartX) {
+        playerCursor.x += 32;
+      } else {
       cursor.onIndex = cursor.onIndex - 1;
       let updatedPosition = playerBoardArray[(cursor.onIndex)];
       cursor.onGrid = updatedPosition;
       console.log(cursor.onGrid);
+      }
     });
 
     this.input.keyboard.on('keydown-D', function () {
+      console.log( playerCursor.x);
       playerCursor.x += 32;
-      cursor.onIndex = cursor.onIndex + 1;
-      let updatedPosition = playerBoardArray[(cursor.onIndex)];
-      cursor.onGrid = updatedPosition;
-      console.log(cursor.onGrid);
+      if (playerCursor.x > boardStartX + (boardLength -32)) {
+        playerCursor.x -= 32;
+      } else {
+        console.log(playerCursor.x);
+        cursor.onIndex = cursor.onIndex + 1;
+        let updatedPosition = playerBoardArray[(cursor.onIndex)];
+        cursor.onGrid = updatedPosition;
+        console.log(cursor.onGrid);
+      }
     });
 
 
