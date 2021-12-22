@@ -1,6 +1,6 @@
 import Phaser from '../lib/phaser.js';
 
-const boardSize = 10;
+const boardSize = 10;//only works with 10 so far
 const playerBoardArray = [];
 const computerBoardArray = [];
 
@@ -23,6 +23,8 @@ export default class Game extends Phaser.Scene{
     this.load.image('left-button', 'assets/button-left.png');
     this.load.image('right-button', 'assets/button-right.png');
     this.load.image('cursor-player', 'assets/cursor-player.png');
+    this.load.audio('cursor-move', 'assets/sfx/cursor-move.wav');
+    this.load.audio('cursor-bounds', 'assets/sfx/cursor-bounds.wav');
   }
 
 
@@ -34,7 +36,10 @@ export default class Game extends Phaser.Scene{
     let computerBoardStartY = 48;
     let boardCenterX = 0;
     let boardCenterY = 0;
-    let cursor = {onGrid: "", onIndex: 0};
+    let cursor = { onGrid: "", onIndex: 0, xPos: 0, yPos: 0 };
+
+    const cursorMoveSound = this.sound.add('cursor-move', {volume: 0.2});
+    const cursorThud = this.sound.add('cursor-bounds', {volume: 0.2});
 
     //handle starting player cursor position
     if (boardSize % 2 == 0) {
@@ -74,11 +79,13 @@ export default class Game extends Phaser.Scene{
     //create game board for player
     for (let y = 0; y < boardLength; y = y + 32) {
       let boardNumber = 1;
+      let k = 0;
       for (let x = 0; x < boardLength; x = x + 32) {
         this.add.image(x + boardStartX, playerBoardStartY, 'water').setScale(1.0);
-        playerBoardArray.push(boardLetter + boardNumber);
+        playerBoardArray.push({ id: boardLetter + boardNumber, ship:false });
         pTileNumber++;
         boardNumber++;
+        k++
       }
       boardLetter = String.fromCharCode(boardLetter.charCodeAt(0) + 1);
       playerBoardStartY = playerBoardStartY + 32;
@@ -87,8 +94,6 @@ export default class Game extends Phaser.Scene{
     let cursorStartPosition = (playerBoardArray[(playerBoardArray.length / 2) + 5]);
     cursor.onGrid = cursorStartPosition;
     cursor.onIndex = (playerBoardArray.length / 2) + 5
-    console.log(cursor.onIndex);
-    console.log(cursor.onGrid);
 
     const layer0 = this.add.layer();
     const layer1 = this.add.layer();
@@ -97,57 +102,66 @@ export default class Game extends Phaser.Scene{
 
     //keyboard movement
     this.input.keyboard.on('keydown-W', function () {
-      console.log(playerCursor.y);
-      console.log(playerBoardY);
+
       playerCursor.y -= 32;
       if (playerCursor.y < playerBoardY) {
+        cursorThud.play();
         playerCursor.y +=32;
       } else {
+        cursorMoveSound.play();
         cursor.onIndex = cursor.onIndex - 10;
         let updatedPosition = playerBoardArray[(cursor.onIndex)];
         cursor.onGrid = updatedPosition;
-        console.log(cursor.onGrid);
+        cursor.yPos = playerCursor.y;
+        console.log(cursor);
       }
     });
 
     this.input.keyboard.on('keydown-S', function () {
-      console.log(playerCursor.y);
-      console.log(playerBoardY);
+
       playerCursor.y += 32;
       if (playerCursor.y > playerBoardY + (boardLength - 32)) {
+        cursorThud.play();
         playerCursor.y -= 32;
       } else {
+        cursorMoveSound.play();
         cursor.onIndex = cursor.onIndex + 10;
         let updatedPosition = playerBoardArray[(cursor.onIndex)];
         cursor.onGrid = updatedPosition;
-        console.log(cursor.onGrid);
+        cursor.yPos = playerCursor.y;
+        console.log(cursor);
       }
     });
 
     this.input.keyboard.on('keydown-A', function () {
-      console.log( playerCursor.x);
+
       playerCursor.x -= 32;
       if (playerCursor.x < boardStartX) {
+        cursorThud.play();
         playerCursor.x += 32;
       } else {
+        cursorMoveSound.play();
       cursor.onIndex = cursor.onIndex - 1;
       let updatedPosition = playerBoardArray[(cursor.onIndex)];
       cursor.onGrid = updatedPosition;
-      console.log(cursor.onGrid);
+      cursor.xPos = playerCursor.x;
+      console.log(cursor);
       }
     });
 
     this.input.keyboard.on('keydown-D', function () {
-      console.log( playerCursor.x);
+
       playerCursor.x += 32;
       if (playerCursor.x > boardStartX + (boardLength -32)) {
+        cursorThud.play();
         playerCursor.x -= 32;
       } else {
-        console.log(playerCursor.x);
+        cursorMoveSound.play();
         cursor.onIndex = cursor.onIndex + 1;
         let updatedPosition = playerBoardArray[(cursor.onIndex)];
         cursor.onGrid = updatedPosition;
-        console.log(cursor.onGrid);
+        cursor.xPos = playerCursor.x;
+        console.log(cursor);
       }
     });
 
@@ -156,7 +170,7 @@ export default class Game extends Phaser.Scene{
     console.log('\n\n\n\n');
     console.log("COMPUTER BOARD");
     let cFirst = 0;
-    let cLast = 10
+    let cLast = boardSize;
     for (let i = 0; i < boardSize; i++) {
       console.log(computerBoardArray.slice(cFirst, cLast));
       cFirst = cFirst + 10;
@@ -166,12 +180,13 @@ export default class Game extends Phaser.Scene{
     console.log('\n\n\n\n');
     console.log('PLAYER BOARD');
     let pFirst = 0;
-    let pLast = 10
+    let pLast = boardSize;
     for (let i = 0; i < boardSize; i++) {
       console.log(playerBoardArray.slice(pFirst, pLast));
-      pFirst = pFirst + 10;
-      pLast = pLast + 10;
+      pFirst = pFirst + boardSize;
+      pLast = pLast + boardSize;
     }
+    console.log(playerBoardArray);
   }
 
 
