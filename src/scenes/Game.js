@@ -23,6 +23,11 @@ export default class Game extends Phaser.Scene{
     this.load.image('left-button', 'assets/button-left.png');
     this.load.image('right-button', 'assets/button-right.png');
     this.load.image('cursor-player', 'assets/cursor-player.png');
+    this.load.image('battleship', 'assets/battleship.png');
+    this.load.image('cruiser', 'assets/cruiser.png');
+    this.load.image('carrier', 'assets/carrier.png');
+    this.load.image('destroyer', 'assets/destroyer.png');
+    this.load.image('submarine', 'assets/submarine.png');
     this.load.audio('cursor-move', 'assets/sfx/cursor-move.wav');
     this.load.audio('cursor-bounds', 'assets/sfx/cursor-bounds.wav');
   }
@@ -82,7 +87,7 @@ export default class Game extends Phaser.Scene{
       let k = 0;
       for (let x = 0; x < boardLength; x = x + 32) {
         this.add.image(x + boardStartX, playerBoardStartY, 'water').setScale(1.0);
-        playerBoardArray.push({ id: boardLetter + boardNumber, ship:false });
+        playerBoardArray.push({ id: boardLetter + boardNumber, ship:false, xPos: x + boardStartX, yPos: playerBoardStartY });
         pTileNumber++;
         boardNumber++;
         k++
@@ -99,6 +104,13 @@ export default class Game extends Phaser.Scene{
     const layer1 = this.add.layer();
     layer0.add([ aButton, bButton, upButton, downbutton, leftButton, rightButton]);
     layer1.add([playerCursor]);
+
+    //place ships
+    this.placeShip('carrier', 5, boardLength, boardStartX);
+    this.placeShip('battleship', 4, boardLength, boardStartX);
+    this.placeShip('cruiser', 3, boardLength, boardStartX);
+    this.placeShip('submarine', 3, boardLength, boardStartX);
+    this.placeShip('destroyer', 2, boardLength, boardStartX);
 
     //keyboard movement
     this.input.keyboard.on('keydown-W', function () {
@@ -143,6 +155,9 @@ export default class Game extends Phaser.Scene{
         cursorMoveSound.play();
       cursor.onIndex = cursor.onIndex - 1;
       let updatedPosition = playerBoardArray[(cursor.onIndex)];
+
+
+
       cursor.onGrid = updatedPosition;
       cursor.xPos = playerCursor.x;
       console.log(cursor);
@@ -164,8 +179,7 @@ export default class Game extends Phaser.Scene{
         console.log(cursor);
       }
     });
-
-
+    /*
     //Show computer board layout console
     console.log('\n\n\n\n');
     console.log("COMPUTER BOARD");
@@ -176,6 +190,7 @@ export default class Game extends Phaser.Scene{
       cFirst = cFirst + 10;
       cLast = cLast + 10;
     }
+    */
     //Show player board layout console
     console.log('\n\n\n\n');
     console.log('PLAYER BOARD');
@@ -186,10 +201,45 @@ export default class Game extends Phaser.Scene{
       pFirst = pFirst + boardSize;
       pLast = pLast + boardSize;
     }
-    console.log(playerBoardArray);
   }
 
+  placeShip(shipType, shipLength, boardLength, boardStartX) {
+    let okToPlace = false;
+    let index = 0;
+    console.log(`ship length: ${shipLength}`);
 
-  update(){
+    do {
+      let tileStart = Phaser.Math.Between(0, playerBoardArray.length - 1);
+      let shipRotation = Phaser.Math.Between(0, 3);
+      console.log(shipRotation);
+      console.log(playerBoardArray[tileStart]);
+      let range = playerBoardArray.slice(tileStart, tileStart + shipLength);
+    
+      //console.log(boardLength + boardStartX);
+      //console.log(`start: ${playerBoardArray[tileStart, tileStart + 4].ship}`);
+
+      if (playerBoardArray[tileStart].xPos + ((shipLength - 1) * 32) > (boardLength + boardStartX) - 32) {
+        console.log(`error: max ship placement X:${playerBoardArray[tileStart].xPos + shipLength} board X: ${((boardLength + boardStartX) - 32)}`);
+        okToPlace = false;
+      } else if (this.checkShipCollision(tileStart, shipLength)) {
+        console.log('test');
+        okToPlace = false;
+      } else {
+          for (let i = 0; i < shipLength; i++) playerBoardArray[tileStart + i].ship = true;
+          //console.log(`end: ${playerBoardArray[tileStart, tileStart + 4].ship}`);
+          okToPlace = true;
+      };
+
+      index = tileStart;
+      console.log('place status: ', okToPlace);
+
+    } while (okToPlace == false);
+    return this.add.sprite(playerBoardArray[index].xPos - 16, playerBoardArray[index].yPos - 16, shipType).setScale(1.0).setOrigin(0,0);
+  }
+
+  checkShipCollision(tileStart, shipLength) {
+    let shipLocation = playerBoardArray.slice(tileStart, tileStart + shipLength);
+    console.log('wa: ', shipLocation);
+    return shipLocation.some(element => element.ship === true);
   }
 }
