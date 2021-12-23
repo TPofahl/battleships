@@ -107,11 +107,11 @@ export default class Game extends Phaser.Scene{
     layer1.add([playerCursor]);
 
     //place ships
-    this.placeShip('carrier', 5, boardLength, boardStartX, playerBoardY);
-    this.placeShip('battleship', 4, boardLength, boardStartX, playerBoardY);
-    this.placeShip('cruiser', 3, boardLength, boardStartX, playerBoardY);
-    this.placeShip('submarine', 3, boardLength, boardStartX, playerBoardY);
-    this.placeShip('destroyer', 2, boardLength, boardStartX, playerBoardY);
+    this.placeShip('carrier', 5, boardSize, boardLength, boardStartX, playerBoardY);
+    this.placeShip('battleship', 4, boardSize, boardLength, boardStartX, playerBoardY);
+    this.placeShip('cruiser', 3, boardSize, boardLength, boardStartX, playerBoardY);
+    this.placeShip('submarine', 3, boardSize, boardLength, boardStartX, playerBoardY);
+    this.placeShip('destroyer', 2, boardSize, boardLength, boardStartX, playerBoardY);
 
     //keyboard movement
     this.input.keyboard.on('keydown-W', function () {
@@ -200,14 +200,14 @@ export default class Game extends Phaser.Scene{
     }
   }
 
-  placeShip(shipType, shipLength, boardLength, boardStartX, playerBoardY) {
+  placeShip(shipType, shipLength, boardSize, boardLength, boardStartX, playerBoardY) {
     let okToPlace = false;
     let index = 0;
     let shipOrientation = '';
     console.log(`ship length: ${shipLength}`);
     let shipRotation = Phaser.Math.Between(0, 3);
     if (shipRotation === 0 || shipRotation === 2 ) shipOrientation = 'vertical';
-    if (shipRotation === 1 || shipRotation === 3 ) shipOrientation = 'vertical';
+    else {shipOrientation = 'horizontal'};
 
     switch (shipOrientation) {
       case 'horizontal':
@@ -218,7 +218,7 @@ export default class Game extends Phaser.Scene{
           if (this.playerBoardArray[tileStart].xPos + ((shipLength - 1) * 32) > (boardLength + boardStartX) - 32) {
             //console.log(`error: max ship placement X:${this.playerBoardArray[tileStart].xPos + shipLength} board X: ${((boardLength + boardStartX) - 32)}`);
             okToPlace = false;
-          } else if (this.checkShipCollision(tileStart, shipLength, 'horizontal')) {
+          } else if (this.checkShipCollision(boardSize, tileStart, shipLength, 'horizontal')) {
             //console.log('test');
             okToPlace = false;
           } else {
@@ -243,11 +243,11 @@ export default class Game extends Phaser.Scene{
           if (this.playerBoardArray[tileStart].yPos + ((shipLength - 1) * 32) > (boardLength + playerBoardY) - 32) {
             console.log(`error: max ship placement Y: ${this.playerBoardArray[tileStart].yPos + shipLength} board Y: ${((boardLength + boardStartX) - 32)}`);
             okToPlace = false;
-          } else if (this.checkShipCollision(tileStart, shipLength, 'vertical')) {
+          } else if (this.checkShipCollision(boardSize, tileStart, shipLength, 'vertical')) {
             console.log('test');
             okToPlace = false;
           } else {
-              for (let i = 0; i < shipLength; i++) this.playerBoardArray[tileStart + i].ship = true;
+              for (let i = 0; i < shipLength; i++) this.playerBoardArray[tileStart + (i * boardSize)].ship = true;
               okToPlace = true;
           };
           index = tileStart;
@@ -263,8 +263,7 @@ export default class Game extends Phaser.Scene{
   }
 
 
-  checkShipCollision(tileStart, shipLength, shipRotation) {
-  
+  checkShipCollision(boardSize, tileStart, shipLength, shipRotation) {
     if (shipRotation === 'horizontal') {
       let shipLocation = this.playerBoardArray.slice(tileStart, tileStart + shipLength);
       return shipLocation.some(element => element.ship === true);
@@ -275,9 +274,9 @@ export default class Game extends Phaser.Scene{
       console.log('lengthhh: ', shipLength);
       console.log('ship: ', shipLocation);
       for (let i = 1; i < shipLength; i++) {
-        shipLocation.push(this.playerBoardArray[i]);
+        shipLocation.push(this.playerBoardArray[tileStart + (i * boardSize)]);
       }
-    console.log('updated array: ', shipLocation);
+      return shipLocation.some(element => element.ship === true);
     }
   }
 }
