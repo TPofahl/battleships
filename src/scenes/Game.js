@@ -1,13 +1,13 @@
 import Phaser from '../lib/phaser.js';
 
 const boardSize = 10;//only works with 10 so far
-const playerBoardArray = [];
 const computerBoardArray = [];
 
 export default class Game extends Phaser.Scene{
 
   constructor(){
     super('game')
+    this.playerBoardArray = [];
   }
 
   init(){
@@ -42,6 +42,7 @@ export default class Game extends Phaser.Scene{
     let boardCenterX = 0;
     let boardCenterY = 0;
     let cursor = { onGrid: "", onIndex: 0, xPos: 0, yPos: 0 };
+    let playerBoard = this.playerBoardArray;
 
     const cursorMoveSound = this.sound.add('cursor-move', {volume: 0.2});
     const cursorThud = this.sound.add('cursor-bounds', {volume: 0.2});
@@ -87,7 +88,7 @@ export default class Game extends Phaser.Scene{
       let k = 0;
       for (let x = 0; x < boardLength; x = x + 32) {
         this.add.image(x + boardStartX, playerBoardStartY, 'water').setScale(1.0);
-        playerBoardArray.push({ id: boardLetter + boardNumber, ship:false, xPos: x + boardStartX, yPos: playerBoardStartY });
+        this.playerBoardArray.push({ id: boardLetter + boardNumber, ship:false, xPos: x + boardStartX, yPos: playerBoardStartY });
         pTileNumber++;
         boardNumber++;
         k++
@@ -96,9 +97,9 @@ export default class Game extends Phaser.Scene{
       playerBoardStartY = playerBoardStartY + 32;
     }
 
-    let cursorStartPosition = (playerBoardArray[(playerBoardArray.length / 2) + 5]);
+    let cursorStartPosition = (this.playerBoardArray[(this.playerBoardArray.length / 2) + 5]);
     cursor.onGrid = cursorStartPosition;
-    cursor.onIndex = (playerBoardArray.length / 2) + 5
+    cursor.onIndex = (this.playerBoardArray.length / 2) + 5
 
     const layer0 = this.add.layer();
     const layer1 = this.add.layer();
@@ -122,7 +123,7 @@ export default class Game extends Phaser.Scene{
       } else {
         cursorMoveSound.play();
         cursor.onIndex = cursor.onIndex - 10;
-        let updatedPosition = playerBoardArray[(cursor.onIndex)];
+        let updatedPosition = playerBoard[(cursor.onIndex)];
         cursor.onGrid = updatedPosition;
         cursor.yPos = playerCursor.y;
         console.log(cursor);
@@ -138,7 +139,7 @@ export default class Game extends Phaser.Scene{
       } else {
         cursorMoveSound.play();
         cursor.onIndex = cursor.onIndex + 10;
-        let updatedPosition = playerBoardArray[(cursor.onIndex)];
+        let updatedPosition = playerBoard[(cursor.onIndex)];
         cursor.onGrid = updatedPosition;
         cursor.yPos = playerCursor.y;
         console.log(cursor);
@@ -154,10 +155,7 @@ export default class Game extends Phaser.Scene{
       } else {
         cursorMoveSound.play();
       cursor.onIndex = cursor.onIndex - 1;
-      let updatedPosition = playerBoardArray[(cursor.onIndex)];
-
-
-
+      let updatedPosition = playerBoard[(cursor.onIndex)];
       cursor.onGrid = updatedPosition;
       cursor.xPos = playerCursor.x;
       console.log(cursor);
@@ -165,7 +163,6 @@ export default class Game extends Phaser.Scene{
     });
 
     this.input.keyboard.on('keydown-D', function () {
-
       playerCursor.x += 32;
       if (playerCursor.x > boardStartX + (boardLength -32)) {
         cursorThud.play();
@@ -173,7 +170,7 @@ export default class Game extends Phaser.Scene{
       } else {
         cursorMoveSound.play();
         cursor.onIndex = cursor.onIndex + 1;
-        let updatedPosition = playerBoardArray[(cursor.onIndex)];
+        let updatedPosition = playerBoard[(cursor.onIndex)];
         cursor.onGrid = updatedPosition;
         cursor.xPos = playerCursor.x;
         console.log(cursor);
@@ -197,7 +194,7 @@ export default class Game extends Phaser.Scene{
     let pFirst = 0;
     let pLast = boardSize;
     for (let i = 0; i < boardSize; i++) {
-      console.log(playerBoardArray.slice(pFirst, pLast));
+      console.log(this.playerBoardArray.slice(pFirst, pLast));
       pFirst = pFirst + boardSize;
       pLast = pLast + boardSize;
     }
@@ -207,38 +204,34 @@ export default class Game extends Phaser.Scene{
     let okToPlace = false;
     let index = 0;
     console.log(`ship length: ${shipLength}`);
+    let shipRotation = Phaser.Math.Between(0, 1);
+
 
     do {
-      let tileStart = Phaser.Math.Between(0, playerBoardArray.length - 1);
-      let shipRotation = Phaser.Math.Between(0, 3);
-      console.log(shipRotation);
-      console.log(playerBoardArray[tileStart]);
-      let range = playerBoardArray.slice(tileStart, tileStart + shipLength);
-    
-      //console.log(boardLength + boardStartX);
-      //console.log(`start: ${playerBoardArray[tileStart, tileStart + 4].ship}`);
+      let tileStart = Phaser.Math.Between(0, this.playerBoardArray.length - 1);
+      console.log(this.playerBoardArray[tileStart]);
 
-      if (playerBoardArray[tileStart].xPos + ((shipLength - 1) * 32) > (boardLength + boardStartX) - 32) {
-        console.log(`error: max ship placement X:${playerBoardArray[tileStart].xPos + shipLength} board X: ${((boardLength + boardStartX) - 32)}`);
+      if (this.playerBoardArray[tileStart].xPos + ((shipLength - 1) * 32) > (boardLength + boardStartX) - 32) {
+        console.log(`error: max ship placement X:${this.playerBoardArray[tileStart].xPos + shipLength} board X: ${((boardLength + boardStartX) - 32)}`);
         okToPlace = false;
       } else if (this.checkShipCollision(tileStart, shipLength)) {
         console.log('test');
         okToPlace = false;
       } else {
-          for (let i = 0; i < shipLength; i++) playerBoardArray[tileStart + i].ship = true;
-          //console.log(`end: ${playerBoardArray[tileStart, tileStart + 4].ship}`);
+          for (let i = 0; i < shipLength; i++) this.playerBoardArray[tileStart + i].ship = true;
           okToPlace = true;
       };
-
       index = tileStart;
       console.log('place status: ', okToPlace);
-
     } while (okToPlace == false);
-    return this.add.sprite(playerBoardArray[index].xPos - 16, playerBoardArray[index].yPos - 16, shipType).setScale(1.0).setOrigin(0,0);
+    
+    let createShip = this.add.sprite(this.playerBoardArray[index].xPos - 16, this.playerBoardArray[index].yPos - 16, shipType).setScale(1.0).setOrigin(0,0);
+    if (shipRotation === 1) createShip.flipX = true;
+    return createShip;
   }
 
   checkShipCollision(tileStart, shipLength) {
-    let shipLocation = playerBoardArray.slice(tileStart, tileStart + shipLength);
+    let shipLocation = this.playerBoardArray.slice(tileStart, tileStart + shipLength);
     console.log('wa: ', shipLocation);
     return shipLocation.some(element => element.ship === true);
   }
