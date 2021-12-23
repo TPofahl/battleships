@@ -107,11 +107,11 @@ export default class Game extends Phaser.Scene{
     layer1.add([playerCursor]);
 
     //place ships
-    this.placeShip('carrier', 5, boardLength, boardStartX);
-    this.placeShip('battleship', 4, boardLength, boardStartX);
-    this.placeShip('cruiser', 3, boardLength, boardStartX);
-    this.placeShip('submarine', 3, boardLength, boardStartX);
-    this.placeShip('destroyer', 2, boardLength, boardStartX);
+    this.placeShip('carrier', 5, boardLength, boardStartX, playerBoardY);
+    this.placeShip('battleship', 4, boardLength, boardStartX, playerBoardY);
+    this.placeShip('cruiser', 3, boardLength, boardStartX, playerBoardY);
+    this.placeShip('submarine', 3, boardLength, boardStartX, playerBoardY);
+    this.placeShip('destroyer', 2, boardLength, boardStartX, playerBoardY);
 
     //keyboard movement
     this.input.keyboard.on('keydown-W', function () {
@@ -200,39 +200,84 @@ export default class Game extends Phaser.Scene{
     }
   }
 
-  placeShip(shipType, shipLength, boardLength, boardStartX) {
+  placeShip(shipType, shipLength, boardLength, boardStartX, playerBoardY) {
     let okToPlace = false;
     let index = 0;
+    let shipOrientation = '';
     console.log(`ship length: ${shipLength}`);
-    let shipRotation = Phaser.Math.Between(0, 1);
+    let shipRotation = Phaser.Math.Between(0, 3);
+    if (shipRotation === 0 || shipRotation === 2 ) shipOrientation = 'vertical';
+    if (shipRotation === 1 || shipRotation === 3 ) shipOrientation = 'vertical';
 
-
-    do {
-      let tileStart = Phaser.Math.Between(0, this.playerBoardArray.length - 1);
-      console.log(this.playerBoardArray[tileStart]);
-
-      if (this.playerBoardArray[tileStart].xPos + ((shipLength - 1) * 32) > (boardLength + boardStartX) - 32) {
-        console.log(`error: max ship placement X:${this.playerBoardArray[tileStart].xPos + shipLength} board X: ${((boardLength + boardStartX) - 32)}`);
-        okToPlace = false;
-      } else if (this.checkShipCollision(tileStart, shipLength)) {
-        console.log('test');
-        okToPlace = false;
-      } else {
-          for (let i = 0; i < shipLength; i++) this.playerBoardArray[tileStart + i].ship = true;
-          okToPlace = true;
-      };
-      index = tileStart;
-      console.log('place status: ', okToPlace);
-    } while (okToPlace == false);
+    switch (shipOrientation) {
+      case 'horizontal':
+        do {
+          let tileStart = Phaser.Math.Between(0, this.playerBoardArray.length - 1);
+          //console.log(this.playerBoardArray[tileStart]);
     
-    let createShip = this.add.sprite(this.playerBoardArray[index].xPos - 16, this.playerBoardArray[index].yPos - 16, shipType).setScale(1.0).setOrigin(0,0);
-    if (shipRotation === 1) createShip.flipX = true;
-    return createShip;
+          if (this.playerBoardArray[tileStart].xPos + ((shipLength - 1) * 32) > (boardLength + boardStartX) - 32) {
+            //console.log(`error: max ship placement X:${this.playerBoardArray[tileStart].xPos + shipLength} board X: ${((boardLength + boardStartX) - 32)}`);
+            okToPlace = false;
+          } else if (this.checkShipCollision(tileStart, shipLength, 'horizontal')) {
+            //console.log('test');
+            okToPlace = false;
+          } else {
+              for (let i = 0; i < shipLength; i++) this.playerBoardArray[tileStart + i].ship = true;
+              okToPlace = true;
+          };
+          index = tileStart;
+          //console.log('place status: ', okToPlace);
+        } while (okToPlace == false);
+        
+        let createHorizontalShip = this.add.sprite(this.playerBoardArray[index].xPos - 16, this.playerBoardArray[index].yPos - 16, shipType).setScale(1.0).setOrigin(0,0);
+        if (shipRotation === 1) createHorizontalShip.flipX = true;
+        return createHorizontalShip;
+      
+      case 'vertical':
+        do {
+          let tileStart = Phaser.Math.Between(0, this.playerBoardArray.length - 1);
+          console.log(this.playerBoardArray[tileStart]);
+          console.log(this.playerBoardArray[tileStart].yPos + ((shipLength - 1) * 32));
+          console.log((boardLength + playerBoardY) - 32);
+    
+          if (this.playerBoardArray[tileStart].yPos + ((shipLength - 1) * 32) > (boardLength + playerBoardY) - 32) {
+            console.log(`error: max ship placement Y: ${this.playerBoardArray[tileStart].yPos + shipLength} board Y: ${((boardLength + boardStartX) - 32)}`);
+            okToPlace = false;
+          } else if (this.checkShipCollision(tileStart, shipLength, 'vertical')) {
+            console.log('test');
+            okToPlace = false;
+          } else {
+              for (let i = 0; i < shipLength; i++) this.playerBoardArray[tileStart + i].ship = true;
+              okToPlace = true;
+          };
+          index = tileStart;
+          console.log('place status: ', okToPlace);
+        } while (okToPlace == false);
+        
+        let createVerticalShip = this.add.sprite(this.playerBoardArray[index].xPos + 16, this.playerBoardArray[index].yPos - 16, shipType).setScale(1.0).setOrigin(0,0);
+        createVerticalShip.rotation += 1.57;//rotate 90 degrees
+        if (shipRotation === 1 || shipRotation === 3) createVerticalShip.flipX = true;
+        return createVerticalShip;
+      default: console.log('error');
+    }
   }
 
-  checkShipCollision(tileStart, shipLength) {
-    let shipLocation = this.playerBoardArray.slice(tileStart, tileStart + shipLength);
-    console.log('wa: ', shipLocation);
-    return shipLocation.some(element => element.ship === true);
+
+  checkShipCollision(tileStart, shipLength, shipRotation) {
+  
+    if (shipRotation === 'horizontal') {
+      let shipLocation = this.playerBoardArray.slice(tileStart, tileStart + shipLength);
+      return shipLocation.some(element => element.ship === true);
+    }
+    if (shipRotation === 'vertical') {
+      let shipLocation = [];
+      shipLocation.push(this.playerBoardArray[tileStart]);
+      console.log('lengthhh: ', shipLength);
+      console.log('ship: ', shipLocation);
+      for (let i = 1; i < shipLength; i++) {
+        shipLocation.push(this.playerBoardArray[i]);
+      }
+    console.log('updated array: ', shipLocation);
+    }
   }
 }
