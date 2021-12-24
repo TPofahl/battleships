@@ -141,6 +141,12 @@ export default class Game extends Phaser.Scene{
     //keyboard select buttons
     this.input.keyboard.on('keydown-X', function () {
       console.log('X press: ', cursor);
+      if (cursor.onGrid.ship === true) {
+        //cursor.x = this.playerBattleship.xPos;
+        //cursor.y = this.playerBattleship.yPos;
+        console.log('SHIP LOCATED');
+        console.log(cursor);
+      }
     });
 
     //keyboard movement
