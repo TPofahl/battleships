@@ -213,6 +213,11 @@ export default class Game extends Phaser.Scene{
       cFirst = cFirst + boardSize;
       cLast = cLast + boardSize;
     }
+    console.log('p-carrier: ', this.computerCarrier);
+    console.log('p-battleship: ', this.computerBattleship);
+    console.log('p-cruiser: ', this.computerCruiser);
+    console.log('p-submarine: ', this.computerSubmarine);
+    console.log('p-destroyer: ', this.computerDestroyer);
     
     //Show player board layout console
     console.log('\n\n\n\n');
@@ -224,14 +229,17 @@ export default class Game extends Phaser.Scene{
       pFirst = pFirst + boardSize;
       pLast = pLast + boardSize;
     }
-    console.log()
+    console.log('c-carrier: ', this.playerCarrier);
+    console.log('c-battleship: ', this.playerBattleship);
+    console.log('c-cruiser: ', this.playerCruiser);
+    console.log('c-submarine: ', this.playerSubmarine);
+    console.log('c-destroyer: ', this.playerDestroyer);
   }
 
   placeShip(shipType, shipLength, boardSize, boardLength, boardStartX, playerBoardY, board, shipArray) {
     let okToPlace = false;
     let index = 0;
     let shipOrientation = '';
-    console.log(`ship length: ${shipLength}`);
     let shipRotation = Phaser.Math.Between(0, 3);
     if (shipRotation === 0 || shipRotation === 1 ) shipOrientation = 'horizontal';
     else {shipOrientation = 'vertical'};
@@ -240,7 +248,6 @@ export default class Game extends Phaser.Scene{
       case 'horizontal':
         do {
           let tileStart = Phaser.Math.Between(0, board.length - 1);
-          console.log('horizontal');
           if (board[tileStart].xPos + ((shipLength - 1) * 32) > (boardLength + boardStartX) - 32) {
             okToPlace = false;
           } else if (this.checkShipCollision(boardSize, tileStart, shipLength, 'horizontal', board)) {
@@ -263,13 +270,13 @@ export default class Game extends Phaser.Scene{
       case 'vertical':
         do {
           let tileStart = Phaser.Math.Between(0, board.length - 1);
-          console.log('vertical');
           if (board[tileStart].yPos + ((shipLength - 1) * 32) > (boardLength + playerBoardY) - 32) {
             okToPlace = false;
           } else if (this.checkShipCollision(boardSize, tileStart, shipLength, 'vertical', board)) {
             okToPlace = false;
           } else {
               for (let i = 0; i < shipLength; i++) {
+                shipArray[i] = board[(tileStart + (i * boardSize))];
                 board[tileStart + (i * boardSize)].ship = true;
                 board[tileStart + (i * boardSize)].shipType = shipType;
               }
