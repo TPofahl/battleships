@@ -83,13 +83,13 @@ export default class Game extends Phaser.Scene{
     let boardLetter = 'A';
     let pTileNumber = 0;
 
-    //Create game board for computer
+    //Create Computer game board
     for (let y = 0; y < boardLength; y = y + 32) {
       let boardNumber = 1;
 
       for (let x = 0; x < boardLength; x = x + 32) {
         this.add.image(x + boardStartX, computerBoardStartY, 'water').setScale(1.0);
-        this.computerBoardArray.push({id: boardLetter + boardNumber, ship:false, shipType: '', xPos: x + boardStartX, yPos: computerBoardStartY});
+        this.computerBoardArray.push({id: boardLetter + boardNumber, ship:false, shipType: '', rotation: '', xPos: x + boardStartX, yPos: computerBoardStartY});
         boardNumber++;
       }
       boardLetter = String.fromCharCode(boardLetter.charCodeAt(0) + 1);
@@ -97,13 +97,13 @@ export default class Game extends Phaser.Scene{
     }
     boardLetter = 'A';
     pTileNumber = 0;
-    //create game board for player
+    //create Player game board
     for (let y = 0; y < boardLength; y = y + 32) {
       let boardNumber = 1;
       let k = 0;
       for (let x = 0; x < boardLength; x = x + 32) {
         this.add.image(x + boardStartX, playerBoardStartY, 'water').setScale(1.0);
-        this.playerBoardArray.push({ id: boardLetter + boardNumber, ship:false, xPos: x + boardStartX, yPos: playerBoardStartY });
+        this.playerBoardArray.push({ id: boardLetter + boardNumber, index: pTileNumber, ship:false, shipType: '', rotation: '', xPos: x + boardStartX, yPos: playerBoardStartY });
         pTileNumber++;
         boardNumber++;
         k++
@@ -132,21 +132,57 @@ export default class Game extends Phaser.Scene{
     console.log('PLAYER');
     //place player ships
     currentBoardArray = this.playerBoardArray;
-    this.placeShip('carrier', 5, boardSize, boardLength, boardStartX, playerBoardY, currentBoardArray, this.playerCarrier);
-    this.placeShip('battleship', 4, boardSize, boardLength, boardStartX, playerBoardY, currentBoardArray, this.playerBattleship);
-    this.placeShip('cruiser', 3, boardSize, boardLength, boardStartX, playerBoardY, currentBoardArray, this.playerCruiser);
-    this.placeShip('submarine', 3, boardSize, boardLength, boardStartX, playerBoardY, currentBoardArray, this.playerSubmarine);
-    this.placeShip('destroyer', 2, boardSize, boardLength, boardStartX, playerBoardY, currentBoardArray, this.playerDestroyer);
-
+    let pCarrier = this.placeShip('carrier', 5, boardSize, boardLength, boardStartX, playerBoardY, currentBoardArray, this.playerCarrier);
+    let pBattleship = this.placeShip('battleship', 4, boardSize, boardLength, boardStartX, playerBoardY, currentBoardArray, this.playerBattleship);
+    let pCruiser = this.placeShip('cruiser', 3, boardSize, boardLength, boardStartX, playerBoardY, currentBoardArray, this.playerCruiser);
+    let pSubmarine = this.placeShip('submarine', 3, boardSize, boardLength, boardStartX, playerBoardY, currentBoardArray, this.playerSubmarine);
+    let pDestroyer = this.placeShip('destroyer', 2, boardSize, boardLength, boardStartX, playerBoardY, currentBoardArray, this.playerDestroyer);
+    
     //keyboard select buttons
     this.input.keyboard.on('keydown-X', function () {
-      console.log('X press: ', cursor);
+      let shipId;
+      let saveCursorPos = cursor;
+      let shipStart = playerBoard.find(element => element.shipType === cursor.onGrid.shipType);
+      console.log('X press: ', saveCursorPos);
+
       if (cursor.onGrid.ship === true) {
-        //cursor.x = this.playerBattleship.xPos;
-        //cursor.y = this.playerBattleship.yPos;
         console.log('SHIP LOCATED');
-        console.log(cursor);
+        
+        switch (cursor.onGrid.shipType) {
+          case 'carrier': 
+          shipId = pCarrier;
+          break;
+          case 'battleship': shipId = pBattleship;
+          break;
+          case 'cruiser': shipId = pCruiser;
+          break;
+          case 'submarine': shipId = pSubmarine;
+          break;
+          case 'destroyer': shipId = pDestroyer;
+          break;
+          default: console.log('error: no ship type on X press');
+        }
+
+        if (cursor.onGrid.rotation === 'horizontal') {
+          playerCursor.x = shipId.x + 16;
+          playerCursor.y = shipId.y + 16;
+        } else {
+          playerCursor.x = shipId.x - 16;
+          playerCursor.y = shipId.y + 16;
+        }
+        //console.log('ship start: ',shipStart);
+        console.log('cursor', cursor);
+        //cursor.onGrid = shipStart;
+        cursor.onGrid.id = shipStart.id;
+        cursor.onGrid.index = shipStart.index;
+        cursor.onGrid.xPos = shipStart.xPos;
+        cursor.onGrid.yPos = shipStart.yPos;
+        //console.log('START: ', shipStart);
+        console.log('new cursor position: ', cursor.onGrid.id);
+        console.log('CHECK BOARD', playerBoard);
+        console.log('CHECK CURSOR', cursor);
       }
+      //insert sound here.
     });
 
     //keyboard movement
@@ -163,6 +199,7 @@ export default class Game extends Phaser.Scene{
         cursor.onGrid = updatedPosition;
         cursor.yPos = playerCursor.y;
       }
+      console.log('cursor pos: ', cursor.onGrid.id);
     });
 
     this.input.keyboard.on('keydown-S', function () {
@@ -178,6 +215,7 @@ export default class Game extends Phaser.Scene{
         cursor.onGrid = updatedPosition;
         cursor.yPos = playerCursor.y;
       }
+      console.log('cursor pos: ', cursor.onGrid.id);
     });
 
     this.input.keyboard.on('keydown-A', function () {
@@ -193,6 +231,7 @@ export default class Game extends Phaser.Scene{
       cursor.onGrid = updatedPosition;
       cursor.xPos = playerCursor.x;
       }
+      console.log('cursor pos: ', cursor.onGrid.id);
     });
 
     this.input.keyboard.on('keydown-D', function () {
@@ -207,6 +246,7 @@ export default class Game extends Phaser.Scene{
         cursor.onGrid = updatedPosition;
         cursor.xPos = playerCursor.x;
       }
+      console.log('cursor pos: ', cursor.onGrid.id);
     });
     
     //Show computer board layout console
@@ -219,12 +259,12 @@ export default class Game extends Phaser.Scene{
       cFirst = cFirst + boardSize;
       cLast = cLast + boardSize;
     }
-    console.log('p-carrier: ', this.computerCarrier);
-    console.log('p-battleship: ', this.computerBattleship);
-    console.log('p-cruiser: ', this.computerCruiser);
-    console.log('p-submarine: ', this.computerSubmarine);
-    console.log('p-destroyer: ', this.computerDestroyer);
-    
+    console.log('c-carrier: ', this.computerCarrier);
+    console.log('c-battleship: ', this.computerBattleship);
+    console.log('c-cruiser: ', this.computerCruiser);
+    console.log('c-submarine: ', this.computerSubmarine);
+    console.log('c-destroyer: ', this.computerDestroyer);
+
     //Show player board layout console
     console.log('\n\n\n\n');
     console.log('PLAYER BOARD');
@@ -235,11 +275,12 @@ export default class Game extends Phaser.Scene{
       pFirst = pFirst + boardSize;
       pLast = pLast + boardSize;
     }
-    console.log('c-carrier: ', this.playerCarrier);
-    console.log('c-battleship: ', this.playerBattleship);
-    console.log('c-cruiser: ', this.playerCruiser);
-    console.log('c-submarine: ', this.playerSubmarine);
-    console.log('c-destroyer: ', this.playerDestroyer);
+
+    console.log('p-carrier: ', this.playerCarrier);
+    console.log('p-battleship: ', this.playerBattleship);
+    console.log('p-cruiser: ', this.playerCruiser);
+    console.log('p-submarine: ', this.playerSubmarine);
+    console.log('p-destroyer: ', this.playerDestroyer);
   }
 
   placeShip(shipType, shipLength, boardSize, boardLength, boardStartX, playerBoardY, board, shipArray) {
@@ -263,6 +304,7 @@ export default class Game extends Phaser.Scene{
                 shipArray[i] = board[(tileStart + i)];
                 board[tileStart + i].ship = true;
                 board[tileStart + i].shipType = shipType;
+                board[tileStart + i].rotation = shipOrientation;
               }
               okToPlace = true;
           };
@@ -285,6 +327,7 @@ export default class Game extends Phaser.Scene{
                 shipArray[i] = board[(tileStart + (i * boardSize))];
                 board[tileStart + (i * boardSize)].ship = true;
                 board[tileStart + (i * boardSize)].shipType = shipType;
+                board[tileStart + (i * boardSize)].rotation = shipOrientation;
               }
               okToPlace = true;
           };
