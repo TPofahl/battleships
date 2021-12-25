@@ -138,16 +138,11 @@ export default class Game extends Phaser.Scene{
     let pSubmarine = this.placeShip('submarine', 3, boardSize, boardLength, boardStartX, playerBoardY, currentBoardArray, this.playerSubmarine);
     let pDestroyer = this.placeShip('destroyer', 2, boardSize, boardLength, boardStartX, playerBoardY, currentBoardArray, this.playerDestroyer);
     
-    //keyboard select buttons
+    //keyboard select button
+    //X: select
     this.input.keyboard.on('keydown-X', function () {
       let shipId;
-      //let cursorCopy = Object.assign({}, cursor);
       let shipStart = playerBoard.find(element => element.shipType === cursor.onGrid.shipType);
-      
-      //let shipStartCopy = Object.assign({}, shipStart);
-      console.log('X press: ', cursor);
-
-      console.log('SHIP START: ', shipStart);
 
       if (cursor.onGrid.ship === true) {
         console.log('SHIP LOCATED');
@@ -179,6 +174,42 @@ export default class Game extends Phaser.Scene{
         cursor.yPos = shipStart.yPos;
       }
       //insert sound here.
+    });
+
+    //R: rotate
+    let rotate = this.playerCarrier[0].angle;
+    console.log('ANGLE: ', this.playerCarrier[0].angle);
+    this.input.keyboard.on('keydown-R', function () {
+      let ship = pCarrier;
+      switch (rotate) {
+        case 0:
+          ship.angle += 90;
+          ship.x += 32;
+          rotate++;
+          if (rotate > 3) rotate = 0; 
+          break;
+        case 1:
+          ship.angle -= 90;
+          ship.x -= 32;
+          ship.flipX = !ship.flipX;
+          rotate++;
+          if (rotate > 3) rotate = 0;
+          break;
+        case 2:
+          ship.angle += 90;
+          ship.x += 32;
+          rotate++;
+          if (rotate > 3) rotate = 0;
+          break;
+        case 3:
+          ship.angle -= 90;
+          ship.x -= 32;
+          ship.flipX = !ship.flipX;
+          rotate++;
+          if (rotate > 3) rotate = 0;
+          break;
+        default: console.log('error: ship angle not found');
+      }
     });
 
     //keyboard movement
@@ -284,7 +315,7 @@ export default class Game extends Phaser.Scene{
     let index = 0;
     let shipOrientation = '';
     let shipRotation = Phaser.Math.Between(0, 3);
-    if (shipRotation === 0 || shipRotation === 1 ) shipOrientation = 'horizontal';
+    if (shipRotation === 0 || shipRotation === 2 ) shipOrientation = 'horizontal';
     else {shipOrientation = 'vertical'};
 
     switch (shipOrientation) {
@@ -301,6 +332,7 @@ export default class Game extends Phaser.Scene{
                 board[tileStart + i].ship = true;
                 board[tileStart + i].shipType = shipType;
                 board[tileStart + i].rotation = shipOrientation;
+                board[tileStart + i].angle = shipRotation;
               }
               okToPlace = true;
           };
@@ -308,7 +340,7 @@ export default class Game extends Phaser.Scene{
         } while (okToPlace == false);
         
         let createHorizontalShip = this.add.sprite(board[index].xPos - 16, board[index].yPos - 16, shipType).setScale(1.0).setOrigin(0,0);
-        if (shipRotation === 1) createHorizontalShip.flipX = true;
+        if (shipRotation === 2) createHorizontalShip.flipX = true;
         return createHorizontalShip;
       
       case 'vertical':
@@ -324,6 +356,7 @@ export default class Game extends Phaser.Scene{
                 board[tileStart + (i * boardSize)].ship = true;
                 board[tileStart + (i * boardSize)].shipType = shipType;
                 board[tileStart + (i * boardSize)].rotation = shipOrientation;
+                board[tileStart + (i * boardSize)].angle = shipRotation;
               }
               okToPlace = true;
           };
@@ -331,8 +364,8 @@ export default class Game extends Phaser.Scene{
         } while (okToPlace == false);
         
         let createVerticalShip = this.add.sprite(board[index].xPos + 16, board[index].yPos - 16, shipType).setScale(1.0).setOrigin(0,0);
-        createVerticalShip.rotation += 1.57;//rotate 90 degrees
-        if (shipRotation === 2) createVerticalShip.flipX = true;
+        createVerticalShip.angle += 90;
+        if (shipRotation === 3) createVerticalShip.flipX = true;
         return createVerticalShip;
       default: console.log('error');
     }
