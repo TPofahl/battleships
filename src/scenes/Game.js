@@ -79,7 +79,7 @@ export default class Game extends Phaser.Scene{
     const leftButton = this.add.sprite(470, 375, 'left-button').setScale(1.2);
     const rightButton = this.add.sprite(530, 375, 'right-button').setScale(1.2);
     const playerCursor = this.add.sprite(boardCenterX, boardCenterY, 'cursor-player').setScale(1.0);//432, 400
-    this.add.text(450, 450, 'keyboard controls:\nW: up        A: left\nS: down    D: right\nX: select\nZ: cancel', { fontFamily: 'Georgia, "Goudy Bookletter 1911", Times, serif' });
+    this.add.text(450, 450, 'keyboard controls:\nW: up        A: left\nS: down    D: right\nX: select\nZ: cancel\nR: rotate', { fontFamily: 'Georgia, "Goudy Bookletter 1911", Times, serif' });
     let boardLetter = 'A';
     let pTileNumber = 0;
 
@@ -141,16 +141,19 @@ export default class Game extends Phaser.Scene{
     //keyboard select buttons
     this.input.keyboard.on('keydown-X', function () {
       let shipId;
-      let saveCursorPos = cursor;
+      //let cursorCopy = Object.assign({}, cursor);
       let shipStart = playerBoard.find(element => element.shipType === cursor.onGrid.shipType);
-      console.log('X press: ', saveCursorPos);
+      
+      //let shipStartCopy = Object.assign({}, shipStart);
+      console.log('X press: ', cursor);
+
+      console.log('SHIP START: ', shipStart);
 
       if (cursor.onGrid.ship === true) {
         console.log('SHIP LOCATED');
         
         switch (cursor.onGrid.shipType) {
-          case 'carrier': 
-          shipId = pCarrier;
+          case 'carrier': shipId = pCarrier;
           break;
           case 'battleship': shipId = pBattleship;
           break;
@@ -170,17 +173,10 @@ export default class Game extends Phaser.Scene{
           playerCursor.x = shipId.x - 16;
           playerCursor.y = shipId.y + 16;
         }
-        //console.log('ship start: ',shipStart);
-        console.log('cursor', cursor);
-        //cursor.onGrid = shipStart;
-        cursor.onGrid.id = shipStart.id;
-        cursor.onGrid.index = shipStart.index;
-        cursor.onGrid.xPos = shipStart.xPos;
-        cursor.onGrid.yPos = shipStart.yPos;
-        //console.log('START: ', shipStart);
-        console.log('new cursor position: ', cursor.onGrid.id);
-        console.log('CHECK BOARD', playerBoard);
-        console.log('CHECK CURSOR', cursor);
+        cursor.onIndex = shipStart.index;
+        cursor.onGrid.index = cursor.onIndex;
+        cursor.xPos = shipStart.xPos;
+        cursor.yPos = shipStart.yPos;
       }
       //insert sound here.
     });
