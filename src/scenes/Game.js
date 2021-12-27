@@ -140,11 +140,17 @@ export default class Game extends Phaser.Scene{
     
     //keyboard select button
     //X: select
+    let selectEnabled = false;
+    this.input.keyboard.on('keydown-F', function () {
+      console.log(cursor);
+    });
+
     this.input.keyboard.on('keydown-X', function () {
+      selectEnabled = true;
       let shipId;
       let shipStart = playerBoard.find(element => element.shipType === cursor.onGrid.shipType);
-
       if (cursor.onGrid.ship === true) {
+        console.log('LOCATED: ', cursor);
         console.log('SHIP LOCATED');
         
         switch (cursor.onGrid.shipType) {
@@ -172,41 +178,66 @@ export default class Game extends Phaser.Scene{
         cursor.onGrid.index = cursor.onIndex;
         cursor.xPos = shipStart.xPos;
         cursor.yPos = shipStart.yPos;
+        console.log('cursor.onIndex: ', cursor.onIndex);
+        console.log('cursor.onGrid.index', cursor.onGrid.index);
+        console.log(shipId);
       }
       //insert sound here.
     });
 
     //R: rotate
-    let rotate = this.playerCarrier[0].angle;
-    console.log('ANGLE: ', this.playerCarrier[0].angle);
+    //let rotate = this.playerCarrier[0].angle;
+    
     this.input.keyboard.on('keydown-R', function () {
-      let ship = pCarrier;
-      switch (rotate) {
+    let shipId;
+    let shipStart = playerBoard.find(element => element.shipType === cursor.onGrid.shipType);
+    console.log('ship start:   ', shipStart.index);
+    console.log('cursasdasdf', cursor.onGrid.index);
+
+    if (shipStart.index !== cursor.onGrid.index) {
+      console.log('condition met');
+      return;
+    }
+    switch (cursor.onGrid.shipType) {
+      case 'carrier': shipId = pCarrier;
+      break;
+      case 'battleship': shipId = pBattleship;
+      break;
+      case 'cruiser': shipId = pCruiser;
+      break;
+      case 'submarine': shipId = pSubmarine;
+      break;
+      case 'destroyer': shipId = pDestroyer;
+      break;
+      default: console.log('error: no ship type on X press');
+    }
+
+      switch (shipStart.angle) {
         case 0:
-          ship.angle += 90;
-          ship.x += 32;
-          rotate++;
-          if (rotate > 3) rotate = 0; 
+          shipId.angle += 90;
+          shipId.x += 32;
+          shipStart.angle++;
+          if (shipStart.angle > 3) rotate = 0; 
           break;
         case 1:
-          ship.angle -= 90;
-          ship.x -= 32;
-          ship.flipX = !ship.flipX;
-          rotate++;
-          if (rotate > 3) rotate = 0;
+          shipId.angle -= 90;
+          shipId.x -= 32;
+          shipId.flipX = !shipId.flipX;
+          shipStart.angle++;
+          if (shipStart.angle > 3) shipStart.angle = 0;
           break;
         case 2:
-          ship.angle += 90;
-          ship.x += 32;
-          rotate++;
-          if (rotate > 3) rotate = 0;
+          shipId.angle += 90;
+          shipId.x += 32;
+          shipStart.angle++;
+          if (shipStart.angle > 3) shipStart.angle = 0;
           break;
         case 3:
-          ship.angle -= 90;
-          ship.x -= 32;
-          ship.flipX = !ship.flipX;
-          rotate++;
-          if (rotate > 3) rotate = 0;
+          shipId.angle -= 90;
+          shipId.x -= 32;
+          shipId.flipX = !shipId.flipX;
+          shipStart.angle++;
+          if (shipStart.angle > 3) shipStart.angle = 0;
           break;
         default: console.log('error: ship angle not found');
       }
