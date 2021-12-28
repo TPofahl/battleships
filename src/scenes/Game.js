@@ -269,26 +269,25 @@ export default class Game extends Phaser.Scene{
     //let rotate = this.playerCarrier[0].angle;
     
     this.input.keyboard.on('keydown-R', function () {
-      console.log('shipppppppppp: ', shipArrayCopy);
+      console.log('shipppppppppp: ', shipArrayCopy[0].angle);
       if (shipArrayCopy) {
         let shipStart = playerBoard.find(element => element.shipType === cursor.onGrid.shipType);
-      //console.log('ship start:   ', shipStart);
+      console.log('ship start:   ', shipStart);
+
     //console.log('cursasdasdf', cursor.onGrid.index);
 
     /*if (shipStart.index !== cursor.onGrid.index) {
       console.log('condition met');
       return;
     }*/
-
-    console.log(shipArrayCopy[0].angle);
     console.log('SELECTED SHIP: ', selectedShip);
 
-      switch (shipArrayCopy[0].angle) {
+      switch (shipStart.angle) {
         case 0:
           selectedShip.angle += 90;
           selectedShip.x += 32;
           shipStart.angle++;
-          if (shipStart.angle > 3) rotate = 0; 
+          if (shipStart.angle > 3) shipStart.angle = 0; 
           break;
         case 1:
           selectedShip.angle -= 90;
