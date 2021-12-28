@@ -35,11 +35,19 @@ export default class Game extends Phaser.Scene{
     this.load.image('left-button', 'assets/button-left.png');
     this.load.image('right-button', 'assets/button-right.png');
     this.load.image('cursor-player', 'assets/cursor-player.png');
+    this.load.image('cursor-active', 'assets/cursor-active.png');
     this.load.image('battleship', 'assets/battleship.png');
     this.load.image('cruiser', 'assets/cruiser.png');
     this.load.image('carrier', 'assets/carrier.png');
     this.load.image('destroyer', 'assets/destroyer.png');
     this.load.image('submarine', 'assets/submarine.png');
+
+    this.load.image('sunk-battleship', 'assets/sunk-battleship.png');
+    this.load.image('sunk-cruiser', 'assets/sunk-cruiser.png');
+    this.load.image('sunk-carrier', 'assets/sunk-carrier.png');
+    this.load.image('sunk-destroyer', 'assets/sunk-destroyer.png');
+    this.load.image('sunk-submarine', 'assets/sunk-submarine.png');
+
     this.load.audio('cursor-move', 'assets/sfx/cursor-move.wav');
     this.load.audio('cursor-bounds', 'assets/sfx/cursor-bounds.wav');
   }
@@ -57,6 +65,11 @@ export default class Game extends Phaser.Scene{
     let boardCenterX = 0;
     let boardCenterY = 0;
     let cursor = {};
+    let shipSelected = false;
+    let selectedShip;
+    let shipArrayCopy;
+    let isPlaceable = this.canPlace;
+    let texture;
 
     let playerBoard = this.playerBoardArray;
     let pCarrierArray = this.playerCarrier;
@@ -154,66 +167,82 @@ export default class Game extends Phaser.Scene{
     this.input.keyboard.on('keydown-X', function () {
 
       let shipStart = playerBoard.find(element => element.shipType === cursor.onGrid.shipType);
-      let shipArray;
       let shipId;
 
       if (cursor.onGrid.ship === true) {
         console.log('LOCATED: ', cursor);
         console.log('SHIP LOCATED');
-        
+        shipSelected = !shipSelected;
+        //Change player cursor to selected cursor
+        if (shipSelected) {
+        playerCursor.setTexture('cursor-active');
+
+        } else {
+          playerCursor.setTexture('cursor-player');
+        }
+
         switch (cursor.onGrid.shipType) {
           case 'carrier': 
             shipId = pCarrier;
-            shipArray = pCarrierArray;
+            selectedShip = shipId;
+            texture = 'carrier';
+            shipArrayCopy = Object.create(pCarrierArray);
           break;
           case 'battleship': 
             shipId = pBattleship;
-            shipArray = pBattleshipArray;
+            selectedShip = shipId;
+            texture = 'battleship'
+            shipArrayCopy = Object.create(pBattleshipArray);
           break;
           case 'cruiser': 
             shipId = pCruiser;
-            shipArray = pCruiserArray;
+            selectedShip = shipId;
+            texture = 'cruiser';
+            shipArrayCopy = Object.create(pCruiserArray);
           break;
           case 'submarine': 
             shipId = pSubmarine;
-            shipArray = pSubmarineArray;
+            selectedShip = shipId;
+            texture = 'submarine';
+            shipArrayCopy = Object.create(pSubmarineArray);
           break;
           case 'destroyer': 
             shipId = pDestroyer;
-            shipArray = pDestroyerArray;
+            selectedShip = shipId;
+            texture = 'destroyer';
+            shipArrayCopy = Object.create(pDestroyerArray);
           break;
           default: console.log('error: no ship type on X press');
         }
+        console.log('OBJECT ASSIGN: ', shipArrayCopy);
 
-        console.log(shipStart.index);
-        cursor.onIndex = shipStart.index;
-        cursor.onGrid.index = cursor.onIndex;
+        cursor.onIndex = shipArrayCopy[0].index;
+        cursor.onGrid.index = shipArrayCopy[0].index;
+
+        console.log('waw',shipArrayCopy);
+        console.log('wawawa',pBattleshipArray);
         cursor.xPos = shipStart.xPos;
         cursor.yPos = shipStart.yPos;
-        console.log('BATTLE ',shipArray);
 
-        if (cursor.onGrid.rotation === 'horizontal') {
+        if (shipArrayCopy[0].rotation === 'horizontal') {
           playerCursor.x = shipId.x + 16;
           playerCursor.y = shipId.y + 16;
-          for (let i = 0; i < shipArray.length; i++) {
-            shipArray[i].index = shipStart.index + i;
-            console.log('res', shipArray[i].index);
+          for (let i = 0; i < shipArrayCopy.length; i++) {
+            shipArrayCopy[i].index = shipStart.index + i;
           }
         } else {
           playerCursor.x = shipId.x - 16;
           playerCursor.y = shipId.y + 16;
-          for (let i = 0; i < shipArray.length; i++) {
-            shipArray[i].index = (shipStart.index + (boardSize * i));
-            console.log('res', shipArray[i].index);
+          for (let i = 0; i < shipArrayCopy.length; i++) {
+            shipArrayCopy[i].index = (shipStart.index + (boardSize * i));
           }
         }
-        console.log('RESULT: ', shipArray);
         let updatedPosition = playerBoard[(cursor.onIndex)];
         cursor.onGrid = updatedPosition;
-        //console.log('cursor.onIndex: ', cursor.onIndex);
-        //console.log('cursor.onGrid.index', cursor.onGrid.index);
         console.log('shipID:: ',shipId);
-      }
+      } else {
+        shipSelected = !shipSelected
+      };
       //insert sound here.
     });
 
@@ -221,62 +250,50 @@ export default class Game extends Phaser.Scene{
     //let rotate = this.playerCarrier[0].angle;
     
     this.input.keyboard.on('keydown-R', function () {
-    let shipId;
     let shipStart = playerBoard.find(element => element.shipType === cursor.onGrid.shipType);
-    console.log('ship start:   ', shipStart.index);
-    console.log('cursasdasdf', cursor.onGrid.index);
+    //console.log('ship start:   ', shipStart.index);
+    //console.log('cursasdasdf', cursor.onGrid.index);
 
-    if (shipStart.index !== cursor.onGrid.index) {
+    /*if (shipStart.index !== cursor.onGrid.index) {
       console.log('condition met');
       return;
-    }
-    switch (cursor.onGrid.shipType) {
-      case 'carrier': shipId = pCarrier;
-      break;
-      case 'battleship': shipId = pBattleship;
-      break;
-      case 'cruiser': shipId = pCruiser;
-      break;
-      case 'submarine': shipId = pSubmarine;
-      break;
-      case 'destroyer': shipId = pDestroyer;
-      break;
-      default: console.log('error: no ship type on X press');
-    }
+    }*/
+    console.log('SELECTED SHIP: ', selectedShip);
 
       switch (shipStart.angle) {
         case 0:
-          shipId.angle += 90;
-          shipId.x += 32;
+          selectedShip.angle += 90;
+          selectedShip.x += 32;
           shipStart.angle++;
           if (shipStart.angle > 3) rotate = 0; 
           break;
         case 1:
-          shipId.angle -= 90;
-          shipId.x -= 32;
-          shipId.flipX = !shipId.flipX;
+          selectedShip.angle -= 90;
+          selectedShip.x -= 32;
+          selectedShip.flipX = !selectedShip.flipX;
           shipStart.angle++;
           if (shipStart.angle > 3) shipStart.angle = 0;
           break;
         case 2:
-          shipId.angle += 90;
-          shipId.x += 32;
+          selectedShip.angle += 90;
+          selectedShip.x += 32;
           shipStart.angle++;
           if (shipStart.angle > 3) shipStart.angle = 0;
           break;
         case 3:
-          shipId.angle -= 90;
-          shipId.x -= 32;
-          shipId.flipX = !shipId.flipX;
+          selectedShip.angle -= 90;
+          selectedShip.x -= 32;
+          selectedShip.flipX = !selectedShip.flipX;
           shipStart.angle++;
           if (shipStart.angle > 3) shipStart.angle = 0;
           break;
         default: console.log('error: ship angle not found');
       }
     });
-
     //keyboard movement
     this.input.keyboard.on('keydown-W', function () {
+      //console.log(isPlaceable());
+      //console.log('passed', shipArrayCopy);
 
       playerCursor.y -= 32;
       if (playerCursor.y < playerBoardY) {
@@ -288,8 +305,12 @@ export default class Game extends Phaser.Scene{
         let updatedPosition = playerBoard[(cursor.onIndex)];
         cursor.onGrid = updatedPosition;
         cursor.yPos = playerCursor.y;
+        if (shipSelected) selectedShip.y -= 32;
       }
-      console.log('cursor pos: ', cursor.onGrid.id);
+      if (shipSelected) isPlaceable(shipArrayCopy, playerBoard, cursor.onGrid.index, selectedShip, texture);
+
+      //console.log('cursor pos: ', cursor.onGrid.id);
+      //console.log('selected ship: ',shipArrayCopy[0].shipType);
     });
 
     this.input.keyboard.on('keydown-S', function () {
@@ -304,8 +325,10 @@ export default class Game extends Phaser.Scene{
         let updatedPosition = playerBoard[(cursor.onIndex)];
         cursor.onGrid = updatedPosition;
         cursor.yPos = playerCursor.y;
+        if (shipSelected) selectedShip.y += 32;
       }
-      console.log('cursor pos: ', cursor.onGrid.id);
+      if (shipSelected) isPlaceable(shipArrayCopy, playerBoard, cursor.onGrid.index, selectedShip, texture);
+      //console.log('cursor pos: ', cursor.onGrid.id);
     });
 
     this.input.keyboard.on('keydown-A', function () {
@@ -320,13 +343,15 @@ export default class Game extends Phaser.Scene{
       let updatedPosition = playerBoard[(cursor.onIndex)];
       cursor.onGrid = updatedPosition;
       cursor.xPos = playerCursor.x;
+      if (shipSelected) selectedShip.x -= 32;
       }
-      console.log('cursor pos: ', cursor.onGrid.id);
+      if (shipSelected) isPlaceable(shipArrayCopy, playerBoard, cursor.onGrid.index, selectedShip, texture);
+      //console.log('cursor pos: ', cursor.onGrid.id);
     });
 
     this.input.keyboard.on('keydown-D', function () {
       playerCursor.x += 32;
-      if (playerCursor.x > boardStartX + (boardLength -32)) {
+      if (playerCursor.x > boardStartX + (boardLength - 32)) {
         cursorThud.play();
         playerCursor.x -= 32;
       } else {
@@ -335,8 +360,10 @@ export default class Game extends Phaser.Scene{
         let updatedPosition = playerBoard[(cursor.onIndex)];
         cursor.onGrid = updatedPosition;
         cursor.xPos = playerCursor.x;
+        if (shipSelected) selectedShip.x += 32;
       }
-      console.log('cursor pos: ', cursor.onGrid.id);
+      if (shipSelected) isPlaceable(shipArrayCopy, playerBoard, cursor.onGrid.index, selectedShip, texture);
+      //console.log('cursor pos: ', cursor.onGrid.id);
     });
     
     //Show computer board layout console
@@ -448,5 +475,23 @@ export default class Game extends Phaser.Scene{
       }
       return shipLocation.some(element => element.ship === true);
     }
+  }
+  
+  canPlace (shipArrayCopy, playerBoard, cursorIndex, shipSprite, texture) { 
+    console.log('cursor pos: ', cursorIndex);
+    console.log('ssss',shipArrayCopy.length);
+    console.log(playerBoard);
+    for (let i = 0; i < shipArrayCopy.length; i++) {
+      //console.log(playerBoard[cursorIndex].ship);
+      if (playerBoard[(cursorIndex + i)].ship === true) {
+        shipSprite.setTexture('sunk-' + texture);
+        console.log('ship detected');
+        return false;
+      } else {
+        console.log('na')
+        shipSprite.setTexture(texture);
+      }
+    } 
+    return false;
   }
 }
