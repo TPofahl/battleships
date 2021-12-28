@@ -57,7 +57,14 @@ export default class Game extends Phaser.Scene{
     let boardCenterX = 0;
     let boardCenterY = 0;
     let cursor = {};
+
     let playerBoard = this.playerBoardArray;
+    let pCarrierArray = this.playerCarrier;
+    let pBattleshipArray = this.playerBattleship;
+    let pCruiserArray = this.playerCruiser;
+    let pSubmarineArray = this.playerSubmarine;
+    let pDestroyerArray = this.playerDestroyer;
+
     const cursorMoveSound = this.sound.add('cursor-move', {volume: 0.2});
     const cursorThud = this.sound.add('cursor-bounds', {volume: 0.2});
 
@@ -140,47 +147,72 @@ export default class Game extends Phaser.Scene{
     
     //keyboard select button
     //X: select
-    let selectEnabled = false;
     this.input.keyboard.on('keydown-F', function () {
       console.log(cursor);
     });
 
     this.input.keyboard.on('keydown-X', function () {
-      selectEnabled = true;
-      let shipId;
+
       let shipStart = playerBoard.find(element => element.shipType === cursor.onGrid.shipType);
+      let shipArray;
+      let shipId;
+
       if (cursor.onGrid.ship === true) {
         console.log('LOCATED: ', cursor);
         console.log('SHIP LOCATED');
         
         switch (cursor.onGrid.shipType) {
-          case 'carrier': shipId = pCarrier;
+          case 'carrier': 
+            shipId = pCarrier;
+            shipArray = pCarrierArray;
           break;
-          case 'battleship': shipId = pBattleship;
+          case 'battleship': 
+            shipId = pBattleship;
+            shipArray = pBattleshipArray;
           break;
-          case 'cruiser': shipId = pCruiser;
+          case 'cruiser': 
+            shipId = pCruiser;
+            shipArray = pCruiserArray;
           break;
-          case 'submarine': shipId = pSubmarine;
+          case 'submarine': 
+            shipId = pSubmarine;
+            shipArray = pSubmarineArray;
           break;
-          case 'destroyer': shipId = pDestroyer;
+          case 'destroyer': 
+            shipId = pDestroyer;
+            shipArray = pDestroyerArray;
           break;
           default: console.log('error: no ship type on X press');
         }
 
-        if (cursor.onGrid.rotation === 'horizontal') {
-          playerCursor.x = shipId.x + 16;
-          playerCursor.y = shipId.y + 16;
-        } else {
-          playerCursor.x = shipId.x - 16;
-          playerCursor.y = shipId.y + 16;
-        }
+        console.log(shipStart.index);
         cursor.onIndex = shipStart.index;
         cursor.onGrid.index = cursor.onIndex;
         cursor.xPos = shipStart.xPos;
         cursor.yPos = shipStart.yPos;
-        console.log('cursor.onIndex: ', cursor.onIndex);
-        console.log('cursor.onGrid.index', cursor.onGrid.index);
-        console.log(shipId);
+        console.log('BATTLE ',shipArray);
+
+        if (cursor.onGrid.rotation === 'horizontal') {
+          playerCursor.x = shipId.x + 16;
+          playerCursor.y = shipId.y + 16;
+          for (let i = 0; i < shipArray.length; i++) {
+            shipArray[i].index = shipStart.index + i;
+            console.log('res', shipArray[i].index);
+          }
+        } else {
+          playerCursor.x = shipId.x - 16;
+          playerCursor.y = shipId.y + 16;
+          for (let i = 0; i < shipArray.length; i++) {
+            shipArray[i].index = (shipStart.index + (boardSize * i));
+            console.log('res', shipArray[i].index);
+          }
+        }
+        console.log('RESULT: ', shipArray);
+        let updatedPosition = playerBoard[(cursor.onIndex)];
+        cursor.onGrid = updatedPosition;
+        //console.log('cursor.onIndex: ', cursor.onIndex);
+        //console.log('cursor.onGrid.index', cursor.onGrid.index);
+        console.log('shipID:: ',shipId);
       }
       //insert sound here.
     });
