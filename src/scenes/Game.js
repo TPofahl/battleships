@@ -269,8 +269,8 @@ export default class Game extends Phaser.Scene{
     //let rotate = this.playerCarrier[0].angle;
     
     this.input.keyboard.on('keydown-R', function () {
-      console.log('shipppppppppp: ', shipArrayCopy[0].angle);
-      console.log('the whoole THINK', shipArrayCopy);
+      //console.log('shipppppppppp: ', shipArrayCopy[0].angle);
+      //console.log('the whoole THINK', shipArrayCopy);
       if (shipArrayCopy) {
         //let shipStart = playerBoard.find(element => element.shipType === cursor.onGrid.shipType);
       //console.log('ship start:   ', shipStart);
@@ -378,10 +378,19 @@ export default class Game extends Phaser.Scene{
     });
 
     this.input.keyboard.on('keydown-S', function () {
-
+      let shipSize = 0;
+      let shipRot = '';
+      if (shipArrayCopy) {
+        shipSize = shipArrayCopy.length * 32;
+        shipRot = shipArrayCopy[0].rotation;
+        console.log(' ROTATO POTATO', shipSize);
+      }
       playerCursor.y += 32;
-      if (playerCursor.y > playerBoardY + (boardLength - 32)) {
+      console.log('res1: ', (playerCursor.y + shipSize));
+      console.log('res2: ', playerBoardStartY + (boardLength - 32));
+      if (playerCursor.y > playerBoardY + (boardLength - 32) || (playerCursor.y + shipSize) > playerBoardStartY && shipRot === 'vertical') {
         cursorThud.play();
+        console.log(shipArrayCopy[0]);
         playerCursor.y -= 32;
       } else {
         cursorMoveSound.play();
@@ -419,10 +428,14 @@ export default class Game extends Phaser.Scene{
 
     this.input.keyboard.on('keydown-D', function () {
       let shipSize = 0;
-      if (shipArrayCopy) shipSize = shipArrayCopy.length * 32;
-      console.log('ship LEN:: ', shipSize);
+      let shipRot = '';
+      if (shipArrayCopy) {
+        shipSize = shipArrayCopy.length * 32;
+        shipRot = shipArrayCopy[0].rotation;
+      }
+
       playerCursor.x += 32;
-      if (playerCursor.x > boardStartX + (boardLength - 32) || (playerCursor.x + shipSize) > boardStartX + (boardLength)) {
+      if (playerCursor.x > boardStartX + (boardLength - 32) || (playerCursor.x + shipSize) > boardStartX + (boardLength) && shipRot === 'horizontal') {
         cursorThud.play();
         playerCursor.x -= 32;
       } else {
