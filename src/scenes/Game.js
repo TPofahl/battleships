@@ -270,9 +270,10 @@ export default class Game extends Phaser.Scene{
     
     this.input.keyboard.on('keydown-R', function () {
       console.log('shipppppppppp: ', shipArrayCopy[0].angle);
+      console.log('the whoole THINK', shipArrayCopy);
       if (shipArrayCopy) {
-        let shipStart = playerBoard.find(element => element.shipType === cursor.onGrid.shipType);
-      console.log('ship start:   ', shipStart);
+        //let shipStart = playerBoard.find(element => element.shipType === cursor.onGrid.shipType);
+      //console.log('ship start:   ', shipStart);
 
     //console.log('cursasdasdf', cursor.onGrid.index);
 
@@ -282,32 +283,68 @@ export default class Game extends Phaser.Scene{
     }*/
     console.log('SELECTED SHIP: ', selectedShip);
 
-      switch (shipStart.angle) {
+      switch (shipArrayCopy[0].angle) {
         case 0:
           selectedShip.angle += 90;
           selectedShip.x += 32;
-          shipStart.angle++;
-          if (shipStart.angle > 3) shipStart.angle = 0; 
+          for (let i = 0; i < shipArrayCopy.length; i++) {
+            shipArrayCopy[i].angle++;
+            shipArrayCopy[i].rotation = 'vertical';
+          }
+          if (shipArrayCopy[0].angle > 3) {
+            for (let i = 0; i < shipArrayCopy.length; i++) {
+              shipArrayCopy[i].angle = 0;
+              shipArrayCopy[i].rotation = 'horizontal';
+            }
+          }
+          canBePlaced = isPlaceable(shipArrayCopy, playerBoard, cursor.onGrid.index, selectedShip, texture);
           break;
         case 1:
           selectedShip.angle -= 90;
           selectedShip.x -= 32;
           selectedShip.flipX = !selectedShip.flipX;
-          shipStart.angle++;
-          if (shipStart.angle > 3) shipStart.angle = 0;
+          for (let i = 0; i < shipArrayCopy.length; i++) {
+            shipArrayCopy[i].angle++;
+            shipArrayCopy[i].rotation = 'horizontal';
+          }
+          if (shipArrayCopy[0].angle > 3) {
+            for (let i = 0; i < shipArrayCopy.length; i++) {
+              shipArrayCopy[i].angle = 0;
+              shipArrayCopy[i].rotation = 'horizontal';
+            }
+          };
+          canBePlaced = isPlaceable(shipArrayCopy, playerBoard, cursor.onGrid.index, selectedShip, texture);
           break;
         case 2:
           selectedShip.angle += 90;
           selectedShip.x += 32;
-          shipStart.angle++;
-          if (shipStart.angle > 3) shipStart.angle = 0;
+          for (let i = 0; i < shipArrayCopy.length; i++) {
+            shipArrayCopy[i].angle++;
+            shipArrayCopy[i].rotation = 'vertical';
+          }
+          if (shipArrayCopy[0].angle > 3) {
+            for (let i = 0; i < shipArrayCopy.length; i++) {
+              shipArrayCopy[i].angle = 0;
+              shipArrayCopy[i].rotation = 'horizontal';
+            }
+          };
+          canBePlaced = isPlaceable(shipArrayCopy, playerBoard, cursor.onGrid.index, selectedShip, texture);
           break;
         case 3:
           selectedShip.angle -= 90;
           selectedShip.x -= 32;
           selectedShip.flipX = !selectedShip.flipX;
-          shipStart.angle++;
-          if (shipStart.angle > 3) shipStart.angle = 0;
+          for (let i = 0; i < shipArrayCopy.length; i++) {
+            shipArrayCopy[i].angle++;
+            shipArrayCopy[i].rotation = 'horizontal';
+          }
+          if (shipArrayCopy[0].angle > 3) {
+            for (let i = 0; i < shipArrayCopy.length; i++) {
+              shipArrayCopy[i].angle = 0;
+              shipArrayCopy[i].rotation = 'horizontal';
+            }
+          };
+          canBePlaced = isPlaceable(shipArrayCopy, playerBoard, cursor.onGrid.index, selectedShip, texture);
           break;
         default: console.log('error: ship angle not found');
       }
