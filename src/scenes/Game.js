@@ -269,9 +269,19 @@ export default class Game extends Phaser.Scene{
     //let rotate = this.playerCarrier[0].angle;
     
     this.input.keyboard.on('keydown-R', function () {
-
+      let shipSize = 0;
+      let shipBoundary = 0;
       if (shipArrayCopy) {
-    console.log('SELECTED SHIP: ', selectedShip);
+        shipSize = shipArrayCopy.length * 32;
+    //check if ship goes off the board when rotated.
+    if ((playerCursor.x + shipSize) > boardStartX + (boardLength) && shipArrayCopy[0].rotation === 'vertical') {
+      console.log('hewre it bneeee for horizontal');
+      console.log('res1: ',playerCursor.x + shipSize);
+      console.log('res2: ',boardStartX + (boardLength));
+      shipBoundary = (playerCursor.x + shipSize) - (boardStartX + (boardLength));
+
+      console.log('res1 - res2: ', shipBoundary);
+    }
 
       switch (shipArrayCopy[0].angle) {
         case 0:
@@ -289,9 +299,15 @@ export default class Game extends Phaser.Scene{
           }
           canBePlaced = isPlaceable(shipArrayCopy, playerBoard, cursor.onGrid.index, selectedShip, texture);
           break;
+        //horizontal left.
         case 1:
           selectedShip.angle -= 90;
           selectedShip.x -= 32;
+          selectedShip.x -= shipBoundary;//move ship image if going off board.
+          playerCursor.x -= shipBoundary;
+          console.log('shipBoundary / 32',shipBoundary / 32);
+          cursor.onGrid.index -= (shipBoundary / 32);
+          cursor.onIndex -= (shipBoundary / 32);
           selectedShip.flipX = !selectedShip.flipX;
           for (let i = 0; i < shipArrayCopy.length; i++) {
             shipArrayCopy[i].angle++;
@@ -320,9 +336,15 @@ export default class Game extends Phaser.Scene{
           };
           canBePlaced = isPlaceable(shipArrayCopy, playerBoard, cursor.onGrid.index, selectedShip, texture);
           break;
+        //horizontal right.
         case 3:
           selectedShip.angle -= 90;
           selectedShip.x -= 32;
+          selectedShip.x -= shipBoundary;//move ship image if going off board.
+          playerCursor.x -= shipBoundary;
+          console.log('shipBoundary / 32',shipBoundary / 32);
+          cursor.onGrid.index -= (shipBoundary / 32);
+          cursor.onIndex -= (shipBoundary / 32);
           selectedShip.flipX = !selectedShip.flipX;
           for (let i = 0; i < shipArrayCopy.length; i++) {
             shipArrayCopy[i].angle++;
