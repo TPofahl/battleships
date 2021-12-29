@@ -163,7 +163,11 @@ export default class Game extends Phaser.Scene{
     //keyboard select button
     //X: select
     this.input.keyboard.on('keydown-F', function () {
-      console.log(cursor);
+      console.log('where cursor is: ',cursor);
+      //Show player board layout console
+      console.log('\n\n\n\n');
+      console.log('PLAYER BOARD');
+      console.log(playerBoard);
     });
 
     this.input.keyboard.on('keydown-X', function () {
@@ -273,8 +277,8 @@ export default class Game extends Phaser.Scene{
       let shipBoundary = 0;
       if (shipArrayCopy) {
         shipSize = shipArrayCopy.length * 32;
-    //check if ship goes off the board when rotated.
-    if ((playerCursor.x + shipSize) > boardStartX + (boardLength) && shipArrayCopy[0].rotation === 'vertical') {
+    //check if ship goes off the board's x-axis when rotated.
+    if ((playerCursor.x + shipSize) > boardStartX + boardLength && shipArrayCopy[0].rotation === 'vertical') {
       console.log('hewre it bneeee for horizontal');
       console.log('res1: ',playerCursor.x + shipSize);
       console.log('res2: ',boardStartX + (boardLength));
@@ -282,11 +286,24 @@ export default class Game extends Phaser.Scene{
 
       console.log('res1 - res2: ', shipBoundary);
     }
-
+    //check if ship goes off the board's y-axis when rotated.
+    if ((playerCursor.y + shipSize) > playerBoardY + boardLength && shipArrayCopy[0].rotation === 'horizontal') {
+      console.log('here it beee for vertical');
+      console.log('res1: ', playerCursor.y + shipSize);
+      console.log('res2: ', playerBoardY + boardLength);
+      shipBoundary = (playerCursor.y + shipSize) - (playerBoardY + (boardLength));
+      console.log('res1 - res2: ', shipBoundary);
+    }
+      
       switch (shipArrayCopy[0].angle) {
+        //vertical down.
         case 0:
           selectedShip.angle += 90;
           selectedShip.x += 32;
+          selectedShip.y -= shipBoundary;//move ship image if going off board.
+          playerCursor.y -= shipBoundary;
+          cursor.onGrid.index -= boardSize * (shipBoundary / 32);
+          cursor.onIndex -= boardSize * (shipBoundary / 32);
           for (let i = 0; i < shipArrayCopy.length; i++) {
             shipArrayCopy[i].angle++;
             shipArrayCopy[i].rotation = 'vertical';
@@ -321,9 +338,14 @@ export default class Game extends Phaser.Scene{
           };
           canBePlaced = isPlaceable(shipArrayCopy, playerBoard, cursor.onGrid.index, selectedShip, texture);
           break;
+        //vertical up.
         case 2:
           selectedShip.angle += 90;
           selectedShip.x += 32;
+          selectedShip.y -= shipBoundary;//move ship image if going off board.
+          playerCursor.y -= shipBoundary;
+          cursor.onGrid.index -= boardSize * (shipBoundary / 32);
+          cursor.onIndex -= boardSize * (shipBoundary / 32);
           for (let i = 0; i < shipArrayCopy.length; i++) {
             shipArrayCopy[i].angle++;
             shipArrayCopy[i].rotation = 'vertical';
