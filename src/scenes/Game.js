@@ -418,8 +418,11 @@ export default class Game extends Phaser.Scene{
     });
 
     this.input.keyboard.on('keydown-D', function () {
+      let shipSize = 0;
+      if (shipArrayCopy) shipSize = shipArrayCopy.length * 32;
+      console.log('ship LEN:: ', shipSize);
       playerCursor.x += 32;
-      if (playerCursor.x > boardStartX + (boardLength - 32)) {
+      if (playerCursor.x > boardStartX + (boardLength - 32) || (playerCursor.x + shipSize) > boardStartX + (boardLength)) {
         cursorThud.play();
         playerCursor.x -= 32;
       } else {
@@ -550,10 +553,7 @@ export default class Game extends Phaser.Scene{
   
   //Check if player's selected ship position is valid.
   canPlace (shipArrayCopy, playerBoard, cursorIndex, shipSprite, texture) { 
-    //console.log('THE BOARD', playerBoard);
-    //console.log('cursor pos: ', cursorIndex);
-    //console.log('ssss',shipArrayCopy[0].rotation);
-    //console.log(playerBoard);
+    console.log(shipArrayCopy.length);
 
     if (shipArrayCopy[0].rotation === 'horizontal') {
       for (let i = 0; i < shipArrayCopy.length; i++) {
@@ -579,6 +579,5 @@ export default class Game extends Phaser.Scene{
       }
       return true;
     }
-    return false;
   }
 }
