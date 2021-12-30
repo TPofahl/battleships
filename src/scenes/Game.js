@@ -302,8 +302,11 @@ export default class Game extends Phaser.Scene{
           selectedShip.x += 32;
           selectedShip.y -= shipBoundary;//move ship image if going off board.
           playerCursor.y -= shipBoundary;
-          cursor.onGrid.index -= boardSize * (shipBoundary / 32);
-          cursor.onIndex -= boardSize * (shipBoundary / 32);
+          if (shipBoundary) {
+            //cursor.onGrid.index -= (boardSize * (shipBoundary / 32));
+            cursor.onIndex -= (boardSize * (shipBoundary / 32));
+            //cursor.onGrid.index = cursor.onIndex;
+          }
           for (let i = 0; i < shipArrayCopy.length; i++) {
             shipArrayCopy[i].angle++;
             shipArrayCopy[i].rotation = 'vertical';
@@ -314,7 +317,6 @@ export default class Game extends Phaser.Scene{
               shipArrayCopy[i].rotation = 'horizontal';
             }
           }
-          canBePlaced = isPlaceable(shipArrayCopy, playerBoard, cursor.onGrid.index, selectedShip, texture);
           break;
         //horizontal left.
         case 1:
@@ -336,7 +338,6 @@ export default class Game extends Phaser.Scene{
               shipArrayCopy[i].rotation = 'horizontal';
             }
           };
-          canBePlaced = isPlaceable(shipArrayCopy, playerBoard, cursor.onGrid.index, selectedShip, texture);
           break;
         //vertical up.
         case 2:
@@ -344,8 +345,11 @@ export default class Game extends Phaser.Scene{
           selectedShip.x += 32;
           selectedShip.y -= shipBoundary;//move ship image if going off board.
           playerCursor.y -= shipBoundary;
-          cursor.onGrid.index -= boardSize * (shipBoundary / 32);
-          cursor.onIndex -= boardSize * (shipBoundary / 32);
+          if (shipBoundary) {
+            //cursor.onGrid.index -= (boardSize * (shipBoundary / 32));
+            cursor.onIndex -= (boardSize * (shipBoundary / 32));
+            //cursor.onGrid.index = cursor.onIndex;
+          }
           for (let i = 0; i < shipArrayCopy.length; i++) {
             shipArrayCopy[i].angle++;
             shipArrayCopy[i].rotation = 'vertical';
@@ -356,7 +360,6 @@ export default class Game extends Phaser.Scene{
               shipArrayCopy[i].rotation = 'horizontal';
             }
           };
-          canBePlaced = isPlaceable(shipArrayCopy, playerBoard, cursor.onGrid.index, selectedShip, texture);
           break;
         //horizontal right.
         case 3:
@@ -378,10 +381,10 @@ export default class Game extends Phaser.Scene{
               shipArrayCopy[i].rotation = 'horizontal';
             }
           };
-          canBePlaced = isPlaceable(shipArrayCopy, playerBoard, cursor.onGrid.index, selectedShip, texture);
           break;
         default: console.log('error: ship angle not found');
       }
+      canBePlaced = isPlaceable(shipArrayCopy, playerBoard, cursor.onIndex, selectedShip, texture);
       }
     });
 
