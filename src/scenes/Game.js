@@ -286,7 +286,6 @@ export default class Game extends Phaser.Scene{
               */
             }
           }
-
           shipArrayCopy = undefined;
         } else {
           cursorThud.play();
@@ -353,7 +352,7 @@ export default class Game extends Phaser.Scene{
           selectedShip.x -= 32;
           selectedShip.x -= shipBoundary;//move ship image if going off board.
           playerCursor.x -= shipBoundary;
-          console.log('shipBoundary / 32',shipBoundary / 32);
+          //console.log('shipBoundary / 32',shipBoundary / 32);
           //cursor.onGrid.index -= (shipBoundary / 32);
           cursor.onIndex -= (shipBoundary / 32);
           selectedShip.flipX = !selectedShip.flipX;
@@ -394,7 +393,7 @@ export default class Game extends Phaser.Scene{
           selectedShip.x -= 32;
           selectedShip.x -= shipBoundary;//move ship image if going off board.
           playerCursor.x -= shipBoundary;
-          console.log('shipBoundary / 32',shipBoundary / 32);
+          //console.log('shipBoundary / 32',shipBoundary / 32);
           //cursor.onGrid.index -= (shipBoundary / 32);
           cursor.onIndex -= (shipBoundary / 32);
           selectedShip.flipX = !selectedShip.flipX;
@@ -448,14 +447,13 @@ export default class Game extends Phaser.Scene{
       if (shipArrayCopy) {
         shipSize = shipArrayCopy.length * 32;
         shipRot = shipArrayCopy[0].rotation;
-        console.log(' ROTATO POTATO', shipSize);
+        //console.log(' ROTATO POTATO', shipSize);
       }
       playerCursor.y += 32;
       console.log('res1: ', (playerCursor.y + shipSize));
       console.log('res2: ', playerBoardStartY + (boardLength - 32));
       if (playerCursor.y > playerBoardY + (boardLength - 32) || (playerCursor.y + shipSize) > playerBoardStartY && shipRot === 'vertical') {
         cursorThud.play();
-        console.log(shipArrayCopy[0]);
         playerCursor.y -= 32;
         isMoving = false;
       } else {
