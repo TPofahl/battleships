@@ -144,14 +144,12 @@ export default class Game extends Phaser.Scene{
     layer1.add([playerCursor]);
 
     //place computer ships
-    console.log('COMP');
     currentBoardArray = this.computerBoardArray;
     this.placeShip('carrier', 5, boardSize, boardLength, boardStartX, computerBoardY, currentBoardArray, this.computerCarrier);
     this.placeShip('battleship', 4, boardSize, boardLength, boardStartX, computerBoardY, currentBoardArray, this.computerBattleship);
     this.placeShip('cruiser', 3, boardSize, boardLength, boardStartX, computerBoardY, currentBoardArray, this.computerCruiser);
     this.placeShip('submarine', 3, boardSize, boardLength, boardStartX, computerBoardY, currentBoardArray, this.computerSubmarine);
     this.placeShip('destroyer', 2, boardSize, boardLength, boardStartX, computerBoardY, currentBoardArray, this.computerDestroyer);
-    console.log('PLAYER');
     //place player ships
     currentBoardArray = this.playerBoardArray;
     let pCarrier = this.placeShip('carrier', 5, boardSize, boardLength, boardStartX, playerBoardY, currentBoardArray, this.playerCarrier);
@@ -174,10 +172,7 @@ export default class Game extends Phaser.Scene{
 
       let shipStart = playerBoard.find(element => element.shipType === cursor.onGrid.shipType);
       let shipId;
-      console.log('PCARRRRRIERRRR: ',     pCarrierArray);
       if (cursor.onGrid.ship === true && shipSelected === false) {
-        //console.log('LOCATED: ', cursor);
-        //console.log('SHIP LOCATED');
         shipSelected = true;
 
         switch (cursor.onGrid.shipType) {
@@ -223,13 +218,8 @@ export default class Game extends Phaser.Scene{
           selectedArray[i].shipType = '';
           selectedArray[i].ship = false;
         }
-        //console.log('THE BOARD', playerBoard);
-
         cursor.onIndex = shipArrayCopy[0].index;
         cursor.onGrid.index = shipArrayCopy[0].index;
-
-        //console.log('waw',shipArrayCopy);
-        //console.log('wawawa',pBattleshipArray);
         cursor.xPos = shipStart.xPos;
         cursor.yPos = shipStart.yPos;
 
@@ -248,12 +238,10 @@ export default class Game extends Phaser.Scene{
         }
         let updatedPosition = playerBoard[(cursor.onIndex)];
         cursor.onGrid = updatedPosition;
-        console.log('shipID:: ',shipId);
       } else {
         if (canBePlaced && shipSelected) {
           shipSelected = false;
           let startTile = cursor.onGrid.index;
-          console.log('start tile:', startTile);
           //add new ship position to player board
           if (shipArrayCopy[0].rotation === 'horizontal') {
             for (let i = 0; i < selectedArray.length; i++) {
@@ -261,14 +249,7 @@ export default class Game extends Phaser.Scene{
               playerBoard[startTile + i].ship = true;
               playerBoard[startTile + i].shipType = texture;
               playerBoard[startTile + i].rotation = shipArrayCopy[0].rotation;
-
               selectedArray[i] = playerBoard[startTile + i];
-              /*
-              selectedArray[i].angle = shipArrayCopy[0].angle;
-              selectedArray[i].ship = true;
-              selectedArray[i].shipType = texture;
-              selectedArray[i].rotation = shipArrayCopy[0].rotation;
-              */
             }
           } else {
             for (let i = 0; i < selectedArray.length; i++) {
@@ -276,14 +257,7 @@ export default class Game extends Phaser.Scene{
               playerBoard[startTile + (i * boardSize)].ship = true;
               playerBoard[startTile + (i * boardSize)].shipType = texture;
               playerBoard[startTile + (i * boardSize)].rotation = shipArrayCopy[0].rotation;
-
               selectedArray[i] = playerBoard[startTile + (i * boardSize)];
-              /*
-              selectedArray[i].angle = shipArrayCopy[0].angle;
-              selectedArray[i].ship = true;
-              selectedArray[i].shipType = texture;
-              selectedArray[i].rotation = shipArrayCopy[0].rotation;
-              */
             }
           }
           shipArrayCopy = undefined;
@@ -309,22 +283,12 @@ export default class Game extends Phaser.Scene{
         shipSize = shipArrayCopy.length * 32;
     //check if ship goes off the board's x-axis when rotated.
     if ((playerCursor.x + shipSize) > boardStartX + boardLength && shipArrayCopy[0].rotation === 'vertical') {
-      console.log('hewre it bneeee for horizontal');
-      console.log('res1: ',playerCursor.x + shipSize);
-      console.log('res2: ',boardStartX + (boardLength));
       shipBoundary = (playerCursor.x + shipSize) - (boardStartX + (boardLength));
-
-      console.log('res1 - res2: ', shipBoundary);
     }
     //check if ship goes off the board's y-axis when rotated.
     if ((playerCursor.y + shipSize) > playerBoardY + boardLength && shipArrayCopy[0].rotation === 'horizontal') {
-      console.log('here it beee for vertical');
-      console.log('res1: ', playerCursor.y + shipSize);
-      console.log('res2: ', playerBoardY + boardLength);
       shipBoundary = (playerCursor.y + shipSize) - (playerBoardY + (boardLength));
-      console.log('res1 - res2: ', shipBoundary);
     }
-      
       switch (shipArrayCopy[0].angle) {
         //vertical down.
         case 0:
@@ -352,8 +316,6 @@ export default class Game extends Phaser.Scene{
           selectedShip.x -= 32;
           selectedShip.x -= shipBoundary;//move ship image if going off board.
           playerCursor.x -= shipBoundary;
-          //console.log('shipBoundary / 32',shipBoundary / 32);
-          //cursor.onGrid.index -= (shipBoundary / 32);
           cursor.onIndex -= (shipBoundary / 32);
           selectedShip.flipX = !selectedShip.flipX;
           for (let i = 0; i < shipArrayCopy.length; i++) {
@@ -393,8 +355,6 @@ export default class Game extends Phaser.Scene{
           selectedShip.x -= 32;
           selectedShip.x -= shipBoundary;//move ship image if going off board.
           playerCursor.x -= shipBoundary;
-          //console.log('shipBoundary / 32',shipBoundary / 32);
-          //cursor.onGrid.index -= (shipBoundary / 32);
           cursor.onIndex -= (shipBoundary / 32);
           selectedShip.flipX = !selectedShip.flipX;
           for (let i = 0; i < shipArrayCopy.length; i++) {
@@ -414,11 +374,8 @@ export default class Game extends Phaser.Scene{
       }
     });
 
-
     //keyboard movement
     this.input.keyboard.on('keydown-W', function () {
-      //console.log(isPlaceable());
-      //console.log('passed', shipArrayCopy);
 
       playerCursor.y -= 32;
       if (playerCursor.y < playerBoardY) {
@@ -435,9 +392,6 @@ export default class Game extends Phaser.Scene{
       if (shipSelected) {
         canBePlaced = isPlaceable(shipArrayCopy, playerBoard, cursor.onGrid.index, selectedShip, texture);
       }
-
-      //console.log('cursor pos: ', cursor.onGrid.id);
-      //console.log('selected ship: ',shipArrayCopy[0].shipType);
     });
 
     this.input.keyboard.on('keydown-S', function () {
@@ -447,11 +401,8 @@ export default class Game extends Phaser.Scene{
       if (shipArrayCopy) {
         shipSize = shipArrayCopy.length * 32;
         shipRot = shipArrayCopy[0].rotation;
-        //console.log(' ROTATO POTATO', shipSize);
       }
       playerCursor.y += 32;
-      console.log('res1: ', (playerCursor.y + shipSize));
-      console.log('res2: ', playerBoardStartY + (boardLength - 32));
       if (playerCursor.y > playerBoardY + (boardLength - 32) || (playerCursor.y + shipSize) > playerBoardStartY && shipRot === 'vertical') {
         cursorThud.play();
         playerCursor.y -= 32;
@@ -467,7 +418,6 @@ export default class Game extends Phaser.Scene{
       if (shipSelected && isMoving) {
         canBePlaced = isPlaceable(shipArrayCopy, playerBoard, cursor.onGrid.index, selectedShip, texture);
       }
-      //console.log('cursor pos: ', cursor.onGrid.id);
     });
 
     this.input.keyboard.on('keydown-A', function () {
@@ -488,7 +438,6 @@ export default class Game extends Phaser.Scene{
       if (shipSelected && isMoving) {
         canBePlaced = isPlaceable(shipArrayCopy, playerBoard, cursor.onGrid.index, selectedShip, texture);
       }
-      //console.log('cursor pos: ', cursor.onGrid.id);
     });
 
     this.input.keyboard.on('keydown-D', function () {
@@ -514,42 +463,9 @@ export default class Game extends Phaser.Scene{
       if (shipSelected) {
         canBePlaced = isPlaceable(shipArrayCopy, playerBoard, cursor.onGrid.index, selectedShip, texture);
       }
-      //console.log('cursor pos: ', cursor.onGrid.id);
     });
-    
-    //Show computer board layout console
-    console.log('\n\n\n\n');
-    console.log("COMPUTER BOARD");
-    let cFirst = 0;
-    let cLast = boardSize;
-    for (let i = 0; i < boardSize; i++) {
-      console.log(this.computerBoardArray.slice(cFirst, cLast));
-      cFirst = cFirst + boardSize;
-      cLast = cLast + boardSize;
-    }
-    console.log('c-carrier: ', this.computerCarrier);
-    console.log('c-battleship: ', this.computerBattleship);
-    console.log('c-cruiser: ', this.computerCruiser);
-    console.log('c-submarine: ', this.computerSubmarine);
-    console.log('c-destroyer: ', this.computerDestroyer);
-
-    //Show player board layout console
-    console.log('\n\n\n\n');
-    console.log('PLAYER BOARD');
-    let pFirst = 0;
-    let pLast = boardSize;
-    for (let i = 0; i < boardSize; i++) {
-      console.log(this.playerBoardArray.slice(pFirst, pLast));
-      pFirst = pFirst + boardSize;
-      pLast = pLast + boardSize;
-    }
-
-    console.log('p-carrier: ', this.playerCarrier);
-    console.log('p-battleship: ', this.playerBattleship);
-    console.log('p-cruiser: ', this.playerCruiser);
-    console.log('p-submarine: ', this.playerSubmarine);
-    console.log('p-destroyer: ', this.playerDestroyer);
   }
+
 
   //First time placement of ship by the program. Places ship randomly on board, in a random position.
   placeShip(shipType, shipLength, boardSize, boardLength, boardStartX, playerBoardY, board, shipArray) {
@@ -631,13 +547,11 @@ export default class Game extends Phaser.Scene{
   
   //Check if player's selected ship position is not overlapping another ship, or out of bounds.
   canPlace (shipArrayCopy, playerBoard, cursorIndex, shipSprite, texture) { 
-    console.log(shipArrayCopy.length);
 
     if (shipArrayCopy[0].rotation === 'horizontal') {
       for (let i = 0; i < shipArrayCopy.length; i++) {
         if (playerBoard[(cursorIndex + i)].ship === true) {
           shipSprite.setTexture('sunk-' + texture);
-          //console.log('ship detected');
           return false;
         } else {
           shipSprite.setTexture(texture);
@@ -647,11 +561,8 @@ export default class Game extends Phaser.Scene{
     }
     if (shipArrayCopy[0].rotation === 'vertical') {
       for (let i = 0; i < shipArrayCopy.length; i++) {
-      console.log('playerBoard[(cursorIndex + (i * boardSize))].ship',playerBoard[(cursorIndex + (i * boardSize))].ship);
-
         if (playerBoard[(cursorIndex + (i * boardSize))].ship === true) {
           shipSprite.setTexture('sunk-' + texture);
-          //console.log('ship detected');
           return false;
         } else {
           shipSprite.setTexture(texture);
