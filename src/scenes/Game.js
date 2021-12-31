@@ -174,7 +174,7 @@ export default class Game extends Phaser.Scene{
 
       let shipStart = playerBoard.find(element => element.shipType === cursor.onGrid.shipType);
       let shipId;
-
+      console.log('PCARRRRRIERRRR: ',     pCarrierArray);
       if (cursor.onGrid.ship === true && shipSelected === false) {
         //console.log('LOCATED: ', cursor);
         //console.log('SHIP LOCATED');
@@ -218,7 +218,6 @@ export default class Game extends Phaser.Scene{
           break;
           default: console.log('error: no ship type on X press');
         }
-        //console.log('OBJECT ASSIGN: ', shipArrayCopy);
         //remove ship from the player board
         for (let i = 0; i < selectedArray.length; i++) {
           selectedArray[i].shipType = '';
@@ -251,10 +250,44 @@ export default class Game extends Phaser.Scene{
         cursor.onGrid = updatedPosition;
         console.log('shipID:: ',shipId);
       } else {
-        if (canBePlaced) {
+        if (canBePlaced && shipSelected) {
           shipSelected = false;
+          let startTile = cursor.onGrid.index;
+          console.log('start tile:', startTile);
+          //add new ship position to player board
+          if (shipArrayCopy[0].rotation === 'horizontal') {
+            for (let i = 0; i < selectedArray.length; i++) {
+              playerBoard[startTile + i].angle = shipArrayCopy[0].angle;
+              playerBoard[startTile + i].ship = true;
+              playerBoard[startTile + i].shipType = texture;
+              playerBoard[startTile + i].rotation = shipArrayCopy[0].rotation;
+
+              selectedArray[i] = playerBoard[startTile + i];
+              /*
+              selectedArray[i].angle = shipArrayCopy[0].angle;
+              selectedArray[i].ship = true;
+              selectedArray[i].shipType = texture;
+              selectedArray[i].rotation = shipArrayCopy[0].rotation;
+              */
+            }
+          } else {
+            for (let i = 0; i < selectedArray.length; i++) {
+              playerBoard[startTile + (i * boardSize)].angle = shipArrayCopy[0].angle;
+              playerBoard[startTile + (i * boardSize)].ship = true;
+              playerBoard[startTile + (i * boardSize)].shipType = texture;
+              playerBoard[startTile + (i * boardSize)].rotation = shipArrayCopy[0].rotation;
+
+              selectedArray[i] = playerBoard[startTile + (i * boardSize)];
+              /*
+              selectedArray[i].angle = shipArrayCopy[0].angle;
+              selectedArray[i].ship = true;
+              selectedArray[i].shipType = texture;
+              selectedArray[i].rotation = shipArrayCopy[0].rotation;
+              */
+            }
+          }
+
           shipArrayCopy = undefined;
-          console.log('ob: ', shipArrayCopy);
         } else {
           cursorThud.play();
         }
@@ -270,8 +303,6 @@ export default class Game extends Phaser.Scene{
     });
 
     //R: rotate
-    //let rotate = this.playerCarrier[0].angle;
-    
     this.input.keyboard.on('keydown-R', function () {
       let shipSize = 0;
       let shipBoundary = 0;
