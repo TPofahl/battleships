@@ -163,7 +163,7 @@ export default class Game extends Phaser.Scene{
     this.input.keyboard.on('keydown-F', function () {
       console.log('where cursor is: ',cursor);
       //Show player board layout console
-      console.log('\n\n\n\n');
+      //console.log('\n\n\n\n');
       console.log('PLAYER BOARD');
       console.log(playerBoard);
     });
@@ -238,6 +238,7 @@ export default class Game extends Phaser.Scene{
         }
         let updatedPosition = playerBoard[(cursor.onIndex)];
         cursor.onGrid = updatedPosition;
+
       } else {
         if (canBePlaced && shipSelected) {
           shipSelected = false;
@@ -253,6 +254,8 @@ export default class Game extends Phaser.Scene{
             }
           } else {
             for (let i = 0; i < selectedArray.length; i++) {
+              //console.log(startTile + (i * boardSize).angle);
+              //console.log('cursor', cursor);
               playerBoard[startTile + (i * boardSize)].angle = shipArrayCopy[0].angle;
               playerBoard[startTile + (i * boardSize)].ship = true;
               playerBoard[startTile + (i * boardSize)].shipType = texture;
@@ -279,6 +282,7 @@ export default class Game extends Phaser.Scene{
     this.input.keyboard.on('keydown-R', function () {
       let shipSize = 0;
       let shipBoundary = 0;
+      let updatedPosition;
       if (shipArrayCopy) {
         shipSize = shipArrayCopy.length * 32;
     //check if ship goes off the board's x-axis when rotated.
@@ -297,7 +301,10 @@ export default class Game extends Phaser.Scene{
           selectedShip.y -= shipBoundary;//move ship image if going off board.
           playerCursor.y -= shipBoundary;
           if (shipBoundary) {
+
             cursor.onIndex -= (boardSize * (shipBoundary / 32));
+            updatedPosition = playerBoard[(cursor.onIndex)];
+            cursor.onGrid = updatedPosition;
           }
           for (let i = 0; i < shipArrayCopy.length; i++) {
             shipArrayCopy[i].angle++;
@@ -317,6 +324,8 @@ export default class Game extends Phaser.Scene{
           selectedShip.x -= shipBoundary;//move ship image if going off board.
           playerCursor.x -= shipBoundary;
           cursor.onIndex -= (shipBoundary / 32);
+          updatedPosition = playerBoard[(cursor.onIndex)];
+          cursor.onGrid = updatedPosition;
           selectedShip.flipX = !selectedShip.flipX;
           for (let i = 0; i < shipArrayCopy.length; i++) {
             shipArrayCopy[i].angle++;
@@ -337,6 +346,8 @@ export default class Game extends Phaser.Scene{
           playerCursor.y -= shipBoundary;
           if (shipBoundary) {
             cursor.onIndex -= (boardSize * (shipBoundary / 32));
+            updatedPosition = playerBoard[(cursor.onIndex)];
+            cursor.onGrid = updatedPosition;
           }
           for (let i = 0; i < shipArrayCopy.length; i++) {
             shipArrayCopy[i].angle++;
@@ -356,6 +367,8 @@ export default class Game extends Phaser.Scene{
           selectedShip.x -= shipBoundary;//move ship image if going off board.
           playerCursor.x -= shipBoundary;
           cursor.onIndex -= (shipBoundary / 32);
+          updatedPosition = playerBoard[(cursor.onIndex)];
+          cursor.onGrid = updatedPosition;
           selectedShip.flipX = !selectedShip.flipX;
           for (let i = 0; i < shipArrayCopy.length; i++) {
             shipArrayCopy[i].angle++;
