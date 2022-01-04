@@ -20,10 +20,11 @@ export default class Game extends Phaser.Scene{
     this.playerBattleship = [];
     this.playerDestroyer = [];
     this.playerCruiser = [];
+
   }
 
   init(){
-
+    //this.startGame = false;
   }
 
   preload(){
@@ -41,6 +42,8 @@ export default class Game extends Phaser.Scene{
     this.load.image('carrier', 'assets/carrier.png');
     this.load.image('destroyer', 'assets/destroyer.png');
     this.load.image('submarine', 'assets/submarine.png');
+    this.load.image('marker-hit', 'assets/marker-hit.png');
+    this.load.image('marker-miss', 'assets/marker-miss.png');
 
     this.load.image('sunk-battleship', 'assets/sunk-battleship.png');
     this.load.image('sunk-cruiser', 'assets/sunk-cruiser.png');
@@ -56,8 +59,8 @@ export default class Game extends Phaser.Scene{
   create(){
     let boardLength = boardSize * 32;//32x32 tiles
     let boardStartX = 112;
-    let playerBoardStartY = 400;
-    let computerBoardStartY = 48;
+    let playerBoardStartY = 200;//400
+    let computerBoardStartY = 200;//48
     let playerBoardY = playerBoardStartY;    
     let computerBoardY = computerBoardStartY;
     let cursorStartPosition = {};
@@ -69,9 +72,12 @@ export default class Game extends Phaser.Scene{
     let selectedArray;
     let selectedShip;
     let shipArrayCopy;
+    let canStartGame = true;
+    let currentPlayer = 'player';
     let isPlaceable = this.canPlace;
     let canBePlaced;
     let texture;
+
 
     let playerBoard = this.playerBoardArray;
     let pCarrierArray = this.playerCarrier;
@@ -79,6 +85,8 @@ export default class Game extends Phaser.Scene{
     let pCruiserArray = this.playerCruiser;
     let pSubmarineArray = this.playerSubmarine;
     let pDestroyerArray = this.playerDestroyer;
+
+    let startGame = false;
 
     const cursorMoveSound = this.sound.add('cursor-move', {volume: 0.2});
     const cursorThud = this.sound.add('cursor-bounds', {volume: 0.2});
@@ -92,25 +100,24 @@ export default class Game extends Phaser.Scene{
       boardCenterY = (boardLength / 2) + playerBoardStartY - 16;
     }
   
-    this.add.text(450, 300, 'Place your ships', { fontFamily: 'Georgia, "Goudy Bookletter 1911", Times, serif' });
     //game controller
-    const aButton = this.add.sprite(580, 350, 'a-button').setScale(1.2);
+    const aButton = this.add.sprite(580, 350, 'a-button').setScale(1.2).setInteractive();
     const bButton = this.add.sprite(580, 400, 'b-button').setScale(1.2);
     const upButton = this.add.sprite(500, 345, 'up-button').setScale(1.2);
     const downbutton = this.add.sprite(500, 405, 'down-button').setScale(1.2);
-    const leftButton = this.add.sprite(470, 375, 'left-button').setScale(1.2);
+    const leftButton = this.add.sprite(470, 375, 'left-button').setScale(1.2).setInteractive();
     const rightButton = this.add.sprite(530, 375, 'right-button').setScale(1.2);
     const playerCursor = this.add.sprite(boardCenterX, boardCenterY, 'cursor-player').setScale(1.0);//432, 400
+    let playerText = this.add.text(100, 150, `place your ships`, { fontFamily: 'Georgia, "Goudy Bookletter 1911", Times, serif' }).setInteractive();
     this.add.text(450, 450, 'keyboard controls:\nW: up        A: left\nS: down    D: right\nX: select\nZ: cancel\nR: rotate', { fontFamily: 'Georgia, "Goudy Bookletter 1911", Times, serif' });
     let boardLetter = 'A';
     let pTileNumber = 0;
-
     //Create Computer game board
     for (let y = 0; y < boardLength; y = y + 32) {
       let boardNumber = 1;
 
       for (let x = 0; x < boardLength; x = x + 32) {
-        this.add.image(x + boardStartX, computerBoardStartY, 'water').setScale(1.0);
+        //this.add.image(x + boardStartX, computerBoardStartY, 'water').setScale(1.0);
         this.computerBoardArray.push({id: boardLetter + boardNumber, ship:false, shipType: '', rotation: '', xPos: x + boardStartX, yPos: computerBoardStartY});
         boardNumber++;
       }
@@ -138,18 +145,13 @@ export default class Game extends Phaser.Scene{
       cursor.onGrid = cursorStartPosition;
       cursor.onIndex = (this.playerBoardArray.length / 2) + (boardSize / 2);
 
-    const layer0 = this.add.layer();
-    const layer1 = this.add.layer();
-    layer0.add([ aButton, bButton, upButton, downbutton, leftButton, rightButton]);
-    layer1.add([playerCursor]);
-
     //place computer ships
     currentBoardArray = this.computerBoardArray;
-    this.placeShip('carrier', 5, boardSize, boardLength, boardStartX, computerBoardY, currentBoardArray, this.computerCarrier);
-    this.placeShip('battleship', 4, boardSize, boardLength, boardStartX, computerBoardY, currentBoardArray, this.computerBattleship);
-    this.placeShip('cruiser', 3, boardSize, boardLength, boardStartX, computerBoardY, currentBoardArray, this.computerCruiser);
-    this.placeShip('submarine', 3, boardSize, boardLength, boardStartX, computerBoardY, currentBoardArray, this.computerSubmarine);
-    this.placeShip('destroyer', 2, boardSize, boardLength, boardStartX, computerBoardY, currentBoardArray, this.computerDestroyer);
+    let cCarrier = this.placeShip('carrier', 5, boardSize, boardLength, boardStartX, computerBoardY, currentBoardArray, this.computerCarrier);
+    let cBattleship = this.placeShip('battleship', 4, boardSize, boardLength, boardStartX, computerBoardY, currentBoardArray, this.computerBattleship);
+    let cCruiser = this.placeShip('cruiser', 3, boardSize, boardLength, boardStartX, computerBoardY, currentBoardArray, this.computerCruiser);
+    let cSubmarine = this.placeShip('submarine', 3, boardSize, boardLength, boardStartX, computerBoardY, currentBoardArray, this.computerSubmarine);
+    let cDestroyer = this.placeShip('destroyer', 2, boardSize, boardLength, boardStartX, computerBoardY, currentBoardArray, this.computerDestroyer);
     //place player ships
     currentBoardArray = this.playerBoardArray;
     let pCarrier = this.placeShip('carrier', 5, boardSize, boardLength, boardStartX, playerBoardY, currentBoardArray, this.playerCarrier);
@@ -158,18 +160,45 @@ export default class Game extends Phaser.Scene{
     let pSubmarine = this.placeShip('submarine', 3, boardSize, boardLength, boardStartX, playerBoardY, currentBoardArray, this.playerSubmarine);
     let pDestroyer = this.placeShip('destroyer', 2, boardSize, boardLength, boardStartX, playerBoardY, currentBoardArray, this.playerDestroyer);
     
-    //keyboard select button
-    //X: select
+
+    let layer0 = this.add.layer();
+    let layer1 = this.add.layer();
+    //group ships as layers to change visibility between transitions.
+    let playerContainer = this.add.layer();
+    let computerContainer = this.add.layer();
+    layer0.add([ aButton, bButton, upButton, downbutton, leftButton, rightButton]);
+    layer1.add([playerCursor]);
+    playerContainer.add([ pCarrier, pBattleship, pCruiser, pSubmarine, pDestroyer]);
+    computerContainer.add([ cCarrier, cBattleship, cCruiser, cSubmarine, cDestroyer]);
+    playerContainer.visible = true;
+    computerContainer.visible = false;
+
+    //Game start button
     this.input.keyboard.on('keydown-F', function () {
       console.log('where cursor is: ',cursor);
-      //Show player board layout console
       //console.log('\n\n\n\n');
       console.log('PLAYER BOARD');
       console.log(playerBoard);
+      if (canStartGame === true) startGame = true
+      //show computer board with ships hidden
+      if (startGame) {
+        playerContainer.visible = false;
+        computerContainer.visible = true;// showing for testing.
+        playerText.setText("player's turn");
+      }
     });
 
-    this.input.keyboard.on('keydown-X', function () {
+    aButton.on('pointerdown', function () {
+      console.log('my button works');
+      playerContainer.visible = !playerContainer.visible;
+      computerContainer.visible = !computerContainer.visible;
+      console.log('start status: ', startGame);
+    });
 
+    //X: select
+    this.input.keyboard.on('keydown-X', function () {
+      if (startGame) return;
+      canStartGame = false;
       let shipStart = playerBoard.find(element => element.shipType === cursor.onGrid.shipType);
       let shipId;
       if (cursor.onGrid.ship === true && shipSelected === false) {
@@ -251,6 +280,7 @@ export default class Game extends Phaser.Scene{
               playerBoard[startTile + i].shipType = texture;
               playerBoard[startTile + i].rotation = shipArrayCopy[0].rotation;
               selectedArray[i] = playerBoard[startTile + i];
+              canStartGame = true;
             }
           } else {
             for (let i = 0; i < selectedArray.length; i++) {
@@ -261,6 +291,7 @@ export default class Game extends Phaser.Scene{
               playerBoard[startTile + (i * boardSize)].shipType = texture;
               playerBoard[startTile + (i * boardSize)].rotation = shipArrayCopy[0].rotation;
               selectedArray[i] = playerBoard[startTile + (i * boardSize)];
+              canStartGame = true;
             }
           }
           shipArrayCopy = undefined;
@@ -479,6 +510,9 @@ export default class Game extends Phaser.Scene{
     });
   }
 
+  update () {
+//console.log(this.playerCruiser);
+  }
 
   //First time placement of ship by the program. Places ship randomly on board, in a random position.
   placeShip(shipType, shipLength, boardSize, boardLength, boardStartX, playerBoardY, board, shipArray) {
@@ -584,4 +618,5 @@ export default class Game extends Phaser.Scene{
       return true;
     }
   }
+
 }
