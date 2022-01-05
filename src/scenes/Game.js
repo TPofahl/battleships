@@ -254,7 +254,12 @@ export default class Game extends Phaser.Scene{
             gameOver = true;
           }
       }
-      if (gameOver) this.scene.start('game-over');
+      if (gameOver) {
+        this.cameras.main.fadeOut(125, 0, 0, 0);
+        this.cameras.main.once(Phaser.Cameras.Scene2D.Events.FADE_OUT_COMPLETE, (cam, effect) => {
+          this.scene.start('game-over');
+        });
+      }
       }, this
     );
 

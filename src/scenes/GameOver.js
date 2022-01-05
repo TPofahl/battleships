@@ -6,6 +6,7 @@ export default class GameOver extends Phaser.Scene{
   }
 
   create(){
+    this.cameras.main.fadeIn(1000, 0,0,0);
     const width = this.scale.width;
     const height = this.scale.height;
 
