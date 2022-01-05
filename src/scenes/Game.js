@@ -1,3 +1,4 @@
+import phaser from '../lib/phaser.js';
 import Phaser from '../lib/phaser.js';
 
 const boardSize = 10;
@@ -20,8 +21,8 @@ export default class Game extends Phaser.Scene{
     this.playerBattleship = [];
     this.playerDestroyer = [];
     this.playerCruiser = [];
+    this.isShot = false;
 
-    this.battleSprite;
   }
 
   init(){
@@ -74,8 +75,11 @@ export default class Game extends Phaser.Scene{
     let canStartGame = true;
     let currentPlayer = 'player';
     let isPlaceable = this.canPlace;
+    let isHit = this.checkShotFired;
     let canBePlaced;
     let texture;
+    this.isShot = false;
+
 
 
     let playerBoard = this.playerBoardArray;
@@ -115,10 +119,9 @@ export default class Game extends Phaser.Scene{
     //Create Computer game board
     for (let y = 0; y < boardLength; y = y + 32) {
       let boardNumber = 1;
-
       for (let x = 0; x < boardLength; x = x + 32) {
         //this.add.image(x + boardStartX, computerBoardStartY, 'water').setScale(1.0);
-        this.computerBoardArray.push({id: boardLetter + boardNumber, ship:false, shipType: '', rotation: '', xPos: x + boardStartX, yPos: computerBoardStartY});
+        this.computerBoardArray.push({id: boardLetter + boardNumber, ship:false, shipType: '', rotation: '', xPos: x + boardStartX, yPos: computerBoardStartY, hit: false });
         boardNumber++;
       }
       boardLetter = String.fromCharCode(boardLetter.charCodeAt(0) + 1);
@@ -132,7 +135,7 @@ export default class Game extends Phaser.Scene{
       let k = 0;
       for (let x = 0; x < boardLength; x = x + 32) {
         this.add.image(x + boardStartX, playerBoardStartY, 'water').setScale(1.0);
-        this.playerBoardArray.push({ id: boardLetter + boardNumber, index: pTileNumber, ship:false, shipType: '', rotation: '', xPos: x + boardStartX, yPos: playerBoardStartY });
+        this.playerBoardArray.push({ id: boardLetter + boardNumber, index: pTileNumber, ship:false, shipType: '', rotation: '', xPos: x + boardStartX, yPos: playerBoardStartY, hit: false });
         pTileNumber++;
         boardNumber++;
         k++
@@ -159,9 +162,7 @@ export default class Game extends Phaser.Scene{
     let pCruiser = this.placeShip('cruiser', 3, boardSize, boardLength, boardStartX, playerBoardY, currentBoardArray, this.playerCruiser);
     let pSubmarine = this.placeShip('submarine', 3, boardSize, boardLength, boardStartX, playerBoardY, currentBoardArray, this.playerSubmarine);
     let pDestroyer = this.placeShip('destroyer', 2, boardSize, boardLength, boardStartX, playerBoardY, currentBoardArray, this.playerDestroyer);
-    
-    this.battleSprite = cBattleship;
-    
+        
 
     let layer0 = this.add.layer();
     let layer1 = this.add.layer();
@@ -193,11 +194,69 @@ export default class Game extends Phaser.Scene{
     });
 
     aButton.on('pointerdown', function () {
+      let gameOver = false;
+
       if (startGame) {
-        console.log(computerBoard[cursor.onIndex].ship);
-          computerBoard[cursor.onIndex].ship = 'target';
+          let checkShot = computerBoard[cursor.onIndex];
+          let currentShip = computerBoard[cursor.onIndex].shipType;
+          let shipArray;
+          let shipTexture;
+          let shipSprite;
+          switch (currentShip) {
+            case 'carrier': 
+              shipArray = this.computerCarrier;
+              shipTexture = 'carrier';
+              shipSprite = cCarrier;
+            break;
+            case 'battleship': 
+              shipArray = this.computerBattleship;
+              shipTexture = 'battleship';
+              shipSprite = cBattleship;
+            break;
+            case 'cruiser': 
+              shipArray = this.computerCruiser;
+              shipTexture = 'cruiser';
+              shipSprite = cCruiser;
+            break;
+            case 'submarine': 
+              shipArray = this.computerSubmarine;
+              shipTexture = 'submarine';
+              shipSprite = cSubmarine;
+            break;
+            case 'destroyer': 
+              shipArray = this.computerDestroyer;
+              shipTexture = 'destroyer';
+              shipSprite = cDestroyer;
+            break;
+            case '': break;
+            default: console.log('error: no ship type on button press');
+          }
+          let x = computerBoard[cursor.onIndex].xPos;
+          let y = computerBoard[cursor.onIndex].yPos;
+          //check if there is a ship in the selected spot, not hit.
+          if (checkShot.hit === false && checkShot.ship === true) {
+            this.add.sprite(x, y, 'marker-hit').setScale(1.0);
+            computerBoard[cursor.onIndex].hit = true;
+            //Check if all spaces on selected ship are hit.
+            let notSunk = shipArray.some(element => !element.hit === true);
+            console.log(notSunk);
+            if (notSunk === false) shipSprite.setTexture(`sunk-${shipTexture}`);
+        
+          } else if (checkShot.hit === false && checkShot.ship === false ) {
+            this.add.sprite(x, y, 'marker-miss').setScale(1.0);
+            computerBoard[cursor.onIndex].hit = true;
+          }
+          //check for game over
+          for (let i = 0; i < this.computerBoardArray.length; i++) {
+            if (this.computerBoardArray[i].hit === false && this.computerBoardArray[i].ship === true) {
+              return;
+            }
+            gameOver = true;
+          }
       }
-    });
+      if (gameOver) this.scene.start('game-over');
+      }, this
+    );
 
     //X: select
     this.input.keyboard.on('keydown-X', function () {
@@ -288,8 +347,6 @@ export default class Game extends Phaser.Scene{
             }
           } else {
             for (let i = 0; i < selectedArray.length; i++) {
-              //console.log(startTile + (i * boardSize).angle);
-              //console.log('cursor', cursor);
               playerBoard[startTile + (i * boardSize)].angle = shipArrayCopy[0].angle;
               playerBoard[startTile + (i * boardSize)].ship = true;
               playerBoard[startTile + (i * boardSize)].shipType = texture;
@@ -516,7 +573,16 @@ export default class Game extends Phaser.Scene{
   }
 
   update () {
-    //this.battleSprite.setTexture('marker-hit');
+    //console.log('this.test0',this.test0);
+    let hits = this.isShot;
+    let test = hits;
+    if (test === true) {
+      console.log('this.isShot');
+      test = false;
+    }
+    //console.log(this.isShot);
+
+    /*
     let boards = [this.computerBoardArray, this.playerBoardArray];
     let ships = [    
       this.computerCarrier,
@@ -551,6 +617,7 @@ export default class Game extends Phaser.Scene{
     //  isSunk = ships[0].some(element => element.ship === true);
     //  console.log(`${ships[0].shipType} is sunk: `,isSunk);
     //}
+    */
   }
 
   //First time placement of ship by the program. Places ship randomly on board, in a random position.
