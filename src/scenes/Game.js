@@ -26,7 +26,6 @@ export default class Game extends Phaser.Scene{
   }
 
   init(){
-    //this.startGame = false;
   }
 
   preload(){
@@ -79,6 +78,9 @@ export default class Game extends Phaser.Scene{
     let canBePlaced;
     let texture;
     this.isShot = false;
+
+    let gameOver = false;
+    let isPlayerTurn = true;
 
 
 
@@ -135,7 +137,7 @@ export default class Game extends Phaser.Scene{
       let k = 0;
       for (let x = 0; x < boardLength; x = x + 32) {
         this.add.image(x + boardStartX, playerBoardStartY, 'water').setScale(1.0);
-        this.playerBoardArray.push({ id: boardLetter + boardNumber, index: pTileNumber, ship:false, shipType: '', rotation: '', xPos: x + boardStartX, yPos: playerBoardStartY, hit: false });
+        this.playerBoardArray.push({ id: boardLetter + boardNumber, index: pTileNumber, ship:false, shipType: '', rotation: '', xPos: x + boardStartX, yPos: playerBoardStartY, hit: false, sunk: false });
         pTileNumber++;
         boardNumber++;
         k++
@@ -194,8 +196,6 @@ export default class Game extends Phaser.Scene{
     });
 
     aButton.on('pointerdown', function () {
-      let gameOver = false;
-
       if (startGame) {
           let checkShot = computerBoard[cursor.onIndex];
           let currentShip = computerBoard[cursor.onIndex].shipType;
@@ -240,26 +240,37 @@ export default class Game extends Phaser.Scene{
             //Check if all spaces on selected ship are hit.
             let notSunk = shipArray.some(element => !element.hit === true);
             console.log(notSunk);
-            if (notSunk === false) shipSprite.setTexture(`sunk-${shipTexture}`);
+            if (notSunk === false) {
+              shipSprite.setTexture(`sunk-${shipTexture}`);
+              for (let i = 0; i < shipArray.length; i++) shipArray[i].sunk = true;
+            }
         
           } else if (checkShot.hit === false && checkShot.ship === false ) {
             this.add.sprite(x, y, 'marker-miss').setScale(1.0);
             computerBoard[cursor.onIndex].hit = true;
           }
           //check for game over
-          for (let i = 0; i < this.computerBoardArray.length; i++) {
-            if (this.computerBoardArray[i].hit === false && this.computerBoardArray[i].ship === true) {
-              return;
-            }
-            gameOver = true;
-          }
+          if (this.computerBattleship[0].sunk === true && this.computerCarrier[0].sunk === true && this.computerCruiser[0].sunk === true && this.computerSubmarine[0].sunk === true && this.computerDestroyer[0].sunk === true) {
+                gameOver = true
+              }
       }
       if (gameOver) {
         this.cameras.main.fadeOut(125, 0, 0, 0);
         this.cameras.main.once(Phaser.Cameras.Scene2D.Events.FADE_OUT_COMPLETE, (cam, effect) => {
           this.scene.start('game-over');
+          return;
         });
       }
+      /*
+      isPlayerTurn = !isPlayerTurn;
+      if (isPlayerTurn === false) {
+        this.cameras.main.fadeOut(125, 0, 0, 0);
+        playerContainer.visible = false;
+        computerContainer.visible = true;
+        playerText.setText(`computer's turn`);
+        this.cameras.main.fadeIn(500, 0, 0, 0);
+      }
+      */
       }, this
     );
 
