@@ -1,6 +1,6 @@
 import Phaser from 'phaser';
 
-let start = false;
+let gameStart = false;
 
 export default class MainMenu extends Phaser.Scene{
   constructor(){
@@ -26,8 +26,6 @@ export default class MainMenu extends Phaser.Scene{
             if (inputText.value !== '') {
                 this.removeListener('click');
                 start = true;
-                //this.setVisible(false);
-                //this.scene.start('game');
             }
         }
     });
