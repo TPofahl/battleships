@@ -1,4 +1,4 @@
-import Phaser from '../lib/phaser.js';
+import Phaser from 'phaser';
 
 const boardSize = 8;
 

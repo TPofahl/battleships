@@ -1,4 +1,6 @@
-import Phaser from '../lib/phaser.js';
+import Phaser from 'phaser';
+
+let start = false;
 
 export default class MainMenu extends Phaser.Scene{
   constructor(){
@@ -6,19 +8,16 @@ export default class MainMenu extends Phaser.Scene{
   }
 
   preload() {
-      this.load.html('nameform', '../../assets/components/nameform.html');
+      this.load.html('nameform', 'assets/components/nameform.html');
   }
 
   create(){
-      console.log('main menu');
+    let userText = null;
     const width = this.scale.width;
     const height = this.scale.height;
-    /*
-    let text = this.add.text(width * 0.5, height * 0.5, 'Press space to start', {
-    fontSize: 24
-    }).setOrigin(0.5);
-    */
-    let element = this.add.dom(400,400).createFromCache('nameform');
+
+    let element = this.add.dom(width * 0.5, height * 0.5).createFromCache('nameform');
+    console.log('AAAAAAAAAAAAAAAAAA', element);
 
     element.addListener('click');
     element.on('click', function (event) {
@@ -26,16 +25,15 @@ export default class MainMenu extends Phaser.Scene{
             let inputText = this.getChildByName('nameField');
             if (inputText.value !== '') {
                 this.removeListener('click');
-                this.setVisible(false);
-                this.scene.start('game');
+                start = true;
+                //this.setVisible(false);
+                //this.scene.start('game');
             }
         }
-    }, this);
-    /*
-    //this.cameras.main.fadeIn(1000, 0,0,0);
-    this.input.keyboard.once('keydown-SPACE', () => {
-      this.scene.start('game');
     });
-    */
+  }
+
+  update() {
+    if (start === true) this.scene.start('game');
   }
 }
