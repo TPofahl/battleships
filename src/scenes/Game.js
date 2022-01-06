@@ -42,7 +42,8 @@ export default class Game extends Phaser.Scene{
     this.pDestroyer;
   }
 
-  init(){
+  init(data){
+    this.pName = data.playerName;
   }
 
   preload(){
@@ -73,6 +74,7 @@ export default class Game extends Phaser.Scene{
 
 
   create(){
+    console.log('passed result: ',this.pName);
     let boardLength = boardSize * 32;//32x32 tiles
     let boardStartX = 112;
     let playerBoardStartY = 200;//400
@@ -89,7 +91,7 @@ export default class Game extends Phaser.Scene{
     let selectedShip;
     let shipArrayCopy;
     let canStartGame = true;
-    let currentPlayer = 'player';
+    let currentPlayer = this.pName;
     let isPlaceable = this.canPlace;
     let isHit = this.checkShotFired;
     let canBePlaced;
@@ -216,7 +218,7 @@ export default class Game extends Phaser.Scene{
         if (startGame) {
           this.playerContainer.visible = false;
           this.computerContainer.visible = false;//true
-          this.playerText.setText(`player's turn`);
+          this.playerText.setText(`${this.pName}'s turn`);
         }
       }
     }, this);
@@ -283,7 +285,7 @@ export default class Game extends Phaser.Scene{
               gameOver = this.isGameOver();//check for gameover.
       }
       if (gameOver) {
-          this.scene.start('game-over', {winner: 'player'});
+          this.scene.start('game-over', {winner: this.pName});
           return;
       }
       if (startGame && this.isPlayerTurn === true) {
@@ -739,7 +741,7 @@ export default class Game extends Phaser.Scene{
 
       this.computerContainer.visible = false;
       this.computerMarkers.visible = true;
-      currentPlayer = 'player';
+      currentPlayer = this.pName;
       this.playerText.setText(`${currentPlayer}'s turn`);
       this.cameras.main.fadeIn(500, 0, 0, 0);
     }
@@ -816,7 +818,7 @@ export default class Game extends Phaser.Scene{
 
     this.computerContainer.visible = false;
     this.computerMarkers.visible = true;
-    currentPlayer = 'player';
+    currentPlayer = this.pName;
     this.playerText.setText(`${currentPlayer}'s turn`);
     this.cameras.main.fadeIn(500, 0, 0, 0);
   }

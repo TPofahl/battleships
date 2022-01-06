@@ -1,6 +1,7 @@
 import Phaser from 'phaser';
 
 let gameStart = false;
+let userText = '';
 
 export default class MainMenu extends Phaser.Scene{
   constructor(){
@@ -12,7 +13,6 @@ export default class MainMenu extends Phaser.Scene{
   }
 
   create(){
-    let userText = null;
     const width = this.scale.width;
     const height = this.scale.height;
 
@@ -25,13 +25,14 @@ export default class MainMenu extends Phaser.Scene{
             let inputText = this.getChildByName('nameField');
             if (inputText.value !== '') {
                 this.removeListener('click');
-                start = true;
+                userText = inputText.value;
+                gameStart = true;
             }
         }
     });
   }
 
   update() {
-    if (start === true) this.scene.start('game');
+    if (gameStart === true) this.scene.start('game', {playerName: userText});
   }
 }
