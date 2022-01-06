@@ -1,6 +1,6 @@
 import Phaser from '../lib/phaser.js';
 
-const boardSize = 6;
+const boardSize = 8;
 
 export default class Game extends Phaser.Scene{
 
@@ -32,7 +32,7 @@ export default class Game extends Phaser.Scene{
     this.playerMarkers = [];
 
 
-    this.duration = 700;//scene change duration.
+    this.duration = 100;//scene change duration.
     this.playerText;
 
     this.pCarrier;
@@ -283,7 +283,7 @@ export default class Game extends Phaser.Scene{
               gameOver = this.isGameOver();//check for gameover.
       }
       if (gameOver) {
-          this.scene.start('game-over');
+          this.scene.start('game-over', {winner: 'player'});
           return;
       }
       if (startGame && this.isPlayerTurn === true) {
@@ -803,7 +803,7 @@ export default class Game extends Phaser.Scene{
       }
       this.gameOver = this.isGameOver();//check for gameover.
       if (this.gameOver) {
-        this.scene.start('game-over');
+        this.scene.start('game-over', {winner: 'computer'});
       }
 
       this.time.delayedCall(this.duration, this.cScene, ['computer'], this);
