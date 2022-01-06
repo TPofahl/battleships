@@ -1,7 +1,6 @@
-import phaser from '../lib/phaser.js';
 import Phaser from '../lib/phaser.js';
 
-const boardSize = 10;
+const boardSize = 6;
 
 export default class Game extends Phaser.Scene{
 
@@ -15,14 +14,18 @@ export default class Game extends Phaser.Scene{
     this.computerBattleship = [];
     this.computerDestroyer = [];
     this.computerCruiser = [];
-
     this.playerCarrier = [];
     this.playerSubmarine = [];
     this.playerBattleship = [];
     this.playerDestroyer = [];
     this.playerCruiser = [];
-    this.isShot = false;
 
+    this.isShot = false;
+    this.isPlayerTurn = true;
+    this.playerContainer = [];
+    this.computerContainer = [];
+    this.duration = 1000;//scene change duration.
+    this.playerText;
   }
 
   init(){
@@ -79,9 +82,14 @@ export default class Game extends Phaser.Scene{
     let texture;
     this.isShot = false;
 
-    let gameOver = false;
-    let isPlayerTurn = true;
 
+    //let playerContainer = this.playerContainer;
+    //let computerContainer = this.computerContainer;
+
+    let gameOver = false;
+    //let isPlayerTurn = true;
+
+    let timedEvent;
 
 
     let playerBoard = this.playerBoardArray;
@@ -91,6 +99,7 @@ export default class Game extends Phaser.Scene{
     let pCruiserArray = this.playerCruiser;
     let pSubmarineArray = this.playerSubmarine;
     let pDestroyerArray = this.playerDestroyer;
+    let playerText = this.playerText;
 
     let startGame = false;
 
@@ -114,8 +123,8 @@ export default class Game extends Phaser.Scene{
     const leftButton = this.add.sprite(120, 575, 'left-button').setScale(1.2).setInteractive();
     const rightButton = this.add.sprite(180, 575, 'right-button').setScale(1.2);
     const playerCursor = this.add.sprite(boardCenterX, boardCenterY, 'cursor-player').setScale(1.0);//432, 400
-    let playerText = this.add.text(100, 150, `place your ships`, { fontFamily: 'Georgia, "Goudy Bookletter 1911", Times, serif' }).setInteractive();
-    this.add.text(280, 520, 'keyboard controls:\nW: up        A: left\nS: down    D: right\nX: select\nZ: cancel\nR: rotate', { fontFamily: 'Georgia, "Goudy Bookletter 1911", Times, serif' });
+    this.playerText = this.add.text(100, 150, `place your ships`, { fontFamily: 'Georgia, "Goudy Bookletter 1911", Times, serif' }).setInteractive();
+    this.add.text(280, 520, 'keyboard controls:\nW: up        A: left\nS: down    D: right\nX: select\nR: rotate', { fontFamily: 'Georgia, "Goudy Bookletter 1911", Times, serif' });
     let boardLetter = 'A';
     let pTileNumber = 0;
     //Create Computer game board
@@ -169,39 +178,37 @@ export default class Game extends Phaser.Scene{
     let layer0 = this.add.layer();
     let layer1 = this.add.layer();
     //group ships as layers to change visibility between transitions.
-    let playerContainer = this.add.layer();
-    let computerContainer = this.add.layer();
+    this.playerContainer = this.add.layer();
+    this.computerContainer = this.add.layer();
     layer0.add([ aButton, bButton, upButton, downbutton, leftButton, rightButton]);
     layer1.add([playerCursor]);
-    playerContainer.add([ pCarrier, pBattleship, pCruiser, pSubmarine, pDestroyer]);
-    computerContainer.add([ cCarrier, cBattleship, cCruiser, cSubmarine, cDestroyer]);
-    playerContainer.visible = true;
-    computerContainer.visible = false;
+    this.playerContainer.add([ pCarrier, pBattleship, pCruiser, pSubmarine, pDestroyer]);
+    this.computerContainer.add([ cCarrier, cBattleship, cCruiser, cSubmarine, cDestroyer]);
+    this.playerContainer.visible = true;
+    this.computerContainer.visible = false;
 
     //Game start button
     this.input.keyboard.on('keydown-F', function () {
-      console.log('where cursor is: ',cursor);
-      console.log('cboard: ',computerBoard);
-      //console.log('\n\n\n\n');
-      console.log('PLAYER BOARD');
-      console.log(playerBoard);
+      console.log('cboard: ',this.computerBoardArray);
+      console.log('pBoard: ',this.playerBoardArray);
       if (canStartGame === true) startGame = true
       //show computer board with ships hidden
       if (startGame) {
-        playerContainer.visible = false;
-        computerContainer.visible = true;// showing for testing.
-        currentPlayer = 'player'
-        playerText.setText(`${currentPlayer}'s turn`);
+        this.playerContainer.visible = false;
+        this.computerContainer.visible = true;
+        this.playerText.setText(`player's turn`);
       }
-    });
+    }, this);
 
     aButton.on('pointerdown', function () {
-      if (startGame) {
+      if (startGame && this.isPlayerTurn) {
           let checkShot = computerBoard[cursor.onIndex];
           let currentShip = computerBoard[cursor.onIndex].shipType;
           let shipArray;
           let shipTexture;
           let shipSprite;
+          console.log('turn: ',this.isPlayerTurn);
+
           switch (currentShip) {
             case 'carrier': 
               shipArray = this.computerCarrier;
@@ -235,7 +242,7 @@ export default class Game extends Phaser.Scene{
           let y = computerBoard[cursor.onIndex].yPos;
           //check if there is a ship in the selected spot, not hit.
           if (checkShot.hit === false && checkShot.ship === true) {
-            this.add.sprite(x, y, 'marker-hit').setScale(1.0);
+            this.computerContainer.add(this.add.sprite(x, y, 'marker-hit').setScale(1.0));
             computerBoard[cursor.onIndex].hit = true;
             //Check if all spaces on selected ship are hit.
             let notSunk = shipArray.some(element => !element.hit === true);
@@ -246,31 +253,30 @@ export default class Game extends Phaser.Scene{
             }
         
           } else if (checkShot.hit === false && checkShot.ship === false ) {
-            this.add.sprite(x, y, 'marker-miss').setScale(1.0);
+            this.computerContainer.add(this.add.sprite(x, y, 'marker-miss').setScale(1.0));
             computerBoard[cursor.onIndex].hit = true;
           }
-          //check for game over
+          //check if player won
+          /*
           if (this.computerBattleship[0].sunk === true && this.computerCarrier[0].sunk === true && this.computerCruiser[0].sunk === true && this.computerSubmarine[0].sunk === true && this.computerDestroyer[0].sunk === true) {
+            console.log('game over....');
                 gameOver = true
               }
+              */
+              gameOver = this.isGameOver();
       }
       if (gameOver) {
-        this.cameras.main.fadeOut(125, 0, 0, 0);
-        this.cameras.main.once(Phaser.Cameras.Scene2D.Events.FADE_OUT_COMPLETE, (cam, effect) => {
+        console.log('game over fired..');
           this.scene.start('game-over');
           return;
-        });
       }
-      /*
-      isPlayerTurn = !isPlayerTurn;
-      if (isPlayerTurn === false) {
-        this.cameras.main.fadeOut(125, 0, 0, 0);
-        playerContainer.visible = false;
-        computerContainer.visible = true;
-        playerText.setText(`computer's turn`);
-        this.cameras.main.fadeIn(500, 0, 0, 0);
+      if (this.isPlayerTurn === false) console.log('pc turn');
+      if (startGame && this.isPlayerTurn === true) {
+        this.time.delayedCall(this.duration, this.sceneChange, [playerText, currentPlayer], this);
+      } else if (this.isPlayerTurn === false) {
+        this.time.delayedCall(this.duration, this.sceneChange, [playerText, currentPlayer], this);
       }
-      */
+      
       }, this
     );
 
@@ -585,55 +591,16 @@ export default class Game extends Phaser.Scene{
         canBePlaced = isPlaceable(shipArrayCopy, playerBoard, cursor.onGrid.index, selectedShip, texture);
       }
     });
-    console.log('this.computercarrier',this.computerCarrier);
+    console.log('PC: ',this.computerBoardArray);
   }
 
   update () {
-    //console.log('this.test0',this.test0);
-    let hits = this.isShot;
-    let test = hits;
-    if (test === true) {
-      console.log('this.isShot');
-      test = false;
+    //computer's turn
+    if (this.isPlayerTurn === false) {
+      console.log('in the computer turn');
+      this.time.delayedCall(this.duration, this.computerShot, [], this);
+      this.isPlayerTurn = true;
     }
-    //console.log(this.isShot);
-
-    /*
-    let boards = [this.computerBoardArray, this.playerBoardArray];
-    let ships = [    
-      this.computerCarrier,
-      this.computerSubmarine,
-      this.computerBattleship,
-      this.computerDestroyer,
-      this.computerCruiser,
-      this.playerCarrier,
-      this.playerSubmarine,
-      this.playerBattleship,
-      this.playerDestroyer,
-      this.playerCruiser
-    ];
-    let isSunk;
-    //update hit/miss markers for both players.
-    for (let index = 0; index <= 1; index++) {
-      for (let i = 0; i < boards[index].length; i++) {
-        if ( boards[index][i].ship === 'target' && boards[index][i].shipType !== '') {
-          let x = boards[index][i].xPos;
-          let y = boards[index][i].yPos;
-          this.add.sprite(x, y, 'marker-hit').setScale(1.0);
-          boards[index][i].ship = 'hit';
-        } else if (boards[index][i].ship === 'target' && boards[index][i].shipType === '') {
-          let x = boards[index][i].xPos;
-          let y = boards[index][i].yPos;
-          this.add.sprite(x, y, 'marker-miss').setScale(1.0);
-          boards[index][i].ship = 'hit';
-        }
-      }
-    }
-    //for (let i = 0; i < ships[0].length; i++) {
-    //  isSunk = ships[0].some(element => element.ship === true);
-    //  console.log(`${ships[0].shipType} is sunk: `,isSunk);
-    //}
-    */
   }
 
   //First time placement of ship by the program. Places ship randomly on board, in a random position.
@@ -738,6 +705,106 @@ export default class Game extends Phaser.Scene{
         }
       }
       return true;
+    }
+  }
+
+  sceneChange(currentPlayer) {
+    if (this.isPlayerTurn === true) {
+      this.cameras.main.fadeOut(125, 0, 0, 0);
+      this.isPlayerTurn = !this.isPlayerTurn;
+      console.log('current player: ',currentPlayer);
+      this.playerContainer.visible = true;
+      this.computerContainer.visible = false;
+      currentPlayer = 'computer';
+      this.playerText.setText(`${currentPlayer}'s turn`);
+      this.cameras.main.fadeIn(500, 0, 0, 0);
+    } else if (this.isPlayerTurn === false) {
+      this.cameras.main.fadeOut(125, 0, 0, 0);
+      this.isPlayerTurn = !this.isPlayerTurn;
+      this.playerContainer.visible = false;
+      this.computerContainer.visible = true;
+      currentPlayer = 'player';
+      this.playerText.setText(`${currentPlayer}'s turn`);
+      this.cameras.main.fadeIn(500, 0, 0, 0);
+    }
+  }
+
+  computerShot() {
+    let random;
+    let currentShip;
+    let shipArray;
+    let shipTexture;
+    let shipSprite;
+    do {
+      random = Phaser.Math.Between(0, this.playerBoardArray.length - 1);
+      } while (this.playerBoardArray[random].hit === true);
+      currentShip = this.playerBoardArray[random].shipType;
+      switch (currentShip) {
+        case 'carrier': 
+          shipArray = this.playerCarrier;
+          shipTexture = 'carrier';
+          shipSprite = this.pCarrier;
+        break;
+        case 'battleship': 
+          shipArray = this.playerBattleship;
+          shipTexture = 'battleship';
+          shipSprite = this.pBattleship;
+        break;
+        case 'cruiser': 
+          shipArray = this.playerCruiser;
+          shipTexture = 'cruiser';
+          shipSprite = this.pCruiser;
+        break;
+        case 'submarine': 
+          shipArray = this.playerSubmarine;
+          shipTexture = 'submarine';
+          shipSprite = this.pSubmarine;
+        break;
+        case 'destroyer': 
+          shipArray = this.playerDestroyer;
+          shipTexture = 'destroyer';
+          shipSprite = this.pDestroyer;
+        break;
+        case '': break;
+        default: console.log('error: no ship type detected in computerShot');
+      }
+
+      this.playerBoardArray[random].hit = true;
+      let x = this.playerBoardArray[random].xPos;
+      let y = this.playerBoardArray[random].yPos;
+      if (this.playerBoardArray[random].ship === true) {
+      let notSunk = shipArray.some(element => !element.hit === true);
+      this.playerContainer.add(this.add.sprite(x, y, 'marker-hit').setScale(1.0));
+      if (notSunk === false) {
+        this.shipSprite.setTexture(`sunk-${shipTexture}`);
+        for (let i = 0; i < shipArray.length; i++) shipArray[i].sunk = true;
+      }
+
+      } else if (this.playerBoardArray[random].ship === false) {
+        this.playerContainer.add(this.add.sprite(x, y, 'marker-miss').setScale(1.0));
+      }
+      this.time.delayedCall(this.duration, this.cScene, ['computer'], this);
+      return;
+  }
+
+  cScene(currentPlayer) {
+    //console.log('player text',playerText);
+    this.cameras.main.fadeOut(125, 0, 0, 0);
+    this.playerContainer.visible = false;
+    this.computerContainer.visible = true;
+    currentPlayer = 'player';
+    this.playerText.setText(`${currentPlayer}'s turn`);
+    this.cameras.main.fadeIn(500, 0, 0, 0);
+  }
+
+  isGameOver() {
+    if (this.computerBattleship[0].sunk === true && this.computerCarrier[0].sunk === true && this.computerCruiser[0].sunk === true && this.computerSubmarine[0].sunk === true && this.computerDestroyer[0].sunk === true) {
+      console.log('player wins');
+          return true;
+    }
+    if (this.playerBattleship[0].sunk === true && this.playerCarrier[0].sunk === true && this.playerCruiser[0].sunk === true && this.playerSubmarine[0].sunk === true && this.playerDestroyer[0].sunk === true) {
+      console.log('computer wins');
+          return true;
     }
   }
 }
