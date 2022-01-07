@@ -11,6 +11,15 @@
   "rules": {
     "prettier/prettier": ["error", {
       "usePrettierrc": true
-    }]
+    }],
+    "comma-dangle": ["error", {
+      "functions": "never",
+      "arrays": "always-multiline",
+      "objects": "always-multiline"
+    }],
+    "no-plusplus": "off",
+    "no-param-reassign": "off",
+    "no-console": "off",
+    "operator-linebreak": "off"
   } 
 }
