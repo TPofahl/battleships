@@ -15,6 +15,8 @@ export default class MainMenu extends Phaser.Scene {
   create() {
     const { width, height } = this.scale;
 
+    console.log('wwwwwwww', width);
+
     const element = this.add
       .dom(width * 0.5, height * 0.5)
       .createFromCache('nameform');
@@ -34,6 +36,12 @@ export default class MainMenu extends Phaser.Scene {
   }
 
   update() {
-    if (gameStart === true) this.scene.start('game', { playerName: userText });
+    if (gameStart === true) {
+      this.scene.start('game', {
+        playerName: userText,
+        screenWidth: this.scale.width,
+        screenHeight: this.scale.height,
+      });
+    }
   }
 }

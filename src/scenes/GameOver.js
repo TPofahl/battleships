@@ -6,7 +6,7 @@ export default class GameOver extends Phaser.Scene {
   }
 
   init(data) {
-    this.winner = data.winner;
+    this.winner = data.winner; // from 'game' scene
   }
 
   create() {
@@ -21,7 +21,7 @@ export default class GameOver extends Phaser.Scene {
     this.add.text(400, 400, `${this.winner} wins`);
 
     this.input.keyboard.once('keydown-SPACE', () => {
-      this.scene.start('game');
+      this.scene.start('maiin-menu');
     });
   }
 }
