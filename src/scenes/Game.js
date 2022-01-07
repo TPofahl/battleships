@@ -81,7 +81,6 @@ export default class Game extends Phaser.Scene {
     let shipArrayCopy;
     let canStartGame = true;
     const currentPlayer = this.pName;
-    const isPlaceable = this.canPlace;
     let canBePlaced;
     let texture;
     this.isShot = false;
@@ -194,7 +193,6 @@ export default class Game extends Phaser.Scene {
     const cCarrier = this.placeShip(
       'carrier',
       5,
-      boardSize,
       boardLength,
       boardStartX,
       computerBoardY,
@@ -204,7 +202,6 @@ export default class Game extends Phaser.Scene {
     const cBattleship = this.placeShip(
       'battleship',
       4,
-      boardSize,
       boardLength,
       boardStartX,
       computerBoardY,
@@ -214,7 +211,6 @@ export default class Game extends Phaser.Scene {
     const cCruiser = this.placeShip(
       'cruiser',
       3,
-      boardSize,
       boardLength,
       boardStartX,
       computerBoardY,
@@ -224,7 +220,6 @@ export default class Game extends Phaser.Scene {
     const cSubmarine = this.placeShip(
       'submarine',
       3,
-      boardSize,
       boardLength,
       boardStartX,
       computerBoardY,
@@ -234,7 +229,6 @@ export default class Game extends Phaser.Scene {
     const cDestroyer = this.placeShip(
       'destroyer',
       2,
-      boardSize,
       boardLength,
       boardStartX,
       computerBoardY,
@@ -246,7 +240,6 @@ export default class Game extends Phaser.Scene {
     const pCarrier = this.placeShip(
       'carrier',
       5,
-      boardSize,
       boardLength,
       boardStartX,
       playerBoardY,
@@ -256,7 +249,6 @@ export default class Game extends Phaser.Scene {
     const pBattleship = this.placeShip(
       'battleship',
       4,
-      boardSize,
       boardLength,
       boardStartX,
       playerBoardY,
@@ -266,7 +258,6 @@ export default class Game extends Phaser.Scene {
     const pCruiser = this.placeShip(
       'cruiser',
       3,
-      boardSize,
       boardLength,
       boardStartX,
       playerBoardY,
@@ -276,7 +267,6 @@ export default class Game extends Phaser.Scene {
     const pSubmarine = this.placeShip(
       'submarine',
       3,
-      boardSize,
       boardLength,
       boardStartX,
       playerBoardY,
@@ -286,7 +276,6 @@ export default class Game extends Phaser.Scene {
     const pDestroyer = this.placeShip(
       'destroyer',
       2,
-      boardSize,
       boardLength,
       boardStartX,
       playerBoardY,
@@ -551,211 +540,227 @@ export default class Game extends Phaser.Scene {
     });
 
     // R: rotate
-    this.input.keyboard.on('keydown-R', () => {
-      let shipSize = 0;
-      let shipBoundary = 0;
-      let updatedPosition;
-      if (shipArrayCopy) {
-        shipSize = shipArrayCopy.length * 32;
-        // check if ship goes off the board's x-axis when rotated.
-        if (
-          playerCursor.x + shipSize > boardStartX + boardLength &&
-          shipArrayCopy[0].rotation === 'vertical'
-        ) {
-          shipBoundary = playerCursor.x + shipSize - (boardStartX + boardLength);
-        }
-        // check if ship goes off the board's y-axis when rotated.
-        if (
-          playerCursor.y + shipSize > playerBoardY + boardLength &&
-          shipArrayCopy[0].rotation === 'horizontal'
-        ) {
-          shipBoundary = playerCursor.y + shipSize - (playerBoardY + boardLength);
-        }
-        switch (shipArrayCopy[0].angle) {
-          // vertical down.
-          case 0:
-            selectedShip.angle += 90;
-            selectedShip.x += 32;
-            selectedShip.y -= shipBoundary; // move ship image if going off board.
-            playerCursor.y -= shipBoundary;
-            if (shipBoundary) {
-              cursor.onIndex -= boardSize * (shipBoundary / 32);
+    this.input.keyboard.on(
+      'keydown-R',
+      () => {
+        let shipSize = 0;
+        let shipBoundary = 0;
+        let updatedPosition;
+        if (shipArrayCopy) {
+          shipSize = shipArrayCopy.length * 32;
+          // check if ship goes off the board's x-axis when rotated.
+          if (
+            playerCursor.x + shipSize > boardStartX + boardLength &&
+            shipArrayCopy[0].rotation === 'vertical'
+          ) {
+            shipBoundary = playerCursor.x + shipSize - (boardStartX + boardLength);
+          }
+          // check if ship goes off the board's y-axis when rotated.
+          if (
+            playerCursor.y + shipSize > playerBoardY + boardLength &&
+            shipArrayCopy[0].rotation === 'horizontal'
+          ) {
+            shipBoundary = playerCursor.y + shipSize - (playerBoardY + boardLength);
+          }
+          switch (shipArrayCopy[0].angle) {
+            // vertical down.
+            case 0:
+              selectedShip.angle += 90;
+              selectedShip.x += 32;
+              selectedShip.y -= shipBoundary; // move ship image if going off board.
+              playerCursor.y -= shipBoundary;
+              if (shipBoundary) {
+                cursor.onIndex -= boardSize * (shipBoundary / 32);
+                updatedPosition = playerBoard[cursor.onIndex];
+                cursor.onGrid = updatedPosition;
+              }
+              for (let i = 0; i < shipArrayCopy.length; i++) {
+                shipArrayCopy[i].angle++;
+                shipArrayCopy[i].rotation = 'vertical';
+              }
+              if (shipArrayCopy[0].angle > 3) {
+                for (let i = 0; i < shipArrayCopy.length; i++) {
+                  shipArrayCopy[i].angle = 0;
+                  shipArrayCopy[i].rotation = 'horizontal';
+                }
+              }
+              break;
+            // horizontal left.
+            case 1:
+              selectedShip.angle -= 90;
+              selectedShip.x -= 32;
+              selectedShip.x -= shipBoundary; // move ship image if going off board.
+              playerCursor.x -= shipBoundary;
+              cursor.onIndex -= shipBoundary / 32;
               updatedPosition = playerBoard[cursor.onIndex];
               cursor.onGrid = updatedPosition;
-            }
-            for (let i = 0; i < shipArrayCopy.length; i++) {
-              shipArrayCopy[i].angle++;
-              shipArrayCopy[i].rotation = 'vertical';
-            }
-            if (shipArrayCopy[0].angle > 3) {
+              selectedShip.flipX = !selectedShip.flipX;
               for (let i = 0; i < shipArrayCopy.length; i++) {
-                shipArrayCopy[i].angle = 0;
+                shipArrayCopy[i].angle++;
                 shipArrayCopy[i].rotation = 'horizontal';
               }
-            }
-            break;
-          // horizontal left.
-          case 1:
-            selectedShip.angle -= 90;
-            selectedShip.x -= 32;
-            selectedShip.x -= shipBoundary; // move ship image if going off board.
-            playerCursor.x -= shipBoundary;
-            cursor.onIndex -= shipBoundary / 32;
-            updatedPosition = playerBoard[cursor.onIndex];
-            cursor.onGrid = updatedPosition;
-            selectedShip.flipX = !selectedShip.flipX;
-            for (let i = 0; i < shipArrayCopy.length; i++) {
-              shipArrayCopy[i].angle++;
-              shipArrayCopy[i].rotation = 'horizontal';
-            }
-            if (shipArrayCopy[0].angle > 3) {
-              for (let i = 0; i < shipArrayCopy.length; i++) {
-                shipArrayCopy[i].angle = 0;
-                shipArrayCopy[i].rotation = 'horizontal';
+              if (shipArrayCopy[0].angle > 3) {
+                for (let i = 0; i < shipArrayCopy.length; i++) {
+                  shipArrayCopy[i].angle = 0;
+                  shipArrayCopy[i].rotation = 'horizontal';
+                }
               }
-            }
-            break;
-          // vertical up.
-          case 2:
-            selectedShip.angle += 90;
-            selectedShip.x += 32;
-            selectedShip.y -= shipBoundary; // move ship image if going off board.
-            playerCursor.y -= shipBoundary;
-            if (shipBoundary) {
-              cursor.onIndex -= boardSize * (shipBoundary / 32);
+              break;
+            // vertical up.
+            case 2:
+              selectedShip.angle += 90;
+              selectedShip.x += 32;
+              selectedShip.y -= shipBoundary; // move ship image if going off board.
+              playerCursor.y -= shipBoundary;
+              if (shipBoundary) {
+                cursor.onIndex -= boardSize * (shipBoundary / 32);
+                updatedPosition = playerBoard[cursor.onIndex];
+                cursor.onGrid = updatedPosition;
+              }
+              for (let i = 0; i < shipArrayCopy.length; i++) {
+                shipArrayCopy[i].angle++;
+                shipArrayCopy[i].rotation = 'vertical';
+              }
+              if (shipArrayCopy[0].angle > 3) {
+                for (let i = 0; i < shipArrayCopy.length; i++) {
+                  shipArrayCopy[i].angle = 0;
+                  shipArrayCopy[i].rotation = 'horizontal';
+                }
+              }
+              break;
+            // horizontal right.
+            case 3:
+              selectedShip.angle -= 90;
+              selectedShip.x -= 32;
+              selectedShip.x -= shipBoundary; // move ship image if going off board.
+              playerCursor.x -= shipBoundary;
+              cursor.onIndex -= shipBoundary / 32;
               updatedPosition = playerBoard[cursor.onIndex];
               cursor.onGrid = updatedPosition;
-            }
-            for (let i = 0; i < shipArrayCopy.length; i++) {
-              shipArrayCopy[i].angle++;
-              shipArrayCopy[i].rotation = 'vertical';
-            }
-            if (shipArrayCopy[0].angle > 3) {
+              selectedShip.flipX = !selectedShip.flipX;
               for (let i = 0; i < shipArrayCopy.length; i++) {
-                shipArrayCopy[i].angle = 0;
+                shipArrayCopy[i].angle++;
                 shipArrayCopy[i].rotation = 'horizontal';
               }
-            }
-            break;
-          // horizontal right.
-          case 3:
-            selectedShip.angle -= 90;
-            selectedShip.x -= 32;
-            selectedShip.x -= shipBoundary; // move ship image if going off board.
-            playerCursor.x -= shipBoundary;
-            cursor.onIndex -= shipBoundary / 32;
-            updatedPosition = playerBoard[cursor.onIndex];
-            cursor.onGrid = updatedPosition;
-            selectedShip.flipX = !selectedShip.flipX;
-            for (let i = 0; i < shipArrayCopy.length; i++) {
-              shipArrayCopy[i].angle++;
-              shipArrayCopy[i].rotation = 'horizontal';
-            }
-            if (shipArrayCopy[0].angle > 3) {
-              for (let i = 0; i < shipArrayCopy.length; i++) {
-                shipArrayCopy[i].angle = 0;
-                shipArrayCopy[i].rotation = 'horizontal';
+              if (shipArrayCopy[0].angle > 3) {
+                for (let i = 0; i < shipArrayCopy.length; i++) {
+                  shipArrayCopy[i].angle = 0;
+                  shipArrayCopy[i].rotation = 'horizontal';
+                }
               }
-            }
-            break;
-          default:
-            console.log('error: ship angle not found');
+              break;
+            default:
+              console.log('error: ship angle not found');
+          }
+          canBePlaced = this.constructor.canPlace(
+            shipArrayCopy,
+            playerBoard,
+            cursor.onIndex,
+            selectedShip,
+            texture
+          );
         }
-        canBePlaced = isPlaceable(
-          shipArrayCopy,
-          playerBoard,
-          cursor.onIndex,
-          selectedShip,
-          texture
-        );
-      }
-    });
+      },
+      this
+    );
 
     // keyboard movement
-    this.input.keyboard.on('keydown-W', () => {
-      playerCursor.y -= 32;
-      if (playerCursor.y < playerBoardY) {
-        cursorThud.play();
-        playerCursor.y += 32;
-      } else {
-        cursorMoveSound.play();
-        cursor.onIndex -= boardSize;
-        const updatedPosition = playerBoard[cursor.onIndex];
-        cursor.onGrid = updatedPosition;
-        cursor.yPos = playerCursor.y;
-        if (shipSelected) selectedShip.y -= 32;
-      }
-      if (shipSelected) {
-        canBePlaced = isPlaceable(
-          shipArrayCopy,
-          playerBoard,
-          cursor.onGrid.index,
-          selectedShip,
-          texture
-        );
-      }
-    });
-
-    this.input.keyboard.on('keydown-S', () => {
-      let isMoving = true;
-      let shipSize = 0;
-      let shipRot = '';
-      if (shipArrayCopy) {
-        shipSize = shipArrayCopy.length * 32;
-        shipRot = shipArrayCopy[0].rotation;
-      }
-      playerCursor.y += 32;
-      if (
-        playerCursor.y > playerBoardY + (boardLength - 32) ||
-        (playerCursor.y + shipSize > playerBoardStartY && shipRot === 'vertical')
-      ) {
-        cursorThud.play();
+    this.input.keyboard.on(
+      'keydown-W',
+      () => {
         playerCursor.y -= 32;
-        isMoving = false;
-      } else {
-        cursorMoveSound.play();
-        cursor.onIndex += boardSize;
-        const updatedPosition = playerBoard[cursor.onIndex];
-        cursor.onGrid = updatedPosition;
-        cursor.yPos = playerCursor.y;
-        if (shipSelected) selectedShip.y += 32;
-      }
-      if (shipSelected && isMoving) {
-        canBePlaced = isPlaceable(
-          shipArrayCopy,
-          playerBoard,
-          cursor.onGrid.index,
-          selectedShip,
-          texture
-        );
-      }
-    });
+        if (playerCursor.y < playerBoardY) {
+          cursorThud.play();
+          playerCursor.y += 32;
+        } else {
+          cursorMoveSound.play();
+          cursor.onIndex -= boardSize;
+          const updatedPosition = playerBoard[cursor.onIndex];
+          cursor.onGrid = updatedPosition;
+          cursor.yPos = playerCursor.y;
+          if (shipSelected) selectedShip.y -= 32;
+        }
+        if (shipSelected) {
+          canBePlaced = this.constructor.canPlace(
+            shipArrayCopy,
+            playerBoard,
+            cursor.onGrid.index,
+            selectedShip,
+            texture
+          );
+        }
+      },
+      this
+    );
 
-    this.input.keyboard.on('keydown-A', () => {
-      let isMoving = true;
-      playerCursor.x -= 32;
-      if (playerCursor.x < boardStartX) {
-        cursorThud.play();
-        playerCursor.x += 32;
-        isMoving = false;
-      } else {
-        cursorMoveSound.play();
-        cursor.onIndex -= 1;
-        const updatedPosition = playerBoard[cursor.onIndex];
-        cursor.onGrid = updatedPosition;
-        cursor.xPos = playerCursor.x;
-        if (shipSelected) selectedShip.x -= 32;
-      }
-      if (shipSelected && isMoving) {
-        canBePlaced = isPlaceable(
-          shipArrayCopy,
-          playerBoard,
-          cursor.onGrid.index,
-          selectedShip,
-          texture
-        );
-      }
-    });
+    this.input.keyboard.on(
+      'keydown-S',
+      () => {
+        let isMoving = true;
+        let shipSize = 0;
+        let shipRot = '';
+        if (shipArrayCopy) {
+          shipSize = shipArrayCopy.length * 32;
+          shipRot = shipArrayCopy[0].rotation;
+        }
+        playerCursor.y += 32;
+        if (
+          playerCursor.y > playerBoardY + (boardLength - 32) ||
+          (playerCursor.y + shipSize > playerBoardStartY && shipRot === 'vertical')
+        ) {
+          cursorThud.play();
+          playerCursor.y -= 32;
+          isMoving = false;
+        } else {
+          cursorMoveSound.play();
+          cursor.onIndex += boardSize;
+          const updatedPosition = playerBoard[cursor.onIndex];
+          cursor.onGrid = updatedPosition;
+          cursor.yPos = playerCursor.y;
+          if (shipSelected) selectedShip.y += 32;
+        }
+        if (shipSelected && isMoving) {
+          canBePlaced = this.constructor.canPlace(
+            shipArrayCopy,
+            playerBoard,
+            cursor.onGrid.index,
+            selectedShip,
+            texture
+          );
+        }
+      },
+      this
+    );
+
+    this.input.keyboard.on(
+      'keydown-A',
+      () => {
+        let isMoving = true;
+        playerCursor.x -= 32;
+        if (playerCursor.x < boardStartX) {
+          cursorThud.play();
+          playerCursor.x += 32;
+          isMoving = false;
+        } else {
+          cursorMoveSound.play();
+          cursor.onIndex -= 1;
+          const updatedPosition = playerBoard[cursor.onIndex];
+          cursor.onGrid = updatedPosition;
+          cursor.xPos = playerCursor.x;
+          if (shipSelected) selectedShip.x -= 32;
+        }
+        if (shipSelected && isMoving) {
+          canBePlaced = this.constructor.canPlace(
+            shipArrayCopy,
+            playerBoard,
+            cursor.onGrid.index,
+            selectedShip,
+            texture
+          );
+        }
+      },
+      this
+    );
 
     this.input.keyboard.on('keydown-D', () => {
       let shipSize = 0;
@@ -782,7 +787,7 @@ export default class Game extends Phaser.Scene {
         if (shipSelected) selectedShip.x += 32;
       }
       if (shipSelected) {
-        canBePlaced = isPlaceable(
+        canBePlaced = this.constructor.canPlace(
           shipArrayCopy,
           playerBoard,
           cursor.onGrid.index,
@@ -806,7 +811,6 @@ export default class Game extends Phaser.Scene {
   placeShip(
     shipType,
     shipLength,
-    boardSize,
     boardLength,
     boardStartX,
     playerBoardY,
@@ -832,8 +836,7 @@ export default class Game extends Phaser.Scene {
           ) {
             okToPlace = false;
           } else if (
-            this.checkShipCollision(
-              boardSize,
+            this.constructor.checkShipCollision(
               tileStart,
               shipLength,
               'horizontal',
@@ -870,8 +873,7 @@ export default class Game extends Phaser.Scene {
           ) {
             okToPlace = false;
           } else if (
-            this.checkShipCollision(
-              boardSize,
+            this.constructor.checkShipCollision(
               tileStart,
               shipLength,
               'vertical',
@@ -906,7 +908,7 @@ export default class Game extends Phaser.Scene {
   }
 
   // Checks if the ship overlaps with any other ship when the program places ships.
-  checkShipCollision(boardSize, tileStart, shipLength, shipRotation, board) {
+  static checkShipCollision(tileStart, shipLength, shipRotation, board) {
     if (shipRotation === 'horizontal') {
       const shipLocation = board.slice(tileStart, tileStart + shipLength);
       return shipLocation.some((element) => element.ship === true);
@@ -919,10 +921,11 @@ export default class Game extends Phaser.Scene {
       }
       return shipLocation.some((element) => element.ship === true);
     }
+    return undefined;
   }
 
   // Check if player's selected ship position is not overlapping another ship, or out of bounds.
-  canPlace(shipArrayCopy, playerBoard, cursorIndex, shipSprite, texture) {
+  static canPlace(shipArrayCopy, playerBoard, cursorIndex, shipSprite, texture) {
     if (shipArrayCopy[0].rotation === 'horizontal') {
       for (let i = 0; i < shipArrayCopy.length; i++) {
         if (playerBoard[cursorIndex + i].ship === true) {
@@ -943,30 +946,29 @@ export default class Game extends Phaser.Scene {
       shipSprite.setTexture(texture);
       return true;
     }
+    return undefined;
   }
-  
 
   sceneChange(currentPlayer) {
     if (this.isPlayerTurn === true) {
-      // player turn
+      // player's turn
       this.cameras.main.fadeOut(125, 0, 0, 0);
       this.isPlayerTurn = !this.isPlayerTurn;
       this.playerContainer.visible = true;
-
       this.computerContainer.visible = false;
       this.computerMarkers.visible = false;
       currentPlayer = 'computer';
       this.playerText.setText(`${currentPlayer}'s turn`);
       this.cameras.main.fadeIn(500, 0, 0, 0);
     } else if (this.isPlayerTurn === false) {
-      // computer turn
+      // computer's turn
       this.cameras.main.fadeOut(125, 0, 0, 0);
       this.isPlayerTurn = !this.isPlayerTurn;
       this.playerContainer.visible = false;
 
       this.computerContainer.visible = false;
       this.computerMarkers.visible = true;
-      currentPlayer = this.pName;
+      currentPlayer = this.pName; // Use name from MainMenu
       this.playerText.setText(`${currentPlayer}'s turn`);
       this.cameras.main.fadeIn(500, 0, 0, 0);
     }
@@ -1012,7 +1014,6 @@ export default class Game extends Phaser.Scene {
       default:
         console.log('error: no ship type detected in computerShot');
     }
-
     this.playerBoardArray[random].hit = true;
     const x = this.playerBoardArray[random].xPos;
     const y = this.playerBoardArray[random].yPos;
