@@ -1,15 +1,16 @@
 import Phaser from 'phaser';
-import MainMenu from './scenes/MainMenu.js';
-import Game from './scenes/Game.js';
-import GameOver from './scenes/GameOver.js';
+import MainMenu from './scenes/MainMenu';
+import Game from './scenes/Game';
+import GameOver from './scenes/GameOver';
 
-export default new Phaser.Game({//config
+export default new Phaser.Game({
+  // config
   type: Phaser.AUTO,
-  width: 768,//768
-  height: 736,
+  width: window.innerWidth, // 768
+  height: window.innerHeight, // 736
   scene: [MainMenu, Game, GameOver],
   parent: 'battleships',
   dom: {
-    createContainer: true
-  }
-})
+    createContainer: true,
+  },
+});
