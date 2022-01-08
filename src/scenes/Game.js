@@ -37,6 +37,8 @@ export default class Game extends Phaser.Scene {
     this.pName = data.playerName; // from 'MainMenu' scene
     this.screenWidth = data.screenWidth;
     this.screenHeight = data.screenHeight;
+    this.tileSize = 128;
+    this.spriteOffset = this.tileSize / 2;
   }
 
   preload() {
@@ -47,33 +49,75 @@ export default class Game extends Phaser.Scene {
     this.load.image('right-button', 'assets/button-right.png');
     this.load.image('rotate-button', 'assets/button-rotate.png');
     this.load.image('start-button', 'assets/button-start.png');
-    this.load.image('cursor-player', 'assets/cursor-player.png');
-    this.load.image('cursor-active', 'assets/cursor-active.png');
-    this.load.image('battleship', 'assets/battleship.png');
-    this.load.image('cruiser', 'assets/cruiser.png');
-    this.load.image('carrier', 'assets/carrier.png');
-    this.load.image('destroyer', 'assets/destroyer.png');
-    this.load.image('submarine', 'assets/submarine.png');
-    this.load.image('sunk-battleship', 'assets/sunk-battleship.png');
-    this.load.image('sunk-cruiser', 'assets/sunk-cruiser.png');
-    this.load.image('sunk-carrier', 'assets/sunk-carrier.png');
-    this.load.image('sunk-destroyer', 'assets/sunk-destroyer.png');
-    this.load.image('sunk-submarine', 'assets/sunk-submarine.png');
+
     this.load.audio('cursor-move', 'assets/sfx/cursor-move.wav');
     this.load.audio('cursor-bounds', 'assets/sfx/cursor-bounds.wav');
-    this.load.image('marker-hit', 'assets/marker-hit.png');
-    this.load.image('marker-miss', 'assets/marker-miss.png');
 
     this.load.svg('water', 'assets/water-tile.svg', {
-      width: 32,
-      height: 32,
+      width: this.tileSize,
+      height: this.tileSize,
+    });
+    this.load.svg('cursor-player', 'assets/cursor-player.svg', {
+      width: this.tileSize,
+      height: this.tileSize,
+    });
+    this.load.svg('cursor-active', 'assets/cursor-active.svg', {
+      width: this.tileSize,
+      height: this.tileSize,
+    });
+    this.load.svg('carrier', 'assets/carrier.svg', {
+      width: this.tileSize * 5,
+      height: this.tileSize,
+    });
+    this.load.svg('sunk-carrier', 'assets/sunk-carrier.svg', {
+      width: this.tileSize * 5,
+      height: this.tileSize,
+    });
+    this.load.svg('battleship', 'assets/battleship.svg', {
+      width: this.tileSize * 4,
+      height: this.tileSize,
+    });
+    this.load.svg('sunk-battleship', 'assets/sunk-battleship.svg', {
+      width: this.tileSize * 4,
+      height: this.tileSize,
+    });
+    this.load.svg('submarine', 'assets/submarine.svg', {
+      width: this.tileSize * 3,
+      height: this.tileSize,
+    });
+    this.load.svg('sunk-submarine', 'assets/sunk-submarine.svg', {
+      width: this.tileSize * 3,
+      height: this.tileSize,
+    });
+    this.load.svg('cruiser', 'assets/cruiser.svg', {
+      width: this.tileSize * 3,
+      height: this.tileSize,
+    });
+    this.load.svg('sunk-cruiser', 'assets/sunk-cruiser.svg', {
+      width: this.tileSize * 3,
+      height: this.tileSize,
+    });
+    this.load.svg('destroyer', 'assets/destroyer.svg', {
+      width: this.tileSize * 2,
+      height: this.tileSize,
+    });
+    this.load.svg('sunk-destroyer', 'assets/sunk-destroyer.svg', {
+      width: this.tileSize * 2,
+      height: this.tileSize,
+    });
+    this.load.svg('marker-hit', 'assets/marker-hit.svg', {
+      width: this.tileSize,
+      height: this.tileSize,
+    });
+    this.load.svg('marker-miss', 'assets/marker-miss.svg', {
+      width: this.tileSize,
+      height: this.tileSize,
     });
   }
 
   create() {
-    console.log('width: ', this.screenWidth);
-    console.log('height: ', this.screenHeight);
-    const boardLength = boardSize * 32; // 32x32 tiles
+    console.log('offset:', this.spriteOffset);
+    const boardLength = boardSize * this.tileSize; // this.tileSizexthis.tileSize tiles
     const boardStartX = 112;
     let playerBoardStartY = 200; // 400
     let computerBoardStartY = 200; // 48
@@ -115,42 +159,42 @@ export default class Game extends Phaser.Scene {
       boardCenterX = boardLength / 2 + boardStartX;
       boardCenterY = boardLength / 2 + playerBoardStartY;
     } else {
-      boardCenterX = boardLength / 2 + boardStartX - 16;
-      boardCenterY = boardLength / 2 + playerBoardStartY - 16;
+      boardCenterX = boardLength / 2 + boardStartX - this.spriteOffset; // 16
+      boardCenterY = boardLength / 2 + playerBoardStartY - this.spriteOffset; // 16
     }
 
     // game controller    //shift -350, +200
     const aButton = this.add
-      .sprite(230, 550, 'a-button')
+      .sprite(230, 750, 'a-button')
       .setScale(1.2)
       .setInteractive();
     const rotateButton = this.add
-      .sprite(230, 600, 'rotate-button')
+      .sprite(230, 800, 'rotate-button')
       .setScale(1.2)
       .setInteractive();
     const startButton = this.add
-      .sprite(330, 570, 'start-button')
+      .sprite(330, 770, 'start-button')
       .setScale(1.2)
       .setInteractive();
     const upButton = this.add
-      .sprite(150, 545, 'up-button')
+      .sprite(150, 745, 'up-button')
       .setScale(1.2)
       .setInteractive(); // was 500, 345
     const downButton = this.add
-      .sprite(150, 605, 'down-button')
+      .sprite(150, 805, 'down-button')
       .setScale(1.2)
       .setInteractive();
     const leftButton = this.add
-      .sprite(120, 575, 'left-button')
+      .sprite(120, 775, 'left-button')
       .setScale(1.2)
       .setInteractive();
     const rightButton = this.add
-      .sprite(180, 575, 'right-button')
+      .sprite(180, 775, 'right-button')
       .setScale(1.2)
       .setInteractive();
     const playerCursor = this.add
       .sprite(boardCenterX, boardCenterY, 'cursor-player')
-      .setScale(1.0); // 432, 400
+      .setScale(1.0); // 4this.tileSize, 400
     this.playerText = this.add
       .text(100, 150, 'place your ships', {
         fontFamily: 'Georgia, "Goudy Bookletter 1911", Times, serif',
@@ -159,10 +203,9 @@ export default class Game extends Phaser.Scene {
     let boardLetter = 'A';
     let pTileNumber = 0;
     // Create Computer game board
-    for (let y = 0; y < boardLength; y += 32) {
+    for (let y = 0; y < boardLength; y += this.tileSize) {
       let boardNumber = 1;
-      for (let x = 0; x < boardLength; x += 32) {
-        // this.add.image(x + boardStartX, computerBoardStartY, 'water').setScale(1.0);
+      for (let x = 0; x < boardLength; x += this.tileSize) {
         this.computerBoardArray.push({
           id: boardLetter + boardNumber,
           ship: false,
@@ -175,15 +218,15 @@ export default class Game extends Phaser.Scene {
         boardNumber += 1;
       }
       boardLetter = String.fromCharCode(boardLetter.charCodeAt(0) + 1);
-      computerBoardStartY += 32;
+      computerBoardStartY += this.tileSize;
     }
     boardLetter = 'A';
     pTileNumber = 0;
     // create Player game board
-    for (let y = 0; y < boardLength; y += 32) {
+    for (let y = 0; y < boardLength; y += this.tileSize) {
       let boardNumber = 1;
-      for (let x = 0; x < boardLength; x += 32) {
-        this.add.image(x + boardStartX, playerBoardStartY, 'water').setScale(1.0);
+      for (let x = 0; x < boardLength; x += this.tileSize) {
+        this.add.image(x + boardStartX, playerBoardStartY, 'water');
         this.playerBoardArray.push({
           id: boardLetter + boardNumber,
           index: pTileNumber,
@@ -199,7 +242,7 @@ export default class Game extends Phaser.Scene {
         boardNumber += 1;
       }
       boardLetter = String.fromCharCode(boardLetter.charCodeAt(0) + 1);
-      playerBoardStartY += 32;
+      playerBoardStartY += this.tileSize;
     }
     // set cursor starting position logic to board
     cursorStartPosition =
@@ -520,14 +563,14 @@ export default class Game extends Phaser.Scene {
             cursor.yPos = shipStart.yPos;
 
             if (shipArrayCopy[0].rotation === 'horizontal') {
-              playerCursor.x = shipId.x + 16;
-              playerCursor.y = shipId.y + 16;
+              playerCursor.x = shipId.x + this.spriteOffset;
+              playerCursor.y = shipId.y + this.spriteOffset;
               for (let i = 0; i < shipArrayCopy.length; i++) {
                 shipArrayCopy[i].index = shipStart.index + i;
               }
             } else {
-              playerCursor.x = shipId.x - 16;
-              playerCursor.y = shipId.y + 16;
+              playerCursor.x = shipId.x - this.spriteOffset;
+              playerCursor.y = shipId.y + this.spriteOffset;
               for (let i = 0; i < shipArrayCopy.length; i++) {
                 shipArrayCopy[i].index = shipStart.index + boardSize * i;
               }
@@ -582,7 +625,7 @@ export default class Game extends Phaser.Scene {
         let shipBoundary = 0;
         let updatedPosition;
         if (shipArrayCopy) {
-          shipSize = shipArrayCopy.length * 32;
+          shipSize = shipArrayCopy.length * this.tileSize;
           // check if ship goes off the board's x-axis when rotated.
           if (
             playerCursor.x + shipSize > boardStartX + boardLength &&
@@ -601,11 +644,11 @@ export default class Game extends Phaser.Scene {
             // vertical down.
             case 0:
               selectedShip.angle += 90;
-              selectedShip.x += 32;
+              selectedShip.x += this.tileSize;
               selectedShip.y -= shipBoundary; // move ship image if going off board.
               playerCursor.y -= shipBoundary;
               if (shipBoundary) {
-                cursor.onIndex -= boardSize * (shipBoundary / 32);
+                cursor.onIndex -= boardSize * (shipBoundary / this.tileSize);
                 updatedPosition = playerBoard[cursor.onIndex];
                 cursor.onGrid = updatedPosition;
               }
@@ -623,10 +666,10 @@ export default class Game extends Phaser.Scene {
             // horizontal left.
             case 1:
               selectedShip.angle -= 90;
-              selectedShip.x -= 32;
+              selectedShip.x -= this.tileSize;
               selectedShip.x -= shipBoundary; // move ship image if going off board.
               playerCursor.x -= shipBoundary;
-              cursor.onIndex -= shipBoundary / 32;
+              cursor.onIndex -= shipBoundary / this.tileSize;
               updatedPosition = playerBoard[cursor.onIndex];
               cursor.onGrid = updatedPosition;
               selectedShip.flipX = !selectedShip.flipX;
@@ -644,11 +687,11 @@ export default class Game extends Phaser.Scene {
             // vertical up.
             case 2:
               selectedShip.angle += 90;
-              selectedShip.x += 32;
+              selectedShip.x += this.tileSize;
               selectedShip.y -= shipBoundary; // move ship image if going off board.
               playerCursor.y -= shipBoundary;
               if (shipBoundary) {
-                cursor.onIndex -= boardSize * (shipBoundary / 32);
+                cursor.onIndex -= boardSize * (shipBoundary / this.tileSize);
                 updatedPosition = playerBoard[cursor.onIndex];
                 cursor.onGrid = updatedPosition;
               }
@@ -666,10 +709,10 @@ export default class Game extends Phaser.Scene {
             // horizontal right.
             case 3:
               selectedShip.angle -= 90;
-              selectedShip.x -= 32;
+              selectedShip.x -= this.tileSize;
               selectedShip.x -= shipBoundary; // move ship image if going off board.
               playerCursor.x -= shipBoundary;
-              cursor.onIndex -= shipBoundary / 32;
+              cursor.onIndex -= shipBoundary / this.tileSize;
               updatedPosition = playerBoard[cursor.onIndex];
               cursor.onGrid = updatedPosition;
               selectedShip.flipX = !selectedShip.flipX;
@@ -704,17 +747,17 @@ export default class Game extends Phaser.Scene {
       'pointerdown',
       function handle() {
         if (this.gamePadActive === false) return;
-        playerCursor.y -= 32;
+        playerCursor.y -= this.tileSize;
         if (playerCursor.y < playerBoardY) {
           cursorThud.play();
-          playerCursor.y += 32;
+          playerCursor.y += this.tileSize;
         } else {
           cursorMoveSound.play();
           cursor.onIndex -= boardSize;
           const updatedPosition = playerBoard[cursor.onIndex];
           cursor.onGrid = updatedPosition;
           cursor.yPos = playerCursor.y;
-          if (shipSelected) selectedShip.y -= 32;
+          if (shipSelected) selectedShip.y -= this.tileSize;
         }
         if (shipSelected) {
           canBePlaced = this.constructor.canPlace(
@@ -737,16 +780,16 @@ export default class Game extends Phaser.Scene {
         let shipSize = 0;
         let shipRot = '';
         if (shipArrayCopy) {
-          shipSize = shipArrayCopy.length * 32;
+          shipSize = shipArrayCopy.length * this.tileSize;
           shipRot = shipArrayCopy[0].rotation;
         }
-        playerCursor.y += 32;
+        playerCursor.y += this.tileSize;
         if (
-          playerCursor.y > playerBoardY + (boardLength - 32) ||
+          playerCursor.y > playerBoardY + (boardLength - this.tileSize) ||
           (playerCursor.y + shipSize > playerBoardStartY && shipRot === 'vertical')
         ) {
           cursorThud.play();
-          playerCursor.y -= 32;
+          playerCursor.y -= this.tileSize;
           isMoving = false;
         } else {
           cursorMoveSound.play();
@@ -754,7 +797,7 @@ export default class Game extends Phaser.Scene {
           const updatedPosition = playerBoard[cursor.onIndex];
           cursor.onGrid = updatedPosition;
           cursor.yPos = playerCursor.y;
-          if (shipSelected) selectedShip.y += 32;
+          if (shipSelected) selectedShip.y += this.tileSize;
         }
         if (shipSelected && isMoving) {
           canBePlaced = this.constructor.canPlace(
@@ -774,10 +817,10 @@ export default class Game extends Phaser.Scene {
       function handle() {
         if (this.gamePadActive === false) return;
         let isMoving = true;
-        playerCursor.x -= 32;
+        playerCursor.x -= this.tileSize;
         if (playerCursor.x < boardStartX) {
           cursorThud.play();
-          playerCursor.x += 32;
+          playerCursor.x += this.tileSize;
           isMoving = false;
         } else {
           cursorMoveSound.play();
@@ -785,7 +828,7 @@ export default class Game extends Phaser.Scene {
           const updatedPosition = playerBoard[cursor.onIndex];
           cursor.onGrid = updatedPosition;
           cursor.xPos = playerCursor.x;
-          if (shipSelected) selectedShip.x -= 32;
+          if (shipSelected) selectedShip.x -= this.tileSize;
         }
         if (shipSelected && isMoving) {
           canBePlaced = this.constructor.canPlace(
@@ -807,25 +850,25 @@ export default class Game extends Phaser.Scene {
         let shipSize = 0;
         let shipRot = '';
         if (shipArrayCopy) {
-          shipSize = shipArrayCopy.length * 32;
+          shipSize = shipArrayCopy.length * this.tileSize;
           shipRot = shipArrayCopy[0].rotation;
         }
 
-        playerCursor.x += 32;
+        playerCursor.x += this.tileSize;
         if (
-          playerCursor.x > boardStartX + (boardLength - 32) ||
+          playerCursor.x > boardStartX + (boardLength - this.tileSize) ||
           (playerCursor.x + shipSize > boardStartX + boardLength &&
             shipRot === 'horizontal')
         ) {
           cursorThud.play();
-          playerCursor.x -= 32;
+          playerCursor.x -= this.tileSize;
         } else {
           cursorMoveSound.play();
           cursor.onIndex += 1;
           const updatedPosition = playerBoard[cursor.onIndex];
           cursor.onGrid = updatedPosition;
           cursor.xPos = playerCursor.x;
-          if (shipSelected) selectedShip.x += 32;
+          if (shipSelected) selectedShip.x += this.tileSize;
         }
         if (shipSelected) {
           canBePlaced = this.constructor.canPlace(
@@ -875,8 +918,8 @@ export default class Game extends Phaser.Scene {
         do {
           const tileStart = Phaser.Math.Between(0, board.length - 1);
           if (
-            board[tileStart].xPos + (shipLength - 1) * 32 >
-            boardLength + boardStartX - 32
+            board[tileStart].xPos + (shipLength - 1) * this.tileSize >
+            boardLength + boardStartX - this.tileSize
           ) {
             okToPlace = false;
           } else if (
@@ -902,8 +945,12 @@ export default class Game extends Phaser.Scene {
         } while (okToPlace === false);
 
         const createHorizontalShip = this.add
-          .sprite(board[index].xPos - 16, board[index].yPos - 16, shipType)
-          .setScale(1.0)
+          // xPos: -16, yPos: -16  when tilesize = 32...
+          .sprite(
+            board[index].xPos - this.spriteOffset,
+            board[index].yPos - this.spriteOffset,
+            shipType
+          )
           .setOrigin(0, 0);
         if (shipRotation === 2) createHorizontalShip.flipX = true;
         return createHorizontalShip;
@@ -912,8 +959,8 @@ export default class Game extends Phaser.Scene {
         do {
           const tileStart = Phaser.Math.Between(0, board.length - 1);
           if (
-            board[tileStart].yPos + (shipLength - 1) * 32 >
-            boardLength + playerBoardY - 32
+            board[tileStart].yPos + (shipLength - 1) * this.tileSize >
+            boardLength + playerBoardY - this.tileSize
           ) {
             okToPlace = false;
           } else if (
@@ -939,7 +986,11 @@ export default class Game extends Phaser.Scene {
         } while (okToPlace === false);
 
         const createVerticalShip = this.add
-          .sprite(board[index].xPos + 16, board[index].yPos - 16, shipType)
+          .sprite(
+            board[index].xPos + this.spriteOffset,
+            board[index].yPos - this.spriteOffset,
+            shipType
+          )
           .setScale(1.0)
           .setOrigin(0, 0);
         createVerticalShip.angle += 90;
