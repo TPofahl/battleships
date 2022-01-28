@@ -1,6 +1,6 @@
 import Phaser from 'phaser';
 
-const boardSize = 8;
+const boardSize = 10;
 
 export default class Game extends Phaser.Scene {
   constructor() {
@@ -30,14 +30,17 @@ export default class Game extends Phaser.Scene {
     this.playerSunk = [];
     this.playerMarkers = [];
 
-    this.duration = 1500; // scene fade change duration.
+    this.duration = 200; // scene-change fade duration.
   }
 
   init(data) {
     this.pName = data.playerName; // from 'MainMenu' scene
     this.screenWidth = data.screenWidth;
     this.screenHeight = data.screenHeight;
-    this.tileSize = 128;
+    console.log('screen width: ', this.screenWidth);
+    //this.tileSize = 64; // increments of 2 only.
+    this.tileSize = Math.round((this.screenHeight * 0.6) / boardSize); // increments of 2 only.
+    console.log('this.tile: ', this.tileSize * boardSize);
     this.spriteOffset = this.tileSize / 2;
   }
 
@@ -116,9 +119,12 @@ export default class Game extends Phaser.Scene {
   }
 
   create() {
-    console.log('offset:', this.spriteOffset);
-    const boardLength = boardSize * this.tileSize; // this.tileSizexthis.tileSize tiles
-    const boardStartX = 112;
+    const boardLength = boardSize * this.tileSize;
+    // Find starting tile position, to center on screen.
+    const boardStartX = Math.round(
+      (this.screenWidth - this.tileSize * boardSize) / 2
+    );
+    console.log('boardStartX', boardStartX);
     let playerBoardStartY = 200; // 400
     let computerBoardStartY = 200; // 48
     const playerBoardY = playerBoardStartY;

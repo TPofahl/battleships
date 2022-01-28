@@ -21,7 +21,7 @@ export default class GameOver extends Phaser.Scene {
     this.add.text(400, 400, `${this.winner} wins`);
 
     this.input.keyboard.once('keydown-SPACE', () => {
-      this.scene.start('maiin-menu');
+      this.scene.start('main-menu');
     });
   }
 }
