@@ -38,23 +38,59 @@ export default class Game extends Phaser.Scene {
     this.screenWidth = data.screenWidth;
     this.screenHeight = data.screenHeight;
     console.log('screen width: ', this.screenWidth);
-    //this.tileSize = 64; // increments of 2 only.
+    // this.tileSize = 64; // increments of 2 only.
     this.tileSize = Math.round((this.screenHeight * 0.6) / boardSize); // increments of 2 only.
     console.log('this.tile: ', this.tileSize * boardSize);
     this.spriteOffset = this.tileSize / 2;
   }
 
   preload() {
-    this.load.image('a-button', 'assets/button-a.png');
-    this.load.image('up-button', 'assets/button-up.png');
-    this.load.image('down-button', 'assets/button-down.png');
-    this.load.image('left-button', 'assets/button-left.png');
-    this.load.image('right-button', 'assets/button-right.png');
-    this.load.image('rotate-button', 'assets/button-rotate.png');
-    this.load.image('start-button', 'assets/button-start.png');
+    // this.load.image('a-button', 'assets/button-a.png');
+    // this.load.image('rotate-button', 'assets/button-rotate.png');
+    // this.load.image('start-button', 'assets/button-start.png');
 
     this.load.audio('cursor-move', 'assets/sfx/cursor-move.wav');
     this.load.audio('cursor-bounds', 'assets/sfx/cursor-bounds.wav');
+
+    this.load.svg('start-button', 'assets/button-start.svg', {
+      width: 250,
+      height: 250,
+    });
+
+    this.load.svg('fire-button', 'assets/button-fire.svg', {
+      width: 250,
+      height: 250,
+    });
+
+    this.load.svg('a-button', 'assets/button-a.svg', {
+      width: 250,
+      height: 150,
+    });
+
+    this.load.svg('rotate-button', 'assets/button-rotate.svg', {
+      width: 250,
+      height: 150,
+    });
+
+    this.load.svg('up-button', 'assets/button-up.svg', {
+      width: 100,
+      height: 100,
+    });
+
+    this.load.svg('down-button', 'assets/button-down.svg', {
+      width: 100,
+      height: 100,
+    });
+
+    this.load.svg('left-button', 'assets/button-left.svg', {
+      width: 100,
+      height: 100,
+    });
+
+    this.load.svg('right-button', 'assets/button-right.svg', {
+      width: 100,
+      height: 100,
+    });
 
     this.load.svg('water', 'assets/water-tile.svg', {
       width: this.tileSize,
@@ -143,6 +179,9 @@ export default class Game extends Phaser.Scene {
     let canBePlaced;
     let texture;
     this.isShot = false;
+    // starting position of the gamepad images
+    const gamePadStartY = playerBoardStartY + this.tileSize * boardSize + 20;
+    const gamePadStartX = this.screenWidth / 2 - this.tileSize / 2;
 
     let gameOver = false;
 
@@ -171,32 +210,37 @@ export default class Game extends Phaser.Scene {
 
     // game controller    //shift -350, +200
     const aButton = this.add
-      .sprite(230, 750, 'a-button')
-      .setScale(1.2)
+      .sprite(gamePadStartX + 280, gamePadStartY + 170, 'a-button')
+      .setScale(1.0)
       .setInteractive();
+    const fireButton = this.add
+      .sprite(gamePadStartX + 280, gamePadStartY + 100, 'fire-button')
+      .setScale(1.0)
+      .setInteractive();
+    fireButton.visible = false;
     const rotateButton = this.add
-      .sprite(230, 800, 'rotate-button')
-      .setScale(1.2)
+      .sprite(gamePadStartX + 280, gamePadStartY + 40, 'rotate-button')
+      .setScale(1.0)
       .setInteractive();
     const startButton = this.add
-      .sprite(330, 770, 'start-button')
-      .setScale(1.2)
+      .sprite(gamePadStartX - 280, gamePadStartY + 100, 'start-button')
+      .setScale(1.0)
       .setInteractive();
     const upButton = this.add
-      .sprite(150, 745, 'up-button')
-      .setScale(1.2)
+      .sprite(gamePadStartX, gamePadStartY, 'up-button')
+      .setScale(1.0)
       .setInteractive(); // was 500, 345
     const downButton = this.add
-      .sprite(150, 805, 'down-button')
-      .setScale(1.2)
+      .sprite(gamePadStartX, gamePadStartY + 200, 'down-button')
+      .setScale(1.0)
       .setInteractive();
     const leftButton = this.add
-      .sprite(120, 775, 'left-button')
-      .setScale(1.2)
+      .sprite(gamePadStartX - 100, gamePadStartY + 100, 'left-button')
+      .setScale(1.0)
       .setInteractive();
     const rightButton = this.add
-      .sprite(180, 775, 'right-button')
-      .setScale(1.2)
+      .sprite(gamePadStartX + 100, gamePadStartY + 100, 'right-button')
+      .setScale(1.0)
       .setInteractive();
     const playerCursor = this.add
       .sprite(boardCenterX, boardCenterY, 'cursor-player')
@@ -412,12 +456,24 @@ export default class Game extends Phaser.Scene {
             this.playerContainer.visible = false;
             this.computerContainer.visible = false; // true
             this.playerText.setText(`${this.pName}'s turn`);
+            startButton.visible = false;
+            aButton.visible = false;
+            rotateButton.visible = false;
+            fireButton.visible = true;
           }
         }
       },
       this
     );
 
+    // Fire button
+    fireButton.on(
+      'pointerdown',
+      () => {
+        console.log('pew');
+      },
+      this
+    );
     aButton.on(
       'pointerdown',
       function handle() {
