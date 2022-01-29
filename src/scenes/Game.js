@@ -1,6 +1,6 @@
 import Phaser from 'phaser';
 
-const boardSize = 10;
+const boardSize = 6;
 
 export default class Game extends Phaser.Scene {
   constructor() {
@@ -470,210 +470,209 @@ export default class Game extends Phaser.Scene {
     fireButton.on(
       'pointerdown',
       () => {
-        console.log('pew');
+        console.log('this.gamepadactive: ', this.gamePadActive);
+        if (this.gamePadActive === false) return;
+        if (startGame && this.isPlayerTurn) {
+          const checkShot = computerBoard[cursor.onIndex];
+          const currentShip = computerBoard[cursor.onIndex].shipType;
+          let shipArray;
+          let shipTexture;
+          let shipSprite;
+
+          switch (currentShip) {
+            case 'carrier':
+              shipArray = this.computerCarrier;
+              shipTexture = 'carrier';
+              shipSprite = cCarrier;
+              break;
+            case 'battleship':
+              shipArray = this.computerBattleship;
+              shipTexture = 'battleship';
+              shipSprite = cBattleship;
+              break;
+            case 'cruiser':
+              shipArray = this.computerCruiser;
+              shipTexture = 'cruiser';
+              shipSprite = cCruiser;
+              break;
+            case 'submarine':
+              shipArray = this.computerSubmarine;
+              shipTexture = 'submarine';
+              shipSprite = cSubmarine;
+              break;
+            case 'destroyer':
+              shipArray = this.computerDestroyer;
+              shipTexture = 'destroyer';
+              shipSprite = cDestroyer;
+              break;
+            case '':
+              break;
+            default:
+              console.log('error: no ship type on button press');
+          }
+          const x = computerBoard[cursor.onIndex].xPos;
+          const y = computerBoard[cursor.onIndex].yPos;
+          if (checkShot.hit) {
+            cursorThud.play();
+            return;
+          }
+          // check if there is a ship in the selected spot, not hit.
+          if (checkShot.hit === false && checkShot.ship === true) {
+            this.computerMarkers.add(
+              this.add.sprite(x, y, 'marker-hit').setScale(1.0)
+            );
+            computerBoard[cursor.onIndex].hit = true;
+            // Check if all spaces on selected ship are hit.
+            const notSunk = shipArray.some((element) => !element.hit === true);
+            if (notSunk === false) {
+              this.computerContainer.remove(shipSprite);
+              shipSprite.setTexture(`sunk-${shipTexture}`);
+              this.computerMarkers.add(shipSprite);
+              for (let i = 0; i < shipArray.length; i++) shipArray[i].sunk = true;
+            }
+          } else if (checkShot.hit === false && checkShot.ship === false) {
+            this.computerMarkers.add(
+              this.add.sprite(x, y, 'marker-miss').setScale(1.0)
+            );
+            computerBoard[cursor.onIndex].hit = true;
+          }
+          gameOver = this.isGameOver(); // check for gameover.
+        }
+        if (gameOver) {
+          // Clear board for next game
+          this.computerBoardArray = [];
+          this.playerBoardArray = [];
+          this.scene.start('game-over', { winner: this.pName });
+          return;
+        }
+        this.gamePadActive = false; // prevent player from moving when not their turn.
+        if (startGame && this.isPlayerTurn === true) {
+          this.time.delayedCall(
+            this.duration,
+            this.sceneChange,
+            [playerText, currentPlayer],
+            this
+          );
+        } else if (this.isPlayerTurn === false) {
+          this.time.delayedCall(
+            this.duration,
+            this.sceneChange,
+            [playerText, currentPlayer],
+            this
+          );
+        }
       },
       this
     );
+
     aButton.on(
       'pointerdown',
       function handle() {
-        if (startGame) {
-          console.log('this.gamepadactive: ', this.gamePadActive);
-          if (this.gamePadActive === false) return;
-          if (startGame && this.isPlayerTurn) {
-            const checkShot = computerBoard[cursor.onIndex];
-            const currentShip = computerBoard[cursor.onIndex].shipType;
-            let shipArray;
-            let shipTexture;
-            let shipSprite;
+        canStartGame = false;
+        const shipStart = playerBoard.find(
+          (element) => element.shipType === cursor.onGrid.shipType
+        );
+        let shipId;
+        if (cursor.onGrid.ship === true && shipSelected === false) {
+          shipSelected = true;
 
-            switch (currentShip) {
-              case 'carrier':
-                shipArray = this.computerCarrier;
-                shipTexture = 'carrier';
-                shipSprite = cCarrier;
-                break;
-              case 'battleship':
-                shipArray = this.computerBattleship;
-                shipTexture = 'battleship';
-                shipSprite = cBattleship;
-                break;
-              case 'cruiser':
-                shipArray = this.computerCruiser;
-                shipTexture = 'cruiser';
-                shipSprite = cCruiser;
-                break;
-              case 'submarine':
-                shipArray = this.computerSubmarine;
-                shipTexture = 'submarine';
-                shipSprite = cSubmarine;
-                break;
-              case 'destroyer':
-                shipArray = this.computerDestroyer;
-                shipTexture = 'destroyer';
-                shipSprite = cDestroyer;
-                break;
-              case '':
-                break;
-              default:
-                console.log('error: no ship type on button press');
-            }
-            const x = computerBoard[cursor.onIndex].xPos;
-            const y = computerBoard[cursor.onIndex].yPos;
-            if (checkShot.hit) {
-              cursorThud.play();
-              return;
-            }
-            // check if there is a ship in the selected spot, not hit.
-            if (checkShot.hit === false && checkShot.ship === true) {
-              this.computerMarkers.add(
-                this.add.sprite(x, y, 'marker-hit').setScale(1.0)
-              );
-              computerBoard[cursor.onIndex].hit = true;
-              // Check if all spaces on selected ship are hit.
-              const notSunk = shipArray.some((element) => !element.hit === true);
-              if (notSunk === false) {
-                this.computerContainer.remove(shipSprite);
-                this.computerMarkers.add(shipSprite);
-                shipSprite.setTexture(`sunk-${shipTexture}`);
-                for (let i = 0; i < shipArray.length; i++) shipArray[i].sunk = true;
-              }
-            } else if (checkShot.hit === false && checkShot.ship === false) {
-              this.computerMarkers.add(
-                this.add.sprite(x, y, 'marker-miss').setScale(1.0)
-              );
-              computerBoard[cursor.onIndex].hit = true;
-            }
-            gameOver = this.isGameOver(); // check for gameover.
+          switch (cursor.onGrid.shipType) {
+            case 'carrier':
+              shipId = pCarrier;
+              selectedArray = pCarrierArray;
+              selectedShip = shipId;
+              texture = 'carrier';
+              shipArrayCopy = Object.create(pCarrierArray);
+              break;
+            case 'battleship':
+              shipId = pBattleship;
+              selectedArray = pBattleshipArray;
+              selectedShip = shipId;
+              texture = 'battleship';
+              shipArrayCopy = Object.create(pBattleshipArray);
+              break;
+            case 'cruiser':
+              shipId = pCruiser;
+              selectedArray = pCruiserArray;
+              selectedShip = shipId;
+              texture = 'cruiser';
+              shipArrayCopy = Object.create(pCruiserArray);
+              break;
+            case 'submarine':
+              shipId = pSubmarine;
+              selectedArray = pSubmarineArray;
+              selectedShip = shipId;
+              texture = 'submarine';
+              shipArrayCopy = Object.create(pSubmarineArray);
+              break;
+            case 'destroyer':
+              shipId = pDestroyer;
+              selectedArray = pDestroyerArray;
+              selectedShip = shipId;
+              texture = 'destroyer';
+              shipArrayCopy = Object.create(pDestroyerArray);
+              break;
+            default:
+              console.log('error: no ship type on X press');
           }
-          if (gameOver) {
-            this.scene.start('game-over', { winner: this.pName });
-            return;
+          // remove ship from the player board
+          for (let i = 0; i < selectedArray.length; i++) {
+            selectedArray[i].shipType = '';
+            selectedArray[i].ship = false;
           }
-          this.gamePadActive = false; // prevent player from moving when not their turn.
-          if (startGame && this.isPlayerTurn === true) {
-            this.time.delayedCall(
-              this.duration,
-              this.sceneChange,
-              [playerText, currentPlayer],
-              this
-            );
-          } else if (this.isPlayerTurn === false) {
-            this.time.delayedCall(
-              this.duration,
-              this.sceneChange,
-              [playerText, currentPlayer],
-              this
-            );
-          }
-        } else {
-          canStartGame = false;
-          const shipStart = playerBoard.find(
-            (element) => element.shipType === cursor.onGrid.shipType
-          );
-          let shipId;
-          if (cursor.onGrid.ship === true && shipSelected === false) {
-            shipSelected = true;
+          cursor.onIndex = shipArrayCopy[0].index;
+          cursor.onGrid.index = shipArrayCopy[0].index;
+          cursor.xPos = shipStart.xPos;
+          cursor.yPos = shipStart.yPos;
 
-            switch (cursor.onGrid.shipType) {
-              case 'carrier':
-                shipId = pCarrier;
-                selectedArray = pCarrierArray;
-                selectedShip = shipId;
-                texture = 'carrier';
-                shipArrayCopy = Object.create(pCarrierArray);
-                break;
-              case 'battleship':
-                shipId = pBattleship;
-                selectedArray = pBattleshipArray;
-                selectedShip = shipId;
-                texture = 'battleship';
-                shipArrayCopy = Object.create(pBattleshipArray);
-                break;
-              case 'cruiser':
-                shipId = pCruiser;
-                selectedArray = pCruiserArray;
-                selectedShip = shipId;
-                texture = 'cruiser';
-                shipArrayCopy = Object.create(pCruiserArray);
-                break;
-              case 'submarine':
-                shipId = pSubmarine;
-                selectedArray = pSubmarineArray;
-                selectedShip = shipId;
-                texture = 'submarine';
-                shipArrayCopy = Object.create(pSubmarineArray);
-                break;
-              case 'destroyer':
-                shipId = pDestroyer;
-                selectedArray = pDestroyerArray;
-                selectedShip = shipId;
-                texture = 'destroyer';
-                shipArrayCopy = Object.create(pDestroyerArray);
-                break;
-              default:
-                console.log('error: no ship type on X press');
+          if (shipArrayCopy[0].rotation === 'horizontal') {
+            playerCursor.x = shipId.x + this.spriteOffset;
+            playerCursor.y = shipId.y + this.spriteOffset;
+            for (let i = 0; i < shipArrayCopy.length; i++) {
+              shipArrayCopy[i].index = shipStart.index + i;
             }
-            // remove ship from the player board
+          } else {
+            playerCursor.x = shipId.x - this.spriteOffset;
+            playerCursor.y = shipId.y + this.spriteOffset;
+            for (let i = 0; i < shipArrayCopy.length; i++) {
+              shipArrayCopy[i].index = shipStart.index + boardSize * i;
+            }
+          }
+          const updatedPosition = playerBoard[cursor.onIndex];
+          cursor.onGrid = updatedPosition;
+        } else if (canBePlaced && shipSelected) {
+          shipSelected = false;
+          const startTile = cursor.onGrid.index;
+          // add new ship position to player board
+          if (shipArrayCopy[0].rotation === 'horizontal') {
             for (let i = 0; i < selectedArray.length; i++) {
-              selectedArray[i].shipType = '';
-              selectedArray[i].ship = false;
+              playerBoard[startTile + i].angle = shipArrayCopy[0].angle;
+              playerBoard[startTile + i].ship = true;
+              playerBoard[startTile + i].shipType = texture;
+              playerBoard[startTile + i].rotation = shipArrayCopy[0].rotation;
+              selectedArray[i] = playerBoard[startTile + i];
+              canStartGame = true;
             }
-            cursor.onIndex = shipArrayCopy[0].index;
-            cursor.onGrid.index = shipArrayCopy[0].index;
-            cursor.xPos = shipStart.xPos;
-            cursor.yPos = shipStart.yPos;
-
-            if (shipArrayCopy[0].rotation === 'horizontal') {
-              playerCursor.x = shipId.x + this.spriteOffset;
-              playerCursor.y = shipId.y + this.spriteOffset;
-              for (let i = 0; i < shipArrayCopy.length; i++) {
-                shipArrayCopy[i].index = shipStart.index + i;
-              }
-            } else {
-              playerCursor.x = shipId.x - this.spriteOffset;
-              playerCursor.y = shipId.y + this.spriteOffset;
-              for (let i = 0; i < shipArrayCopy.length; i++) {
-                shipArrayCopy[i].index = shipStart.index + boardSize * i;
-              }
-            }
-            const updatedPosition = playerBoard[cursor.onIndex];
-            cursor.onGrid = updatedPosition;
-          } else if (canBePlaced && shipSelected) {
-            shipSelected = false;
-            const startTile = cursor.onGrid.index;
-            // add new ship position to player board
-            if (shipArrayCopy[0].rotation === 'horizontal') {
-              for (let i = 0; i < selectedArray.length; i++) {
-                playerBoard[startTile + i].angle = shipArrayCopy[0].angle;
-                playerBoard[startTile + i].ship = true;
-                playerBoard[startTile + i].shipType = texture;
-                playerBoard[startTile + i].rotation = shipArrayCopy[0].rotation;
-                selectedArray[i] = playerBoard[startTile + i];
-                canStartGame = true;
-              }
-            } else {
-              for (let i = 0; i < selectedArray.length; i++) {
-                playerBoard[startTile + i * boardSize].angle =
-                  shipArrayCopy[0].angle;
-                playerBoard[startTile + i * boardSize].ship = true;
-                playerBoard[startTile + i * boardSize].shipType = texture;
-                playerBoard[startTile + i * boardSize].rotation =
-                  shipArrayCopy[0].rotation;
-                selectedArray[i] = playerBoard[startTile + i * boardSize];
-                canStartGame = true;
-              }
-            }
-            shipArrayCopy = undefined;
           } else {
-            cursorThud.play();
+            for (let i = 0; i < selectedArray.length; i++) {
+              playerBoard[startTile + i * boardSize].angle = shipArrayCopy[0].angle;
+              playerBoard[startTile + i * boardSize].ship = true;
+              playerBoard[startTile + i * boardSize].shipType = texture;
+              playerBoard[startTile + i * boardSize].rotation =
+                shipArrayCopy[0].rotation;
+              selectedArray[i] = playerBoard[startTile + i * boardSize];
+              canStartGame = true;
+            }
           }
-          // Change player cursor to selected cursor
-          if (shipSelected) {
-            playerCursor.setTexture('cursor-active');
-          } else {
-            playerCursor.setTexture('cursor-player');
-          }
+          shipArrayCopy = undefined;
+        } else {
+          cursorThud.play();
+        }
+        // Change player cursor to selected cursor
+        if (shipSelected) {
+          playerCursor.setTexture('cursor-active');
+        } else {
+          playerCursor.setTexture('cursor-player');
         }
       },
       this
@@ -803,7 +802,15 @@ export default class Game extends Phaser.Scene {
       },
       this
     );
-
+    this.input.keyboard.on(
+      'keydown-F',
+      () => {
+        console.log(cursor);
+        console.log('pBoard:', this.playerBoardArray);
+        console.log('cBoard:', this.computerBoardArray);
+      },
+      this
+    );
     // keyboard movement
     upButton.on(
       'pointerdown',
