@@ -29,8 +29,8 @@ export default class Game extends Phaser.Scene {
     this.computerMarkers = [];
     this.playerSunk = [];
     this.playerMarkers = [];
-
-    this.duration = 200; // scene-change fade duration.
+    // how long a board is shown for after a shot, before scene fade.
+    this.duration = 1500;
   }
 
   init(data) {
@@ -244,11 +244,12 @@ export default class Game extends Phaser.Scene {
       .setInteractive();
     const playerCursor = this.add
       .sprite(boardCenterX, boardCenterY, 'cursor-player')
-      .setScale(1.0); // 4this.tileSize, 400
+      .setScale(1.0);
     this.playerText = this.add
-      .text(100, 150, 'place your ships', {
+      .text(boardStartX, playerBoardStartY - 100, 'place your ships', {
         fontFamily: 'Georgia, "Goudy Bookletter 1911", Times, serif',
       })
+      .setScale(2.0)
       .setInteractive();
     let boardLetter = 'A';
     let pTileNumber = 0;
@@ -1116,7 +1117,7 @@ export default class Game extends Phaser.Scene {
   sceneChange(currentPlayer) {
     if (this.isPlayerTurn === true) {
       // player's turn
-      this.cameras.main.fadeOut(125, 0, 0, 0);
+      this.cameras.main.fadeOut(500, 0, 0, 0);
       this.isPlayerTurn = !this.isPlayerTurn;
       this.playerContainer.visible = true;
       this.computerContainer.visible = false;
@@ -1126,7 +1127,7 @@ export default class Game extends Phaser.Scene {
       this.cameras.main.fadeIn(500, 0, 0, 0);
     } else if (this.isPlayerTurn === false) {
       // computer's turn
-      this.cameras.main.fadeOut(125, 0, 0, 0);
+      this.cameras.main.fadeOut(500, 0, 0, 0);
       this.isPlayerTurn = !this.isPlayerTurn;
       this.playerContainer.visible = false;
 
@@ -1194,13 +1195,16 @@ export default class Game extends Phaser.Scene {
     }
     this.gameOver = this.isGameOver(); // check for gameover.
     if (this.gameOver) {
+      this.computerBoardArray = [];
+      this.playerBoardArray = [];
+      this.gamePadActive = true;
       this.scene.start('game-over', { winner: 'computer' });
     }
     this.time.delayedCall(this.duration, this.cScene, ['computer'], this);
   }
 
   cScene(currentPlayer) {
-    this.cameras.main.fadeOut(125, 0, 0, 0);
+    this.cameras.main.fadeOut(500, 0, 0, 0);
     this.playerContainer.visible = false;
 
     this.computerContainer.visible = false;
