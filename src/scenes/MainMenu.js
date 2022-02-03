@@ -17,12 +17,11 @@ export default class MainMenu extends Phaser.Scene {
     const { width, height } = this.scale;
     gameStart = false;
 
-
     this.add
       .text(width * 0.5 - 120, height * 0.5 - 50, 'select board size', {
         fontFamily: 'Georgia, "Goudy Bookletter 1911", Times, serif',
       })
-      .setScale(2.0)
+      .setScale(2.0);
 
     const element = this.add
       .dom(width * 0.5, height * 0.5)
@@ -39,7 +38,9 @@ export default class MainMenu extends Phaser.Scene {
           gameBoard = selectedBoardSize.value;
           userText = inputText.value;
           gameStart = true;
-        } else {inputText.placeholder = 'Name required to start'}
+        } else {
+          inputText.placeholder = 'Name required to start';
+        }
       }
     });
   }

@@ -4,6 +4,7 @@ export default class Game extends Phaser.Scene {
   constructor() {
     super('game');
     this.boardSize = 6;
+    this.gameCount = 0;
     this.computerBoardArray = [];
     this.playerBoardArray = [];
 
@@ -42,6 +43,26 @@ export default class Game extends Phaser.Scene {
   }
 
   preload() {
+    // remove preloaded board/ship images from last game to rescale, if applicable
+    if (this.gameCount) {
+      console.log('chips ahoy');
+      this.textures.remove('water');
+      this.textures.remove('cursor-player');
+      this.textures.remove('cursor-active');
+      this.textures.remove('carrier');
+      this.textures.remove('sunk-carrier');
+      this.textures.remove('battleship');
+      this.textures.remove('sunk-battleship');
+      this.textures.remove('submarine');
+      this.textures.remove('sunk-submarine');
+      this.textures.remove('cruiser');
+      this.textures.remove('sunk-cruiser');
+      this.textures.remove('destroyer');
+      this.textures.remove('sunk-destroyer');
+      this.textures.remove('marker-hit');
+      this.textures.remove('marker-miss');
+    }
+
     this.load.audio('cursor-move', 'assets/sfx/cursor-move.wav');
     this.load.audio('cursor-bounds', 'assets/sfx/cursor-bounds.wav');
 
@@ -49,42 +70,34 @@ export default class Game extends Phaser.Scene {
       width: 250,
       height: 250,
     });
-
     this.load.svg('fire-button', 'assets/button-fire.svg', {
       width: 250,
       height: 250,
     });
-
     this.load.svg('a-button', 'assets/button-a.svg', {
       width: 250,
       height: 150,
     });
-
     this.load.svg('rotate-button', 'assets/button-rotate.svg', {
       width: 250,
       height: 150,
     });
-
     this.load.svg('up-button', 'assets/button-up.svg', {
       width: 100,
       height: 100,
     });
-
     this.load.svg('down-button', 'assets/button-down.svg', {
       width: 100,
       height: 100,
     });
-
     this.load.svg('left-button', 'assets/button-left.svg', {
       width: 100,
       height: 100,
     });
-
     this.load.svg('right-button', 'assets/button-right.svg', {
       width: 100,
       height: 100,
     });
-
     this.load.svg('water', 'assets/water-tile.svg', {
       width: this.tileSize,
       height: this.tileSize,
@@ -148,6 +161,7 @@ export default class Game extends Phaser.Scene {
   }
 
   create() {
+    console.log('THIS.TILESIZE: ', this.tileSize);
     const boardLength = this.boardSize * this.tileSize;
     // Find starting tile position, to center on screen.
     const boardStartX = Math.round(
@@ -266,7 +280,7 @@ export default class Game extends Phaser.Scene {
     }
     boardLetter = 'A';
     pTileNumber = 0;
-    // create Player game board
+    // create game board
     for (let y = 0; y < boardLength; y += this.tileSize) {
       let boardNumber = 1;
       for (let x = 0; x < boardLength; x += this.tileSize) {
@@ -545,6 +559,7 @@ export default class Game extends Phaser.Scene {
           // Clear board for next game
           this.computerBoardArray = [];
           this.playerBoardArray = [];
+          this.gameCount++;
           this.scene.start('game-over', { winner: this.pName });
           return;
         }
@@ -669,6 +684,8 @@ export default class Game extends Phaser.Scene {
             }
           }
           shipArrayCopy = undefined;
+        } else if (canBePlaced && !shipSelected) {
+          canStartGame = true;
         } else {
           cursorThud.play();
         }
@@ -1217,6 +1234,7 @@ export default class Game extends Phaser.Scene {
       this.computerBoardArray = [];
       this.playerBoardArray = [];
       this.gamePadActive = true;
+      this.gameCount++;
       this.scene.start('game-over', { winner: 'computer' });
     }
     this.time.delayedCall(this.duration, this.cScene, ['computer'], this);
