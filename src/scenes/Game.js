@@ -30,7 +30,7 @@ export default class Game extends Phaser.Scene {
     this.playerSunk = [];
     this.playerMarkers = [];
     // how long a board is shown for after a shot, before scene fade.
-    this.duration = 150;
+    this.duration = 1500;
   }
 
   init(data) {
@@ -161,13 +161,11 @@ export default class Game extends Phaser.Scene {
   }
 
   create() {
-    console.log('THIS.TILESIZE: ', this.tileSize);
     const boardLength = this.boardSize * this.tileSize;
     // Find starting tile position, to center on screen.
     const boardStartX = Math.round(
       (this.screenWidth - this.tileSize * this.boardSize) / 2
     );
-    console.log('boardStartX', boardStartX);
     let playerBoardStartY = 200; // 400
     let computerBoardStartY = 200; // 48
     const playerBoardY = playerBoardStartY;
@@ -460,13 +458,10 @@ export default class Game extends Phaser.Scene {
       'pointerdown',
       function handle() {
         if (this.isPlayerTurn) {
-          console.log('cboard: ', this.computerBoardArray);
-          console.log('pBoard: ', this.playerBoardArray);
           if (canStartGame === true) {
             // move player cursor to enemy board, start game
             this.playerContainer.remove(playerCursor);
             this.computerMarkers.add(playerCursor);
-            console.log(this.computerContainer);
             startGame = true;
           }
           // show computer board with ships hidden
@@ -828,16 +823,7 @@ export default class Game extends Phaser.Scene {
       },
       this
     );
-    // this listener is for testing.
-    this.input.keyboard.on(
-      'keydown-F',
-      () => {
-        console.log('cursor:', cursor);
-        console.log('pBoard:', this.playerBoardArray);
-        console.log('cBoard:', this.computerBoardArray);
-      },
-      this
-    );
+
     // keyboard movement
     upButton.on(
       'pointerdown',
