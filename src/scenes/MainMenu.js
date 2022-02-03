@@ -1,6 +1,7 @@
 import Phaser from 'phaser';
 
 let gameStart = false;
+let gameBoard = 6;
 let userText = '';
 
 export default class MainMenu extends Phaser.Scene {
@@ -14,6 +15,9 @@ export default class MainMenu extends Phaser.Scene {
 
   create() {
     const { width, height } = this.scale;
+
+    this.add.dom(width * 0.5, height * 0.5 - 100).createFromCache('sizeslider');
+
     const element = this.add
       .dom(width * 0.5, height * 0.5)
       .createFromCache('nameform');
@@ -22,9 +26,11 @@ export default class MainMenu extends Phaser.Scene {
 
     element.on('click', function handle(event) {
       if (event.target.name === 'playButton') {
+        const selectedBoardSize = this.getChildByName('boardLength');
         const inputText = this.getChildByName('nameField');
         if (inputText.value !== '') {
           this.removeListener('click');
+          gameBoard = selectedBoardSize.value;
           userText = inputText.value;
           gameStart = true;
         }
@@ -35,6 +41,7 @@ export default class MainMenu extends Phaser.Scene {
   update() {
     if (gameStart === true) {
       this.scene.start('game', {
+        boardSize: gameBoard,
         playerName: userText,
         screenWidth: this.scale.width,
         screenHeight: this.scale.height,

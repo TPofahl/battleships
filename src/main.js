@@ -6,8 +6,9 @@ import GameOver from './scenes/GameOver';
 export default new Phaser.Game({
   // config
   type: Phaser.AUTO,
-  width: window.innerWidth, // 768
-  height: window.innerHeight, // 736
+  width: window.innerWidth,
+  height: window.innerHeight,
+  backgroundColor: '#030832',
   scene: [MainMenu, Game, GameOver],
   parent: 'battleships',
   dom: {

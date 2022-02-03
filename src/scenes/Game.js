@@ -1,10 +1,9 @@
 import Phaser from 'phaser';
 
-const boardSize = 6;
-
 export default class Game extends Phaser.Scene {
   constructor() {
     super('game');
+    this.boardSize = 6;
     this.computerBoardArray = [];
     this.playerBoardArray = [];
 
@@ -30,25 +29,19 @@ export default class Game extends Phaser.Scene {
     this.playerSunk = [];
     this.playerMarkers = [];
     // how long a board is shown for after a shot, before scene fade.
-    this.duration = 1500;
+    this.duration = 150;
   }
 
   init(data) {
+    this.boardSize = parseInt(data.boardSize, 10);
     this.pName = data.playerName; // from 'MainMenu' scene
     this.screenWidth = data.screenWidth;
     this.screenHeight = data.screenHeight;
-    console.log('screen width: ', this.screenWidth);
-    // this.tileSize = 64; // increments of 2 only.
-    this.tileSize = Math.round((this.screenHeight * 0.6) / boardSize); // increments of 2 only.
-    console.log('this.tile: ', this.tileSize * boardSize);
+    this.tileSize = Math.round((this.screenHeight * 0.6) / this.boardSize); // increments of 2 only.
     this.spriteOffset = this.tileSize / 2;
   }
 
   preload() {
-    // this.load.image('a-button', 'assets/button-a.png');
-    // this.load.image('rotate-button', 'assets/button-rotate.png');
-    // this.load.image('start-button', 'assets/button-start.png');
-
     this.load.audio('cursor-move', 'assets/sfx/cursor-move.wav');
     this.load.audio('cursor-bounds', 'assets/sfx/cursor-bounds.wav');
 
@@ -155,10 +148,10 @@ export default class Game extends Phaser.Scene {
   }
 
   create() {
-    const boardLength = boardSize * this.tileSize;
+    const boardLength = this.boardSize * this.tileSize;
     // Find starting tile position, to center on screen.
     const boardStartX = Math.round(
-      (this.screenWidth - this.tileSize * boardSize) / 2
+      (this.screenWidth - this.tileSize * this.boardSize) / 2
     );
     console.log('boardStartX', boardStartX);
     let playerBoardStartY = 200; // 400
@@ -180,7 +173,7 @@ export default class Game extends Phaser.Scene {
     let texture;
     this.isShot = false;
     // starting position of the gamepad images
-    const gamePadStartY = playerBoardStartY + this.tileSize * boardSize + 20;
+    const gamePadStartY = playerBoardStartY + this.tileSize * this.boardSize + 20;
     const gamePadStartX = this.screenWidth / 2 - this.tileSize / 2;
 
     let gameOver = false;
@@ -200,7 +193,7 @@ export default class Game extends Phaser.Scene {
     const cursorThud = this.sound.add('cursor-bounds', { volume: 0.2 });
 
     // handle starting player cursor sprite position
-    if (boardSize % 2 === 0) {
+    if (this.boardSize % 2 === 0) {
       boardCenterX = boardLength / 2 + boardStartX;
       boardCenterY = boardLength / 2 + playerBoardStartY;
     } else {
@@ -297,9 +290,9 @@ export default class Game extends Phaser.Scene {
     }
     // set cursor starting position logic to board
     cursorStartPosition =
-      this.playerBoardArray[this.playerBoardArray.length / 2 + boardSize / 2];
+      this.playerBoardArray[this.playerBoardArray.length / 2 + this.boardSize / 2];
     cursor.onGrid = cursorStartPosition;
-    cursor.onIndex = this.playerBoardArray.length / 2 + boardSize / 2;
+    cursor.onIndex = this.playerBoardArray.length / 2 + this.boardSize / 2;
 
     // place computer ships
     currentBoardArray = this.computerBoardArray;
@@ -310,7 +303,8 @@ export default class Game extends Phaser.Scene {
       boardStartX,
       computerBoardY,
       currentBoardArray,
-      this.computerCarrier
+      this.computerCarrier,
+      this.boardSize
     );
     const cBattleship = this.placeShip(
       'battleship',
@@ -319,7 +313,8 @@ export default class Game extends Phaser.Scene {
       boardStartX,
       computerBoardY,
       currentBoardArray,
-      this.computerBattleship
+      this.computerBattleship,
+      this.boardSize
     );
     const cCruiser = this.placeShip(
       'cruiser',
@@ -328,7 +323,8 @@ export default class Game extends Phaser.Scene {
       boardStartX,
       computerBoardY,
       currentBoardArray,
-      this.computerCruiser
+      this.computerCruiser,
+      this.boardSize
     );
     const cSubmarine = this.placeShip(
       'submarine',
@@ -337,7 +333,8 @@ export default class Game extends Phaser.Scene {
       boardStartX,
       computerBoardY,
       currentBoardArray,
-      this.computerSubmarine
+      this.computerSubmarine,
+      this.boardSize
     );
     const cDestroyer = this.placeShip(
       'destroyer',
@@ -346,7 +343,8 @@ export default class Game extends Phaser.Scene {
       boardStartX,
       computerBoardY,
       currentBoardArray,
-      this.computerDestroyer
+      this.computerDestroyer,
+      this.boardSize
     );
     // place player ships
     currentBoardArray = this.playerBoardArray;
@@ -357,7 +355,8 @@ export default class Game extends Phaser.Scene {
       boardStartX,
       playerBoardY,
       currentBoardArray,
-      this.playerCarrier
+      this.playerCarrier,
+      this.boardSize
     );
     const pBattleship = this.placeShip(
       'battleship',
@@ -366,7 +365,8 @@ export default class Game extends Phaser.Scene {
       boardStartX,
       playerBoardY,
       currentBoardArray,
-      this.playerBattleship
+      this.playerBattleship,
+      this.boardSize
     );
     const pCruiser = this.placeShip(
       'cruiser',
@@ -375,7 +375,8 @@ export default class Game extends Phaser.Scene {
       boardStartX,
       playerBoardY,
       currentBoardArray,
-      this.playerCruiser
+      this.playerCruiser,
+      this.boardSize
     );
     const pSubmarine = this.placeShip(
       'submarine',
@@ -384,7 +385,8 @@ export default class Game extends Phaser.Scene {
       boardStartX,
       playerBoardY,
       currentBoardArray,
-      this.playerSubmarine
+      this.playerSubmarine,
+      this.boardSize
     );
     const pDestroyer = this.placeShip(
       'destroyer',
@@ -393,7 +395,8 @@ export default class Game extends Phaser.Scene {
       boardStartX,
       playerBoardY,
       currentBoardArray,
-      this.playerDestroyer
+      this.playerDestroyer,
+      this.boardSize
     );
 
     this.pCarrier = pCarrier;
@@ -471,7 +474,6 @@ export default class Game extends Phaser.Scene {
     fireButton.on(
       'pointerdown',
       () => {
-        console.log('this.gamepadactive: ', this.gamePadActive);
         if (this.gamePadActive === false) return;
         if (startGame && this.isPlayerTurn) {
           const checkShot = computerBoard[cursor.onIndex];
@@ -636,7 +638,7 @@ export default class Game extends Phaser.Scene {
             playerCursor.x = shipId.x - this.spriteOffset;
             playerCursor.y = shipId.y + this.spriteOffset;
             for (let i = 0; i < shipArrayCopy.length; i++) {
-              shipArrayCopy[i].index = shipStart.index + boardSize * i;
+              shipArrayCopy[i].index = shipStart.index + this.boardSize * i;
             }
           }
           const updatedPosition = playerBoard[cursor.onIndex];
@@ -656,12 +658,13 @@ export default class Game extends Phaser.Scene {
             }
           } else {
             for (let i = 0; i < selectedArray.length; i++) {
-              playerBoard[startTile + i * boardSize].angle = shipArrayCopy[0].angle;
-              playerBoard[startTile + i * boardSize].ship = true;
-              playerBoard[startTile + i * boardSize].shipType = texture;
-              playerBoard[startTile + i * boardSize].rotation =
+              playerBoard[startTile + i * this.boardSize].angle =
+                shipArrayCopy[0].angle;
+              playerBoard[startTile + i * this.boardSize].ship = true;
+              playerBoard[startTile + i * this.boardSize].shipType = texture;
+              playerBoard[startTile + i * this.boardSize].rotation =
                 shipArrayCopy[0].rotation;
-              selectedArray[i] = playerBoard[startTile + i * boardSize];
+              selectedArray[i] = playerBoard[startTile + i * this.boardSize];
               canStartGame = true;
             }
           }
@@ -710,7 +713,7 @@ export default class Game extends Phaser.Scene {
               selectedShip.y -= shipBoundary; // move ship image if going off board.
               playerCursor.y -= shipBoundary;
               if (shipBoundary) {
-                cursor.onIndex -= boardSize * (shipBoundary / this.tileSize);
+                cursor.onIndex -= this.boardSize * (shipBoundary / this.tileSize);
                 updatedPosition = playerBoard[cursor.onIndex];
                 cursor.onGrid = updatedPosition;
               }
@@ -753,7 +756,7 @@ export default class Game extends Phaser.Scene {
               selectedShip.y -= shipBoundary; // move ship image if going off board.
               playerCursor.y -= shipBoundary;
               if (shipBoundary) {
-                cursor.onIndex -= boardSize * (shipBoundary / this.tileSize);
+                cursor.onIndex -= this.boardSize * (shipBoundary / this.tileSize);
                 updatedPosition = playerBoard[cursor.onIndex];
                 cursor.onGrid = updatedPosition;
               }
@@ -797,16 +800,18 @@ export default class Game extends Phaser.Scene {
             playerBoard,
             cursor.onIndex,
             selectedShip,
-            texture
+            texture,
+            this.boardSize
           );
         }
       },
       this
     );
+    // this listener is for testing.
     this.input.keyboard.on(
       'keydown-F',
       () => {
-        console.log(cursor);
+        console.log('cursor:', cursor);
         console.log('pBoard:', this.playerBoardArray);
         console.log('cBoard:', this.computerBoardArray);
       },
@@ -823,7 +828,7 @@ export default class Game extends Phaser.Scene {
           playerCursor.y += this.tileSize;
         } else {
           cursorMoveSound.play();
-          cursor.onIndex -= boardSize;
+          cursor.onIndex -= this.boardSize;
           const updatedPosition = playerBoard[cursor.onIndex];
           cursor.onGrid = updatedPosition;
           cursor.yPos = playerCursor.y;
@@ -835,7 +840,8 @@ export default class Game extends Phaser.Scene {
             playerBoard,
             cursor.onGrid.index,
             selectedShip,
-            texture
+            texture,
+            this.boardSize
           );
         }
       },
@@ -863,7 +869,7 @@ export default class Game extends Phaser.Scene {
           isMoving = false;
         } else {
           cursorMoveSound.play();
-          cursor.onIndex += boardSize;
+          cursor.onIndex += this.boardSize;
           const updatedPosition = playerBoard[cursor.onIndex];
           cursor.onGrid = updatedPosition;
           cursor.yPos = playerCursor.y;
@@ -875,7 +881,8 @@ export default class Game extends Phaser.Scene {
             playerBoard,
             cursor.onGrid.index,
             selectedShip,
-            texture
+            texture,
+            this.boardSize
           );
         }
       },
@@ -906,7 +913,8 @@ export default class Game extends Phaser.Scene {
             playerBoard,
             cursor.onGrid.index,
             selectedShip,
-            texture
+            texture,
+            this.boardSize
           );
         }
       },
@@ -946,7 +954,8 @@ export default class Game extends Phaser.Scene {
             playerBoard,
             cursor.onGrid.index,
             selectedShip,
-            texture
+            texture,
+            this.boardSize
           );
         }
       },
@@ -972,7 +981,8 @@ export default class Game extends Phaser.Scene {
     boardStartX,
     playerBoardY,
     board,
-    shipArray
+    shipArray,
+    boardSize
   ) {
     let okToPlace = false;
     let index = 0;
@@ -997,7 +1007,8 @@ export default class Game extends Phaser.Scene {
               tileStart,
               shipLength,
               'horizontal',
-              board
+              board,
+              boardSize
             )
           ) {
             okToPlace = false;
@@ -1038,17 +1049,18 @@ export default class Game extends Phaser.Scene {
               tileStart,
               shipLength,
               'vertical',
-              board
+              board,
+              boardSize
             )
           ) {
             okToPlace = false;
           } else {
             for (let i = 0; i < shipLength; i++) {
-              shipArray[i] = board[tileStart + i * boardSize];
-              board[tileStart + i * boardSize].ship = true;
-              board[tileStart + i * boardSize].shipType = shipType;
-              board[tileStart + i * boardSize].rotation = shipOrientation;
-              board[tileStart + i * boardSize].angle = shipRotation;
+              shipArray[i] = board[tileStart + i * this.boardSize];
+              board[tileStart + i * this.boardSize].ship = true;
+              board[tileStart + i * this.boardSize].shipType = shipType;
+              board[tileStart + i * this.boardSize].rotation = shipOrientation;
+              board[tileStart + i * this.boardSize].angle = shipRotation;
             }
             okToPlace = true;
           }
@@ -1073,7 +1085,7 @@ export default class Game extends Phaser.Scene {
   }
 
   // Checks if the ship overlaps with any other ship when the program places ships.
-  static checkShipCollision(tileStart, shipLength, shipRotation, board) {
+  static checkShipCollision(tileStart, shipLength, shipRotation, board, boardSize) {
     if (shipRotation === 'horizontal') {
       const shipLocation = board.slice(tileStart, tileStart + shipLength);
       return shipLocation.some((element) => element.ship === true);
@@ -1090,7 +1102,14 @@ export default class Game extends Phaser.Scene {
   }
 
   // Check if player's selected ship position is not overlapping another ship, or out of bounds.
-  static canPlace(shipArrayCopy, playerBoard, cursorIndex, shipSprite, texture) {
+  static canPlace(
+    shipArrayCopy,
+    playerBoard,
+    cursorIndex,
+    shipSprite,
+    texture,
+    boardSize
+  ) {
     if (shipArrayCopy[0].rotation === 'horizontal') {
       for (let i = 0; i < shipArrayCopy.length; i++) {
         if (playerBoard[cursorIndex + i].ship === true) {
@@ -1213,12 +1232,12 @@ export default class Game extends Phaser.Scene {
     this.playerText.setText(`${currentPlayer}'s turn`);
     this.cameras.main.fadeIn(500, 0, 0, 0);
     this.cameras.main.once(Phaser.Cameras.Scene2D.Events.FADE_IN_COMPLETE, () => {
-      console.log('i fired');
       this.gamePadActive = true;
     });
   }
 
   isGameOver() {
+    // check if player won
     if (
       this.computerBattleship[0].sunk === true &&
       this.computerCarrier[0].sunk === true &&
@@ -1226,9 +1245,9 @@ export default class Game extends Phaser.Scene {
       this.computerSubmarine[0].sunk === true &&
       this.computerDestroyer[0].sunk === true
     ) {
-      console.log('player wins');
       return true;
     }
+    // check if computer won
     if (
       this.playerBattleship[0].sunk === true &&
       this.playerCarrier[0].sunk === true &&
@@ -1236,7 +1255,6 @@ export default class Game extends Phaser.Scene {
       this.playerSubmarine[0].sunk === true &&
       this.playerDestroyer[0].sunk === true
     ) {
-      console.log('computer wins');
       return true;
     }
     return false;
