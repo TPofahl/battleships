@@ -38,7 +38,7 @@ export default class Game extends Phaser.Scene {
     this.pName = data.playerName; // from 'MainMenu' scene
     this.screenWidth = data.screenWidth;
     this.screenHeight = data.screenHeight;
-    this.tileSize = Math.round((this.screenHeight * 0.6) / this.boardSize); // increments of 2 only.
+    this.tileSize = Math.round((this.screenHeight * 0.5) / this.boardSize); // increments of 2 only.
     this.spriteOffset = this.tileSize / 2;
   }
 
@@ -67,36 +67,36 @@ export default class Game extends Phaser.Scene {
     this.load.audio('cursor-bounds', 'assets/sfx/cursor-bounds.wav');
 
     this.load.svg('start-button', 'assets/button-start.svg', {
-      width: 250,
-      height: 250,
+      width: 200,
+      height: 200,
     });
     this.load.svg('fire-button', 'assets/button-fire.svg', {
-      width: 250,
-      height: 250,
+      width: 200,
+      height: 200,
     });
     this.load.svg('a-button', 'assets/button-a.svg', {
-      width: 250,
-      height: 150,
+      width: 200,
+      height: 120,
     });
     this.load.svg('rotate-button', 'assets/button-rotate.svg', {
-      width: 250,
-      height: 150,
+      width: 200,
+      height: 120,
     });
     this.load.svg('up-button', 'assets/button-up.svg', {
-      width: 100,
-      height: 100,
+      width: 90,
+      height: 90,
     });
     this.load.svg('down-button', 'assets/button-down.svg', {
-      width: 100,
-      height: 100,
+      width: 90,
+      height: 90,
     });
     this.load.svg('left-button', 'assets/button-left.svg', {
-      width: 100,
-      height: 100,
+      width: 90,
+      height: 90,
     });
     this.load.svg('right-button', 'assets/button-right.svg', {
-      width: 100,
-      height: 100,
+      width: 90,
+      height: 90,
     });
     this.load.svg('water', 'assets/water-tile.svg', {
       width: this.tileSize,
@@ -166,8 +166,8 @@ export default class Game extends Phaser.Scene {
     const boardStartX = Math.round(
       (this.screenWidth - this.tileSize * this.boardSize) / 2
     );
-    let playerBoardStartY = 200; // 400
-    let computerBoardStartY = 200; // 48
+    let playerBoardStartY = 100; // 400
+    let computerBoardStartY = 100; // 48
     const playerBoardY = playerBoardStartY;
     const computerBoardY = computerBoardStartY;
     let cursorStartPosition = {};
@@ -215,20 +215,20 @@ export default class Game extends Phaser.Scene {
 
     // game controller    //shift -350, +200
     const aButton = this.add
-      .sprite(gamePadStartX + 280, gamePadStartY + 170, 'a-button')
+      .sprite(gamePadStartX + 238, gamePadStartY + 143, 'a-button')
       .setScale(1.0)
       .setInteractive();
     const fireButton = this.add
-      .sprite(gamePadStartX + 280, gamePadStartY + 100, 'fire-button')
+      .sprite(gamePadStartX + 238, gamePadStartY + 90, 'fire-button')
       .setScale(1.0)
       .setInteractive();
     fireButton.visible = false;
     const rotateButton = this.add
-      .sprite(gamePadStartX + 280, gamePadStartY + 40, 'rotate-button')
+      .sprite(gamePadStartX + 238, gamePadStartY + 36, 'rotate-button')
       .setScale(1.0)
       .setInteractive();
     const startButton = this.add
-      .sprite(gamePadStartX - 280, gamePadStartY + 100, 'start-button')
+      .sprite(gamePadStartX - 238, gamePadStartY + 90, 'start-button')
       .setScale(1.0)
       .setInteractive();
     const upButton = this.add
@@ -236,15 +236,15 @@ export default class Game extends Phaser.Scene {
       .setScale(1.0)
       .setInteractive(); // was 500, 345
     const downButton = this.add
-      .sprite(gamePadStartX, gamePadStartY + 200, 'down-button')
+      .sprite(gamePadStartX, gamePadStartY + 180, 'down-button')
       .setScale(1.0)
       .setInteractive();
     const leftButton = this.add
-      .sprite(gamePadStartX - 100, gamePadStartY + 100, 'left-button')
+      .sprite(gamePadStartX - 90, gamePadStartY + 90, 'left-button')
       .setScale(1.0)
       .setInteractive();
     const rightButton = this.add
-      .sprite(gamePadStartX + 100, gamePadStartY + 100, 'right-button')
+      .sprite(gamePadStartX + 90, gamePadStartY + 90, 'right-button')
       .setScale(1.0)
       .setInteractive();
     const playerCursor = this.add
