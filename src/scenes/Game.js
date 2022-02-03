@@ -43,9 +43,9 @@ export default class Game extends Phaser.Scene {
   }
 
   preload() {
-    // remove preloaded board/ship images from last game to rescale, if applicable
+    // remove preloaded board/ship images from last game, so images
+    // will be properly resized when a different board size is selected
     if (this.gameCount) {
-      console.log('chips ahoy');
       this.textures.remove('water');
       this.textures.remove('cursor-player');
       this.textures.remove('cursor-active');
@@ -658,6 +658,7 @@ export default class Game extends Phaser.Scene {
           }
           const updatedPosition = playerBoard[cursor.onIndex];
           cursor.onGrid = updatedPosition;
+          canBePlaced = true;
         } else if (canBePlaced && shipSelected) {
           shipSelected = false;
           const startTile = cursor.onGrid.index;
@@ -686,6 +687,9 @@ export default class Game extends Phaser.Scene {
           shipArrayCopy = undefined;
         } else if (canBePlaced && !shipSelected) {
           canStartGame = true;
+        } else if (cursor.onGrid.ship === false && shipSelected === false) {
+          canStartGame = true;
+          cursorThud.play();
         } else {
           cursorThud.play();
         }
