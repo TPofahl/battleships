@@ -162,10 +162,8 @@ export default class Game extends Phaser.Scene {
 
   create() {
     const boardLength = this.boardSize * this.tileSize;
-    // Find starting tile position, to center on screen.
-    const boardStartX = Math.round(
-      (this.screenWidth - this.tileSize * this.boardSize) / 2
-    );
+    // Find top-left water tile position
+    const boardStartX = this.tileSize / 2 + (this.screenWidth - boardLength) / 2;
     let playerBoardStartY = 100; // 400
     let computerBoardStartY = 100; // 48
     const playerBoardY = playerBoardStartY;
@@ -186,7 +184,7 @@ export default class Game extends Phaser.Scene {
     this.isShot = false;
     // starting position of the gamepad images
     const gamePadStartY = playerBoardStartY + this.tileSize * this.boardSize + 20;
-    const gamePadStartX = this.screenWidth / 2 - this.tileSize / 2;
+    const gamePadStartX = this.screenWidth / 2;
 
     let gameOver = false;
 
@@ -209,8 +207,8 @@ export default class Game extends Phaser.Scene {
       boardCenterX = boardLength / 2 + boardStartX;
       boardCenterY = boardLength / 2 + playerBoardStartY;
     } else {
-      boardCenterX = boardLength / 2 + boardStartX - this.spriteOffset; // 16
-      boardCenterY = boardLength / 2 + playerBoardStartY - this.spriteOffset; // 16
+      boardCenterX = boardLength / 2 + boardStartX - this.spriteOffset;
+      boardCenterY = boardLength / 2 + playerBoardStartY - this.spriteOffset;
     }
 
     // game controller    //shift -350, +200
@@ -1033,7 +1031,6 @@ export default class Game extends Phaser.Scene {
         } while (okToPlace === false);
 
         const createHorizontalShip = this.add
-          // xPos: -16, yPos: -16  when tilesize = 32...
           .sprite(
             board[index].xPos - this.spriteOffset,
             board[index].yPos - this.spriteOffset,
