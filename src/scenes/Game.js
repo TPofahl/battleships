@@ -3,7 +3,7 @@ import Phaser from 'phaser';
 export default class Game extends Phaser.Scene {
   constructor() {
     super('game');
-    this.boardSize = 6;
+    this.boardSize = 10;
     this.gameCount = 0;
     this.computerBoardArray = [];
     this.playerBoardArray = [];
@@ -34,7 +34,7 @@ export default class Game extends Phaser.Scene {
   }
 
   init(data) {
-    this.boardSize = parseInt(data.boardSize, 10);
+    // this.boardSize = parseInt(data.boardSize, 10);
     this.pName = data.playerName; // from 'MainMenu' scene
     this.screenWidth = data.screenWidth;
     this.screenHeight = data.screenHeight;
@@ -237,9 +237,11 @@ export default class Game extends Phaser.Scene {
       .sprite(gamePadStartX, gamePadStartY, 'up-button')
       .setScale(1.0)
       .setInteractive();
+    /*
     this.add
       .sprite(gamePadStartX, gamePadStartY + 90, 'center-decoration')
       .setScale(1.0);
+    */
     const downButton = this.add
       .sprite(gamePadStartX, gamePadStartY + 180, 'down-button')
       .setScale(1.0)

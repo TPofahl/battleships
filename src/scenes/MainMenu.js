@@ -47,7 +47,7 @@ export default class MainMenu extends Phaser.Scene {
     this.add.image(this.width * 0.5, this.height * 0.1, 'title');
 
     this.add
-      .text(this.width * 0.5 - 210, this.height * 0.3 - 100, 'select board size', {
+      .text(this.width * 0.5 - 210, this.height * 0.3 - 150, 'select board size', {
         fontFamily: 'Georgia, "Goudy Bookletter 1911", Times, serif',
       })
       .setScale(2.0);
