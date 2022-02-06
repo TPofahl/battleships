@@ -86,6 +86,10 @@ export default class Game extends Phaser.Scene {
       width: 90,
       height: 90,
     });
+    this.load.svg('center-decoration', 'assets/center-buttons.svg', {
+      width: 90,
+      height: 90,
+    });
     this.load.svg('down-button', 'assets/button-down.svg', {
       width: 90,
       height: 90,
@@ -232,7 +236,10 @@ export default class Game extends Phaser.Scene {
     const upButton = this.add
       .sprite(gamePadStartX, gamePadStartY, 'up-button')
       .setScale(1.0)
-      .setInteractive(); // was 500, 345
+      .setInteractive();
+    this.add
+      .sprite(gamePadStartX, gamePadStartY + 90, 'center-decoration')
+      .setScale(1.0);
     const downButton = this.add
       .sprite(gamePadStartX, gamePadStartY + 180, 'down-button')
       .setScale(1.0)
