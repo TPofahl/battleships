@@ -20,6 +20,14 @@ export default class MainMenu extends Phaser.Scene {
       width: this.width * 0.8,
       height: this.height,
     });
+    this.load.svg('plus', 'assets/button-plus.svg', {
+      width: this.width * 0.4,
+      height: this.height * 0.2,
+    });
+    this.load.svg('minus', 'assets/button-minus.svg', {
+      width: this.width * 0.4,
+      height: this.height * 0.2,
+    });
     this.load.svg('play', 'assets/button-start-game.svg', {
       width: this.width * 0.4,
       height: this.height * 0.2,
@@ -51,6 +59,8 @@ export default class MainMenu extends Phaser.Scene {
         fontFamily: 'Georgia, "Goudy Bookletter 1911", Times, serif',
       })
       .setScale(2.0);
+
+    this.add.image(this.width * 0.5, this.height * 0.1, 'title');
 
     const element = this.add
       .dom(this.width * 0.5, this.height * 0.3)
