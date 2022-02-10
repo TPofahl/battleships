@@ -3,7 +3,6 @@ import Phaser from 'phaser';
 export default class Game extends Phaser.Scene {
   constructor() {
     super('game');
-    // this.boardSize = 10;
     this.gameCount = 0;
     this.computerBoardArray = [];
     this.playerBoardArray = [];
@@ -835,6 +834,7 @@ export default class Game extends Phaser.Scene {
     upButton.on(
       'pointerdown',
       function handle() {
+        console.log('pew pew')
         if (this.gamePadActive === false) return;
         playerCursor.y -= this.tileSize;
         if (playerCursor.y < playerBoardY) {

@@ -54,6 +54,8 @@ export default class MainMenu extends Phaser.Scene {
 
   create() {
     gameStart = false;
+    let upClick = true;
+    let downClick = true;
     const cursorMoveSound = this.sound.add('cursor-move', { volume: 0.2 });
 
     this.add.image(this.width * 0.5, this.height * 0.1, 'title');
@@ -81,10 +83,22 @@ export default class MainMenu extends Phaser.Scene {
 
     minusButton.on(
       'pointerdown',
-      function handle() {
-        if (gameBoard > 7) {
-          gameBoard -= 2;
-          cursorMoveSound.play();
+      () => {
+        // Desktop
+        if (this.width > this.height) {
+          if (gameBoard > 7) {
+            gameBoard -= 2;
+            cursorMoveSound.play();
+          }
+          // Mobile
+        } else if (downClick) {
+          downClick = false;
+          if (gameBoard > 7) {
+            gameBoard -= 2;
+            cursorMoveSound.play();
+          }
+        } else {
+          downClick = true;
         }
         this.boardText.setText(`${gameBoard} x ${gameBoard}`);
       },
@@ -93,16 +107,46 @@ export default class MainMenu extends Phaser.Scene {
 
     plusButton.on(
       'pointerdown',
-      function handle() {
-        if (gameBoard < 11) {
-          gameBoard += 2;
-          cursorMoveSound.play();
+      () => {
+        // Desktop
+        if (this.width > this.height) {
+          if (gameBoard < 11) {
+            gameBoard += 2;
+            cursorMoveSound.play();
+          }
+          // Mobile
+        } else if (upClick) {
+          upClick = false;
+          if (gameBoard < 11) {
+            gameBoard += 2;
+            cursorMoveSound.play();
+          }
+        } else {
+          upClick = true;
         }
         this.boardText.setText(`${gameBoard} x ${gameBoard}`);
       },
       this
     );
 
+    /*
+    plusButton.on(
+      'pointerdown',
+      () => {
+        if (upClick) {
+          upClick = false;
+          if (gameBoard < 11) {
+            gameBoard += 2;
+            cursorMoveSound.play();
+          }
+        } else {
+          upClick = true;
+        }
+        this.boardText.setText(`${gameBoard} x ${gameBoard}`);
+      },
+      this
+    );
+    */
     play.on(
       'pointerdown',
       () => {
