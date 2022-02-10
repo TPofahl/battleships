@@ -30,7 +30,7 @@ export default class Game extends Phaser.Scene {
     this.playerSunk = [];
     this.playerMarkers = [];
     // how long a board is shown for after a shot, before scene fade.
-    this.duration = 200;
+    this.duration = 1800;
   }
 
   init(data) {
