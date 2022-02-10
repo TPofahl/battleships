@@ -29,7 +29,7 @@ export default class Game extends Phaser.Scene {
     this.playerSunk = [];
     this.playerMarkers = [];
     // how long a board is shown for after a shot, before scene fade.
-    this.duration = 1500;
+    this.duration = 2000;
   }
 
   init(data) {
@@ -166,9 +166,10 @@ export default class Game extends Phaser.Scene {
   create() {
     const boardLength = this.boardSize * this.tileSize;
     // Find top-left water tile position
-    const boardStartX = this.tileSize / 2 + (this.screenWidth - boardLength) / 2;
-    let playerBoardStartY = 100; // 400
-    let computerBoardStartY = 100; // 48
+    const boardStartX = (this.tileSize + (this.screenWidth - boardLength)) / 2;
+    const boardStartY = this.tileSize / 2 + 50;
+    let playerBoardStartY = boardStartY;
+    let computerBoardStartY = boardStartY;
     const playerBoardY = playerBoardStartY;
     const computerBoardY = computerBoardStartY;
     let cursorStartPosition = {};
@@ -257,7 +258,7 @@ export default class Game extends Phaser.Scene {
       .sprite(boardCenterX, boardCenterY, 'cursor-player')
       .setScale(1.0);
     this.playerText = this.add
-      .text(boardStartX, playerBoardStartY - 100, 'place your ships', {
+      .text(boardStartX, 5, 'place your ships', {
         fontFamily: 'Georgia, "Goudy Bookletter 1911", Times, serif',
       })
       .setScale(2.0)
@@ -834,7 +835,6 @@ export default class Game extends Phaser.Scene {
     upButton.on(
       'pointerdown',
       function handle() {
-        console.log('pew pew')
         if (this.gamePadActive === false) return;
         playerCursor.y -= this.tileSize;
         if (playerCursor.y < playerBoardY) {
