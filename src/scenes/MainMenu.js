@@ -14,6 +14,7 @@ export default class MainMenu extends Phaser.Scene {
   }
 
   preload() {
+    this.load.audio('cursor-move', 'assets/sfx/cursor-move.wav');
     // Desktop
     if (this.width > this.height) {
       this.load.svg('title', 'assets/title-battleships.svg', {
@@ -53,6 +54,7 @@ export default class MainMenu extends Phaser.Scene {
 
   create() {
     gameStart = false;
+    const cursorMoveSound = this.sound.add('cursor-move', { volume: 0.2 });
 
     this.add.image(this.width * 0.5, this.height * 0.1, 'title');
 
@@ -80,8 +82,10 @@ export default class MainMenu extends Phaser.Scene {
     minusButton.on(
       'pointerdown',
       () => {
-        console.log('i fired');
-        if (gameBoard > 7) gameBoard -= 2;
+        if (gameBoard > 7) {
+          gameBoard -= 2;
+          cursorMoveSound.play();
+        }
         this.boardText.setText(`${gameBoard} x ${gameBoard}`);
       },
       this
@@ -90,8 +94,10 @@ export default class MainMenu extends Phaser.Scene {
     plusButton.on(
       'pointerdown',
       () => {
-        console.log('i fired');
-        if (gameBoard < 11) gameBoard += 2;
+        if (gameBoard < 11) {
+          gameBoard += 2;
+          cursorMoveSound.play();
+        }
         this.boardText.setText(`${gameBoard} x ${gameBoard}`);
       },
       this
