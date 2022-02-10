@@ -81,7 +81,7 @@ export default class MainMenu extends Phaser.Scene {
 
     minusButton.on(
       'pointerdown',
-      () => {
+      function handle() {
         if (gameBoard > 7) {
           gameBoard -= 2;
           cursorMoveSound.play();
@@ -93,7 +93,7 @@ export default class MainMenu extends Phaser.Scene {
 
     plusButton.on(
       'pointerdown',
-      () => {
+      function handle() {
         if (gameBoard < 11) {
           gameBoard += 2;
           cursorMoveSound.play();

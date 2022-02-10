@@ -26,7 +26,6 @@ export default class GameOver extends Phaser.Scene {
     element.addListener('click');
 
     element.on('click', function handle() {
-      console.log(gameStart);
       this.removeListener('click');
       gameStart = true;
     });
@@ -37,8 +36,8 @@ export default class GameOver extends Phaser.Scene {
       })
       .setOrigin(0.5);
     this.add
-      .text(width * 0.5 - 165, height * 0.5 - 150, `${this.winner} wins`)
-      .setScale(2.5);
+      .text(width * 0.5 - 165, height * 0.5 - 200, `${this.winner} wins`)
+      .setScale(3.0);
   }
 
   update() {
