@@ -4,7 +4,7 @@ export default class Game extends Phaser.Scene {
   constructor() {
     super('game');
     this.gameCount = 0;
-    this.arrowSize = 90;
+    this.arrowSize = 0;
     this.computerBoardArray = [];
     this.playerBoardArray = [];
 
@@ -30,7 +30,7 @@ export default class Game extends Phaser.Scene {
     this.playerSunk = [];
     this.playerMarkers = [];
     // how long a board is shown for after a shot, before scene fade.
-    this.duration = 2000;
+    this.duration = 200;
   }
 
   init(data) {
@@ -62,11 +62,13 @@ export default class Game extends Phaser.Scene {
       this.textures.remove('marker-hit');
       this.textures.remove('marker-miss');
     }
-    if (this.tileSize > this.arrowSize) {
-      this.arrowSize = 90;
+
+    if (this.screenWidth > this.screenHeight) {
+      this.arrowSize = 70;
     } else {
-      this.arrowSize = this.tileSize;
+      this.arrowSize = this.tileSize * this.boardSize * 0.15;
     }
+
     this.load.audio('cursor-move', 'assets/sfx/cursor-move.wav');
     this.load.audio('cursor-bounds', 'assets/sfx/cursor-bounds.wav');
 
@@ -75,8 +77,8 @@ export default class Game extends Phaser.Scene {
       height: 200,
     });
     this.load.svg('fire-button', 'assets/button-fire.svg', {
-      width: 200,
-      height: 200,
+      width: this.tileSize * this.boardSize * 0.15 * 3,
+      height: this.arrowSize * 3,
     });
     this.load.svg('a-button', 'assets/button-a.svg', {
       width: 200,
@@ -192,8 +194,7 @@ export default class Game extends Phaser.Scene {
     let texture;
     this.isShot = false;
     // starting position of the gamepad images
-    // const gamePadStartY = playerBoardStartY + this.tileSize * this.boardSize + 20;
-    const gamePadStartY = playerBoardStartY + this.tileSize * this.boardSize + 20;
+    const gamePadStartY = playerBoardStartY + this.tileSize * this.boardSize + 25;
     const gamePadStartX = this.screenWidth / 2;
 
     let gameOver = false;
@@ -221,7 +222,7 @@ export default class Game extends Phaser.Scene {
       boardCenterY = boardLength / 2 + playerBoardStartY - this.spriteOffset;
     }
 
-    // game controller    //shift -350, +200
+    // game controller
     const aButton = this.add
       .sprite(
         gamePadStartX + 100 + (boardLength / 2 - 200),
@@ -230,15 +231,7 @@ export default class Game extends Phaser.Scene {
       )
       .setScale(1.0)
       .setInteractive();
-    const fireButton = this.add
-      .sprite(
-        gamePadStartX + 100 + (boardLength / 2 - 200),
-        gamePadStartY + 90,
-        'fire-button'
-      )
-      .setScale(1.0)
-      .setInteractive();
-    fireButton.visible = false;
+
     const rotateButton = this.add
       .sprite(
         gamePadStartX + 100 + (boardLength / 2 - 200),
@@ -256,35 +249,61 @@ export default class Game extends Phaser.Scene {
       )
       .setScale(1.0)
       .setInteractive();
+
+    // for mobile/desktop directional pad sizes
+    let scale = 1.0;
+    let scaleOffset = 0;
+    if (this.screenHeight > this.screenWidth) {
+      scale = 0.8;
+      scaleOffset = 20;
+    }
+
     const upButton = this.add
       .sprite(gamePadStartX, gamePadStartY, 'up-button')
-      .setScale(1.0)
+      .setScale(scale)
       .setInteractive();
     /*
     this.add
       .sprite(gamePadStartX, gamePadStartY + 90, 'center-decoration')
-      .setScale(1.0);
+      .setScale(scale);
     */
     const downButton = this.add
-      .sprite(gamePadStartX, gamePadStartY + this.arrowSize * 2, 'down-button')
-      .setScale(1.0)
+      .sprite(
+        gamePadStartX,
+        gamePadStartY + (this.arrowSize - scaleOffset) * 2,
+        'down-button'
+      )
+      .setScale(scale)
       .setInteractive();
+
     const leftButton = this.add
       .sprite(
-        gamePadStartX - this.arrowSize,
-        gamePadStartY + this.arrowSize,
+        gamePadStartX - this.arrowSize + scaleOffset,
+        gamePadStartY + this.arrowSize - scaleOffset,
         'left-button'
       )
-      .setScale(1.0)
+      .setScale(scale)
       .setInteractive();
+
     const rightButton = this.add
       .sprite(
-        gamePadStartX + this.arrowSize,
-        gamePadStartY + this.arrowSize,
+        gamePadStartX + this.arrowSize - scaleOffset,
+        gamePadStartY + this.arrowSize - scaleOffset,
         'right-button'
+      )
+      .setScale(scale)
+      .setInteractive();
+
+    const fireButton = this.add
+      .sprite(
+        gamePadStartX + this.arrowSize * 1.5 + boardLength / 2 - this.arrowSize * 3,
+        gamePadStartY + this.arrowSize,
+        'fire-button'
       )
       .setScale(1.0)
       .setInteractive();
+    fireButton.visible = false;
+
     const playerCursor = this.add
       .sprite(boardCenterX, boardCenterY, 'cursor-player')
       .setScale(1.0);
@@ -512,8 +531,13 @@ export default class Game extends Phaser.Scene {
             rotateButton.visible = false;
             fireButton.visible = true;
 
-            fireButton.x = gamePadStartX + 100 + (boardLength / 2 - 200);
             // reposition gamepad once game starts, make arrow buttons and fire button larger
+            upButton.setScale(1.0);
+            downButton.setScale(1.0);
+            leftButton.setScale(1.0);
+            rightButton.setScale(1.0);
+
+            // Position arrow pad on left-edge of board
             upButton.x =
               gamePadStartX + this.arrowSize / 2 - boardLength / 2 + this.arrowSize;
             downButton.x =
@@ -524,6 +548,12 @@ export default class Game extends Phaser.Scene {
               this.arrowSize / 2 -
               boardLength / 2 +
               this.arrowSize * 2;
+
+            if (this.screenHeight > this.screenWidth) {
+              downButton.y += 40;
+              leftButton.y += 20;
+              rightButton.y += 20;
+            }
           }
         }
       },

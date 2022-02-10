@@ -129,24 +129,6 @@ export default class MainMenu extends Phaser.Scene {
       this
     );
 
-    /*
-    plusButton.on(
-      'pointerdown',
-      () => {
-        if (upClick) {
-          upClick = false;
-          if (gameBoard < 11) {
-            gameBoard += 2;
-            cursorMoveSound.play();
-          }
-        } else {
-          upClick = true;
-        }
-        this.boardText.setText(`${gameBoard} x ${gameBoard}`);
-      },
-      this
-    );
-    */
     play.on(
       'pointerdown',
       () => {
