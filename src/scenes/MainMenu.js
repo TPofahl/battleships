@@ -44,6 +44,7 @@ export default class MainMenu extends Phaser.Scene {
         height: this.height * 0.1,
       });
     }
+
     this.load.svg('play', 'assets/button-start-game.svg', {
       width: this.width * 0.3,
       height: this.height * 0.2,
@@ -79,7 +80,7 @@ export default class MainMenu extends Phaser.Scene {
       .setInteractive();
 
     // Add link icons
-    this.add.dom(this.width * 0.5, this.height * 0.4).createFromCache('icons');
+    // this.add.dom(this.width * 0.5, this.height * 0.4).createFromCache('icons');
 
     minusButton.on(
       'pointerdown',
