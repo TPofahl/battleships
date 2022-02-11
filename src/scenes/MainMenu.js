@@ -51,7 +51,7 @@ export default class MainMenu extends Phaser.Scene {
       height: this.height * 0.2,
     });
 
-    this.load.html('icons', 'assets/components/icons.html');
+    // this.load.html('icons', 'assets/components/icons.html');
   }
 
   create() {
@@ -80,10 +80,12 @@ export default class MainMenu extends Phaser.Scene {
       .image(this.width * 0.5, this.height * 0.55, 'play')
       .setInteractive();
 
-    // Add link icons
+    // Add link
+    /*
     this.icons = this.add
       .dom(this.width * 0.5, this.height * 0.4)
       .createFromCache('icons');
+    */
 
     minusButton.on(
       'pointerdown',
@@ -146,7 +148,7 @@ export default class MainMenu extends Phaser.Scene {
     if (gameStart === true) {
       // Remove dom elements.
       // ios has issues with pointer events in scenes, after a scene with dom elements
-      this.icons.removeElement('icons');
+      // this.icons.removeElement('icons');
 
       this.scene.start('game', {
         boardSize: gameBoard,
