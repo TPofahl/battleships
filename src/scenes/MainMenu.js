@@ -6,6 +6,7 @@ let gameBoard = 10;
 export default class MainMenu extends Phaser.Scene {
   constructor() {
     super('main-menu');
+    this.icons = '';
   }
 
   init(data) {
@@ -80,7 +81,9 @@ export default class MainMenu extends Phaser.Scene {
       .setInteractive();
 
     // Add link icons
-    // this.add.dom(this.width * 0.5, this.height * 0.4).createFromCache('icons');
+    this.icons = this.add
+      .dom(this.width * 0.5, this.height * 0.4)
+      .createFromCache('icons');
 
     minusButton.on(
       'pointerdown',
@@ -141,7 +144,11 @@ export default class MainMenu extends Phaser.Scene {
 
   update() {
     if (gameStart === true) {
-      this.scene.start('game', {
+      // Remove dom elements.
+      // ios has issues with pointer events in scenes, after a scene with dom elements
+      this.icons.removeElement('icons');
+
+      this.scene.start('game-over', {
         boardSize: gameBoard,
         playerName: 'player',
         screenWidth: this.width,
