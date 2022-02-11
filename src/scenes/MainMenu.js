@@ -148,7 +148,7 @@ export default class MainMenu extends Phaser.Scene {
       // ios has issues with pointer events in scenes, after a scene with dom elements
       this.icons.removeElement('icons');
 
-      this.scene.start('game-over', {
+      this.scene.start('game', {
         boardSize: gameBoard,
         playerName: 'player',
         screenWidth: this.width,
