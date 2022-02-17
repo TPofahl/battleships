@@ -43,6 +43,7 @@ export default class Game extends Phaser.Scene {
   }
 
   preload() {
+    let gamePadWidth = 200;
     // remove preloaded board/ship images from last game, so images
     // will be properly resized when a different board size is selected
     if (this.gameCount) {
@@ -63,8 +64,12 @@ export default class Game extends Phaser.Scene {
       this.textures.remove('marker-miss');
     }
 
-    if (this.screenWidth > this.screenHeight) {
+    if (this.screenWidth > this.screenHeight && this.screenHeight > 1150) {
       this.arrowSize = 70;
+    } else if (this.screenHeight > 900) {
+      console.log('ahahahah');
+      this.arrowSize = 40;
+      gamePadWidth = 150;
     } else {
       this.arrowSize = this.tileSize * this.boardSize * 0.15;
     }
@@ -73,26 +78,26 @@ export default class Game extends Phaser.Scene {
     this.load.audio('cursor-bounds', 'assets/sfx/cursor-bounds.wav');
 
     this.load.svg('start-button', 'assets/button-start.svg', {
-      width: 200,
-      height: 200,
+      width: gamePadWidth,
+      height: gamePadWidth,
     });
     this.load.svg('fire-button', 'assets/button-fire.svg', {
       width: this.tileSize * this.boardSize * 0.15 * 3,
       height: this.arrowSize * 3,
     });
     this.load.svg('a-button', 'assets/button-a.svg', {
-      width: 200,
+      width: gamePadWidth,
       height: 120,
     });
     this.load.svg('rotate-button', 'assets/button-rotate.svg', {
-      width: 200,
+      width: gamePadWidth,
       height: 120,
     });
     this.load.svg('up-button', 'assets/button-up.svg', {
       width: this.arrowSize,
       height: this.arrowSize,
     });
-    this.load.svg('center-decoration', 'assets/center-buttons.svg', {
+    this.load.svg('center-decoration', 'assets/button-center.svg', {
       width: this.arrowSize,
       height: this.arrowSize,
     });
@@ -211,8 +216,9 @@ export default class Game extends Phaser.Scene {
 
     let startGame = false;
 
-    const cursorMoveSound = this.sound.add('cursor-move', { volume: 0.2 });
-    const cursorThud = this.sound.add('cursor-bounds', { volume: 0.2 });
+    // Max sound level
+    const cursorMoveSound = this.sound.add('cursor-move', { volume: 0.4 });
+    const cursorThud = this.sound.add('cursor-bounds', { volume: 0.3 });
 
     // handle starting player cursor sprite position
     if (this.boardSize % 2 === 0) {
@@ -263,11 +269,15 @@ export default class Game extends Phaser.Scene {
       .sprite(gamePadStartX, gamePadStartY, 'up-button')
       .setScale(scale)
       .setInteractive();
-    /*
-    this.add
-      .sprite(gamePadStartX, gamePadStartY + 90, 'center-decoration')
+
+    const centerButton = this.add
+      .sprite(
+        gamePadStartX,
+        gamePadStartY + this.arrowSize - scaleOffset,
+        'center-decoration'
+      )
       .setScale(scale);
-    */
+
     const downButton = this.add
       .sprite(
         gamePadStartX,
@@ -489,6 +499,7 @@ export default class Game extends Phaser.Scene {
       rotateButton,
       startButton,
       upButton,
+      centerButton,
       downButton,
       leftButton,
       rightButton,
@@ -534,12 +545,15 @@ export default class Game extends Phaser.Scene {
 
             // reposition gamepad once game starts, make arrow buttons and fire button larger
             upButton.setScale(1.0);
+            centerButton.setScale(1.0);
             downButton.setScale(1.0);
             leftButton.setScale(1.0);
             rightButton.setScale(1.0);
 
             // Position arrow pad on left-edge of board
             upButton.x =
+              gamePadStartX + this.arrowSize / 2 - boardLength / 2 + this.arrowSize;
+            centerButton.x =
               gamePadStartX + this.arrowSize / 2 - boardLength / 2 + this.arrowSize;
             downButton.x =
               gamePadStartX + this.arrowSize / 2 - boardLength / 2 + this.arrowSize;
@@ -551,6 +565,7 @@ export default class Game extends Phaser.Scene {
               this.arrowSize * 2;
 
             if (this.screenHeight > this.screenWidth) {
+              centerButton.y += 20;
               downButton.y += 40;
               leftButton.y += 20;
               rightButton.y += 20;
