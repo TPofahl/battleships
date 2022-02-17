@@ -194,7 +194,8 @@ export default class Game extends Phaser.Scene {
     let texture;
     this.isShot = false;
     // starting position of the gamepad images
-    const gamePadStartY = playerBoardStartY + this.tileSize * this.boardSize + 25;
+    // const gamePadStartY = playerBoardStartY + this.tileSize * this.boardSize + 25;
+    const gamePadStartY = 95 + this.tileSize * this.boardSize;
     const gamePadStartX = this.screenWidth / 2;
 
     let gameOver = false;
