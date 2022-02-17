@@ -43,7 +43,6 @@ export default class Game extends Phaser.Scene {
   }
 
   preload() {
-    let gamePadWidth = 200;
     // remove preloaded board/ship images from last game, so images
     // will be properly resized when a different board size is selected
     if (this.gameCount) {
@@ -63,13 +62,8 @@ export default class Game extends Phaser.Scene {
       this.textures.remove('marker-hit');
       this.textures.remove('marker-miss');
     }
-
-    if (this.screenWidth > this.screenHeight && this.screenHeight > 1150) {
+    if (this.screenWidth > this.screenHeight) {
       this.arrowSize = 70;
-    } else if (this.screenHeight > 900) {
-      console.log('ahahahah');
-      this.arrowSize = 40;
-      gamePadWidth = 150;
     } else {
       this.arrowSize = this.tileSize * this.boardSize * 0.15;
     }
@@ -78,19 +72,19 @@ export default class Game extends Phaser.Scene {
     this.load.audio('cursor-bounds', 'assets/sfx/cursor-bounds.wav');
 
     this.load.svg('start-button', 'assets/button-start.svg', {
-      width: gamePadWidth,
-      height: gamePadWidth,
+      width: 200,
+      height: 200,
     });
     this.load.svg('fire-button', 'assets/button-fire.svg', {
       width: this.tileSize * this.boardSize * 0.15 * 3,
       height: this.arrowSize * 3,
     });
     this.load.svg('a-button', 'assets/button-a.svg', {
-      width: gamePadWidth,
+      width: 200,
       height: 120,
     });
     this.load.svg('rotate-button', 'assets/button-rotate.svg', {
-      width: gamePadWidth,
+      width: 200,
       height: 120,
     });
     this.load.svg('up-button', 'assets/button-up.svg', {
