@@ -20,23 +20,24 @@ export default class GameOver extends Phaser.Scene {
     gameStart = false;
 
     const element = this.add
-      .dom(width * 0.5, height * 0.5 + 150)
+      .dom(width * 0.5, height * 0.5)
       .createFromCache('playButton');
 
     element.addListener('click');
 
     element.on('click', function handle() {
-      console.log(gameStart);
       this.removeListener('click');
       gameStart = true;
     });
 
     this.add
-      .text(width * 0.5, height * 0.5, 'Game Over', {
-        fontSize: 48,
+      .text(width * 0.5, height * 0.5 - 350, 'Game Over', {
+        fontSize: 120,
       })
       .setOrigin(0.5);
-    this.add.text(width * 0.5 - 39, height * 0.5 + 50, `${this.winner} wins`);
+    this.add
+      .text(width * 0.5 - 165, height * 0.5 - 200, `${this.winner} wins`)
+      .setScale(3.0);
   }
 
   update() {

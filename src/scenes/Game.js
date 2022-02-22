@@ -3,8 +3,8 @@ import Phaser from 'phaser';
 export default class Game extends Phaser.Scene {
   constructor() {
     super('game');
-    this.boardSize = 10;
     this.gameCount = 0;
+    this.arrowSize = 0;
     this.computerBoardArray = [];
     this.playerBoardArray = [];
 
@@ -30,11 +30,11 @@ export default class Game extends Phaser.Scene {
     this.playerSunk = [];
     this.playerMarkers = [];
     // how long a board is shown for after a shot, before scene fade.
-    this.duration = 1500;
+    this.duration = 1800;
   }
 
   init(data) {
-    // this.boardSize = parseInt(data.boardSize, 10);
+    this.boardSize = parseInt(data.boardSize, 10);
     this.pName = data.playerName; // from 'MainMenu' scene
     this.screenWidth = data.screenWidth;
     this.screenHeight = data.screenHeight;
@@ -62,6 +62,11 @@ export default class Game extends Phaser.Scene {
       this.textures.remove('marker-hit');
       this.textures.remove('marker-miss');
     }
+    if (this.screenWidth > this.screenHeight) {
+      this.arrowSize = 70;
+    } else {
+      this.arrowSize = this.tileSize * this.boardSize * 0.15;
+    }
 
     this.load.audio('cursor-move', 'assets/sfx/cursor-move.wav');
     this.load.audio('cursor-bounds', 'assets/sfx/cursor-bounds.wav');
@@ -71,8 +76,8 @@ export default class Game extends Phaser.Scene {
       height: 200,
     });
     this.load.svg('fire-button', 'assets/button-fire.svg', {
-      width: 200,
-      height: 200,
+      width: this.tileSize * this.boardSize * 0.15 * 3,
+      height: this.arrowSize * 3,
     });
     this.load.svg('a-button', 'assets/button-a.svg', {
       width: 200,
@@ -83,24 +88,24 @@ export default class Game extends Phaser.Scene {
       height: 120,
     });
     this.load.svg('up-button', 'assets/button-up.svg', {
-      width: 90,
-      height: 90,
+      width: this.arrowSize,
+      height: this.arrowSize,
     });
-    this.load.svg('center-decoration', 'assets/center-buttons.svg', {
-      width: 90,
-      height: 90,
+    this.load.svg('center-decoration', 'assets/button-center.svg', {
+      width: this.arrowSize,
+      height: this.arrowSize,
     });
     this.load.svg('down-button', 'assets/button-down.svg', {
-      width: 90,
-      height: 90,
+      width: this.arrowSize,
+      height: this.arrowSize,
     });
     this.load.svg('left-button', 'assets/button-left.svg', {
-      width: 90,
-      height: 90,
+      width: this.arrowSize,
+      height: this.arrowSize,
     });
     this.load.svg('right-button', 'assets/button-right.svg', {
-      width: 90,
-      height: 90,
+      width: this.arrowSize,
+      height: this.arrowSize,
     });
     this.load.svg('water', 'assets/water-tile.svg', {
       width: this.tileSize,
@@ -167,9 +172,10 @@ export default class Game extends Phaser.Scene {
   create() {
     const boardLength = this.boardSize * this.tileSize;
     // Find top-left water tile position
-    const boardStartX = this.tileSize / 2 + (this.screenWidth - boardLength) / 2;
-    let playerBoardStartY = 100; // 400
-    let computerBoardStartY = 100; // 48
+    const boardStartX = (this.tileSize + (this.screenWidth - boardLength)) / 2;
+    const boardStartY = this.tileSize / 2 + 50;
+    let playerBoardStartY = boardStartY;
+    let computerBoardStartY = boardStartY;
     const playerBoardY = playerBoardStartY;
     const computerBoardY = computerBoardStartY;
     let cursorStartPosition = {};
@@ -187,7 +193,8 @@ export default class Game extends Phaser.Scene {
     let texture;
     this.isShot = false;
     // starting position of the gamepad images
-    const gamePadStartY = playerBoardStartY + this.tileSize * this.boardSize + 20;
+    // const gamePadStartY = playerBoardStartY + this.tileSize * this.boardSize + 25;
+    const gamePadStartY = 120 + this.tileSize * this.boardSize;
     const gamePadStartX = this.screenWidth / 2;
 
     let gameOver = false;
@@ -203,8 +210,9 @@ export default class Game extends Phaser.Scene {
 
     let startGame = false;
 
-    const cursorMoveSound = this.sound.add('cursor-move', { volume: 0.2 });
-    const cursorThud = this.sound.add('cursor-bounds', { volume: 0.2 });
+    // Max sound level
+    const cursorMoveSound = this.sound.add('cursor-move', { volume: 0.4 });
+    const cursorThud = this.sound.add('cursor-bounds', { volume: 0.3 });
 
     // handle starting player cursor sprite position
     if (this.boardSize % 2 === 0) {
@@ -215,50 +223,97 @@ export default class Game extends Phaser.Scene {
       boardCenterY = boardLength / 2 + playerBoardStartY - this.spriteOffset;
     }
 
-    // game controller    //shift -350, +200
+    // game controller
     const aButton = this.add
-      .sprite(gamePadStartX + 238, gamePadStartY + 143, 'a-button')
+      .sprite(
+        gamePadStartX + 100 + (boardLength / 2 - 200),
+        gamePadStartY + 143,
+        'a-button'
+      )
       .setScale(1.0)
       .setInteractive();
+
+    const rotateButton = this.add
+      .sprite(
+        gamePadStartX + 100 + (boardLength / 2 - 200),
+        gamePadStartY + 36,
+        'rotate-button'
+      )
+      .setScale(1.0)
+      .setInteractive();
+
+    const startButton = this.add
+      .sprite(
+        gamePadStartX + 100 - boardLength / 2,
+        gamePadStartY + 90,
+        'start-button'
+      )
+      .setScale(1.0)
+      .setInteractive();
+
+    // for mobile/desktop directional pad sizes
+    let scale = 1.0;
+    let scaleOffset = 0;
+    if (this.screenHeight > this.screenWidth) {
+      scale = 0.8;
+      scaleOffset = 20;
+    }
+
+    const upButton = this.add
+      .sprite(gamePadStartX, gamePadStartY, 'up-button')
+      .setScale(scale)
+      .setInteractive();
+
+    const centerButton = this.add
+      .sprite(
+        gamePadStartX,
+        gamePadStartY + this.arrowSize - scaleOffset,
+        'center-decoration'
+      )
+      .setScale(scale);
+
+    const downButton = this.add
+      .sprite(
+        gamePadStartX,
+        gamePadStartY + (this.arrowSize - scaleOffset) * 2,
+        'down-button'
+      )
+      .setScale(scale)
+      .setInteractive();
+
+    const leftButton = this.add
+      .sprite(
+        gamePadStartX - this.arrowSize + scaleOffset,
+        gamePadStartY + this.arrowSize - scaleOffset,
+        'left-button'
+      )
+      .setScale(scale)
+      .setInteractive();
+
+    const rightButton = this.add
+      .sprite(
+        gamePadStartX + this.arrowSize - scaleOffset,
+        gamePadStartY + this.arrowSize - scaleOffset,
+        'right-button'
+      )
+      .setScale(scale)
+      .setInteractive();
+
     const fireButton = this.add
-      .sprite(gamePadStartX + 238, gamePadStartY + 90, 'fire-button')
+      .sprite(
+        gamePadStartX + this.arrowSize * 1.5 + boardLength / 2 - this.arrowSize * 3,
+        gamePadStartY + this.arrowSize,
+        'fire-button'
+      )
       .setScale(1.0)
       .setInteractive();
     fireButton.visible = false;
-    const rotateButton = this.add
-      .sprite(gamePadStartX + 238, gamePadStartY + 36, 'rotate-button')
-      .setScale(1.0)
-      .setInteractive();
-    const startButton = this.add
-      .sprite(gamePadStartX - 238, gamePadStartY + 90, 'start-button')
-      .setScale(1.0)
-      .setInteractive();
-    const upButton = this.add
-      .sprite(gamePadStartX, gamePadStartY, 'up-button')
-      .setScale(1.0)
-      .setInteractive();
-    /*
-    this.add
-      .sprite(gamePadStartX, gamePadStartY + 90, 'center-decoration')
-      .setScale(1.0);
-    */
-    const downButton = this.add
-      .sprite(gamePadStartX, gamePadStartY + 180, 'down-button')
-      .setScale(1.0)
-      .setInteractive();
-    const leftButton = this.add
-      .sprite(gamePadStartX - 90, gamePadStartY + 90, 'left-button')
-      .setScale(1.0)
-      .setInteractive();
-    const rightButton = this.add
-      .sprite(gamePadStartX + 90, gamePadStartY + 90, 'right-button')
-      .setScale(1.0)
-      .setInteractive();
+
     const playerCursor = this.add
       .sprite(boardCenterX, boardCenterY, 'cursor-player')
       .setScale(1.0);
     this.playerText = this.add
-      .text(boardStartX, playerBoardStartY - 100, 'place your ships', {
+      .text(boardStartX, 5, 'place your ships', {
         fontFamily: 'Georgia, "Goudy Bookletter 1911", Times, serif',
       })
       .setScale(2.0)
@@ -438,6 +493,7 @@ export default class Game extends Phaser.Scene {
       rotateButton,
       startButton,
       upButton,
+      centerButton,
       downButton,
       leftButton,
       rightButton,
@@ -480,6 +536,34 @@ export default class Game extends Phaser.Scene {
             aButton.visible = false;
             rotateButton.visible = false;
             fireButton.visible = true;
+
+            // reposition gamepad once game starts, make arrow buttons and fire button larger
+            upButton.setScale(1.0);
+            centerButton.setScale(1.0);
+            downButton.setScale(1.0);
+            leftButton.setScale(1.0);
+            rightButton.setScale(1.0);
+
+            // Position arrow pad on left-edge of board
+            upButton.x =
+              gamePadStartX + this.arrowSize / 2 - boardLength / 2 + this.arrowSize;
+            centerButton.x =
+              gamePadStartX + this.arrowSize / 2 - boardLength / 2 + this.arrowSize;
+            downButton.x =
+              gamePadStartX + this.arrowSize / 2 - boardLength / 2 + this.arrowSize;
+            leftButton.x = gamePadStartX + this.arrowSize / 2 - boardLength / 2;
+            rightButton.x =
+              gamePadStartX +
+              this.arrowSize / 2 -
+              boardLength / 2 +
+              this.arrowSize * 2;
+
+            if (this.screenHeight > this.screenWidth) {
+              centerButton.y += 20;
+              downButton.y += 40;
+              leftButton.y += 20;
+              rightButton.y += 20;
+            }
           }
         }
       },
