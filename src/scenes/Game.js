@@ -32,8 +32,8 @@ export default class Game extends Phaser.Scene {
     this.directionIdx = 0;
     this.botTrackShip = false;
     // this.shotDirection = ['left', 'right'];
-    this.shotDirection = ['right', 'left', 'up'];
-    this.currentDirections = this.shotDirection;
+    this.shotDirection = ['right', 'left', 'down'];
+    this.currentDirections = 4;
     this.shotIdx = 0;
     this.checkX = 0;
     this.checkY = 0;
@@ -1332,29 +1332,31 @@ export default class Game extends Phaser.Scene {
 
     if (this.botTrackShip === true) {
       // Pick a random direction to fire in a line (when a ship is hit but not sunk).
-      console.log('THIS.BOTSHOTDIRECTION', this.botShotDirection);
+      console.log('this.botShotDirection', this.botShotDirection);
       if (this.botShotDirection === '') {
         this.checkX = this.botCurrentTarget.xPos;
         this.checkY = this.botCurrentTarget.yPos;
-        console.log('dfsasdefdf', this.shotDirection);
+        console.log('shotDir', this.shotDirection);
         this.directionIdx = Phaser.Math.Between(0, this.shotDirection.length - 1);
         this.botShotDirection = this.shotDirection[this.directionIdx];
-        console.log('this.idxxxxx', this.directionIdx);
-        console.log('check out here!!!!!!', this.botShotDirection);
+        console.log('this.idx', this.directionIdx);
       }
-      console.log(
-        'SHOTS SHOTS SHOT SHOTS SHOTS',
-        this.shotDirection[this.directionIdx]
-      );
+
+      console.log(`Entering DO - ${this.counter}`);
       do {
-        console.log('SHOT DIR LENGTH!!!', this.shotDirection.length);
+        console.log('shot dir length', this.shotDirection.length);
         // Once a direction is removed, find new direction.
         console.log('Saved dir length: ', this.currentDirections.length);
-        if (this.shotDirection.length < this.currentDirections.length) {
+        console.log('test, ', typeof this.shotDirection.length);
+        if (this.shotDirection.length < this.currentDirections) {
           this.directionIdx = Phaser.Math.Between(0, this.shotDirection.length - 1);
-          console.log('AAAAAAAAAAAAAAA');
-          this.currentDirections = this.shotDirection;
+          this.currentDirections--;
         }
+        console.log(
+          `*****************${
+            this.shotDirection[this.directionIdx]
+          }*****************`
+        );
         switch (this.shotDirection[this.directionIdx]) {
           case 'left':
             this.shotIdx--;
@@ -1378,7 +1380,6 @@ export default class Game extends Phaser.Scene {
             }
             break;
           case 'right':
-            console.log('SHOT DIRECTION ARRAY!!:', this.shotDirection);
             this.shotIdx++;
             this.checkX += this.tileSize;
             if (
@@ -1404,16 +1405,38 @@ export default class Game extends Phaser.Scene {
             }
             break;
           case 'up':
-            console.log('SHOT DIRECTION ARRAY!!:', this.shotDirection);
             this.shotIdx -= this.boardSize;
             this.checkY -= this.tileSize;
             if (this.checkY < this.boardStartY) {
               console.log('bounds met');
               this.shotIdx += this.boardSize;
-              // this.checkY = this.botCurrentTarget.yPos;
+              this.checkY += this.tileSize;
               // this.shotIdx =
               console.log('this.shotDirection before:', this.shotDirection);
               this.shotDirection.splice(this.shotDirection.indexOf('up'), 1);
+              console.log('this.shotDirection after:', this.shotDirection);
+              this.botShotDirection = '';
+              console.log(
+                '*********************************************************CHANGING DIRECTION****'
+              );
+              this.shotIdx = random;
+            } else {
+              console.log('was false');
+            }
+            break;
+          case 'down':
+            this.shotIdx += this.boardSize;
+            this.checkY += this.tileSize;
+            if (
+              this.checkY >
+              this.boardStartY - this.tileSize + this.tileSize * this.boardSize
+            ) {
+              console.log('bounds met');
+              this.shotIdx -= this.boardSize;
+              this.checkY -= this.tileSize;
+              // this.shotIdx =
+              console.log('this.shotDirection before:', this.shotDirection);
+              this.shotDirection.splice(this.shotDirection.indexOf('down'), 1);
               console.log('this.shotDirection after:', this.shotDirection);
               this.botShotDirection = '';
               console.log(
@@ -1428,8 +1451,12 @@ export default class Game extends Phaser.Scene {
             console.log('error: ship direction cannot be assigned');
         }
         this.counter++;
-        console.log('COUNT:', this.counter);
         console.log('TILE SIZE:::', this.tileSize);
+        console.log(
+          `~~~~~~~~~~~~~~~~~~~~~~~<(${
+            this.playerBoardArray[this.shotIdx].id
+          })>~~~~~~~~~~~~~~~~~~~~~~~`
+        );
         console.log(
           `RIGHT   checkX:${this.checkX}, cond:${
             this.boardStartX - this.tileSize + this.tileSize * this.boardSize
@@ -1438,8 +1465,9 @@ export default class Game extends Phaser.Scene {
         console.log(`LEFT   checkX:${this.checkX}, cond:${this.boardStartX}`);
         console.log(`UP   checkY:${this.checkY}, cond:${this.boardStartY}`);
       } while (this.playerBoardArray[this.shotIdx].hit === true);
+      console.log('broke out of DO');
 
-      console.log('SHOT DIRECTION ARRAY!!:', this.shotDirection);
+      console.log('shot direction:', this.shotDirection);
       this.playerBoardArray[this.shotIdx].hit = true;
       x = this.playerBoardArray[this.shotIdx].xPos;
       y = this.playerBoardArray[this.shotIdx].yPos;
