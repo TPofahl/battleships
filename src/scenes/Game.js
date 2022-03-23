@@ -31,8 +31,7 @@ export default class Game extends Phaser.Scene {
     this.botShotDirection = '';
     this.directionIdx = 0;
     this.botTrackShip = false;
-    // this.shotDirection = ['left', 'right'];
-    this.shotDirection = ['right', 'left', 'down'];
+    this.shotDirection = ['right', 'left', 'down', 'up'];
     this.currentDirections = 4;
     this.shotIdx = 0;
     this.checkX = 0;
@@ -1263,7 +1262,6 @@ export default class Game extends Phaser.Scene {
       this.cameras.main.fadeOut(500, 0, 0, 0);
       this.isPlayerTurn = !this.isPlayerTurn;
       this.playerContainer.visible = false;
-
       this.computerContainer.visible = false;
       this.computerMarkers.visible = true;
       currentPlayer = this.pName; // Use name from MainMenu
@@ -1283,21 +1281,170 @@ export default class Game extends Phaser.Scene {
     console.log(this.playerBoardArray);
     const isShipHit = this.playerBoardArray.find(
       (element) =>
+        // eslint-disable-next-line implicit-arrow-linebreak
         element.ship === true && element.sunk === false && element.hit === true
     );
     // When a ship is hit but bot sunk, make the tile the starting point for bot to sink the ship.
-    if (isShipHit) {
+    // This only applies when there is no current target.
+    if (isShipHit && this.botCurrentTarget.length === 0) {
       this.botCurrentTarget = isShipHit;
-      random = isShipHit.index;
+      // random = this.botCurrentTarget.index;
+      this.shotIdx = this.botCurrentTarget.index;
       // Control for bot to shoot randomly or track.
       this.botTrackShip = true;
     } else {
       do {
         random = Phaser.Math.Between(0, this.playerBoardArray.length - 1);
+        // this.shotIdx = random;
       } while (this.playerBoardArray[random].hit === true);
     }
 
-    const currentShip = this.playerBoardArray[random].shipType;
+    if (this.botTrackShip === true) {
+      // Pick a random direction to fire in a line (when a ship is hit but not sunk).
+      console.log('this.botShotDirection', this.botShotDirection);
+      if (this.botShotDirection === '') {
+        this.checkX = this.botCurrentTarget.xPos;
+        this.checkY = this.botCurrentTarget.yPos;
+        this.directionIdx = Phaser.Math.Between(0, this.shotDirection.length - 1);
+        this.botShotDirection = this.shotDirection[this.directionIdx];
+      }
+
+      console.log(`Entering DO - ${this.counter}`);
+      do {
+        console.log('shot dir length', this.shotDirection.length);
+        // Once a direction is removed, find new direction.
+        console.log(
+          `CURRENT--- DIR: ${
+            this.shotDirection[this.directionIdx]
+          }, this.shotDirection.length: ${
+            this.shotDirection.length
+          }, this.currentDirections ${this.currentDirections}`
+        );
+        if (this.shotDirection.length < this.currentDirections) {
+          this.directionIdx = Phaser.Math.Between(0, this.shotDirection.length - 1);
+          this.currentDirections--;
+        }
+        console.log(
+          `*****************${
+            this.shotDirection[this.directionIdx]
+          }*****************`
+        );
+        switch (this.shotDirection[this.directionIdx]) {
+          case 'left':
+            this.shotIdx--;
+            this.checkX -= this.tileSize;
+            if (this.checkX < this.boardStartX) {
+              console.log('bounds met');
+              console.log('this.shotDirection before:', this.shotDirection);
+              this.shotDirection.splice(this.shotDirection.indexOf('left'), 1);
+              console.log('this.shotDirection after:', this.shotDirection);
+              this.shotIdx = this.botCurrentTarget.index;
+              console.log(
+                `*********************************************************CHANGING DIRECTION, shotIdx assigned: ${this.shotIdx}****`
+              );
+              this.checkX = this.botCurrentTarget.xPos;
+              this.checkY = this.botCurrentTarget.yPos;
+            } else {
+              /*
+              if (this.shotIdx < this.playerBoardArray.length) {
+                console.log('IDX WAS LESS THAN BOARD LENGTH');
+                this.shotIdx = 0;
+              }
+              */
+              console.log('was false');
+            }
+            break;
+          case 'right':
+            this.shotIdx++;
+            this.checkX += this.tileSize;
+            if (
+              this.checkX >
+              this.boardStartX - this.tileSize + this.tileSize * this.boardSize
+            ) {
+              console.log('bounds met');
+              console.log('this.shotDirection before:', this.shotDirection);
+              this.shotDirection.splice(this.shotDirection.indexOf('right'), 1);
+              console.log('this.shotDirection after:', this.shotDirection);
+              console.log('shot direct array, ', this.shotDirection);
+              this.shotIdx = this.botCurrentTarget.index;
+              console.log(
+                `*********************************************************CHANGING DIRECTION, shotIdx assigned: ${this.shotIdx}****`
+              );
+              this.checkX = this.botCurrentTarget.xPos;
+              this.checkY = this.botCurrentTarget.yPos;
+            } else {
+              /*
+              if (this.shotIdx > this.playerBoardArray.length) {
+                console.log('IDX WAS GREATER THAN BOARD LENGTH');
+                this.shotIdx = this.playerBoardArray.length - 1;
+              }
+              */
+              console.log('was false');
+            }
+            break;
+          case 'up':
+            this.shotIdx -= this.boardSize;
+            this.checkY -= this.tileSize;
+            if (this.checkY < this.boardStartY) {
+              console.log('bounds met');
+              console.log('this.shotDirection before:', this.shotDirection);
+              this.shotDirection.splice(this.shotDirection.indexOf('up'), 1);
+              console.log('this.shotDirection after:', this.shotDirection);
+              this.shotIdx = this.botCurrentTarget.index;
+              console.log(
+                `*********************************************************CHANGING DIRECTION, shotIdx assigned: ${this.shotIdx}****`
+              );
+              this.checkX = this.botCurrentTarget.xPos;
+              this.checkY = this.botCurrentTarget.yPos;
+            } else {
+              console.log('was false');
+            }
+            break;
+          case 'down':
+            this.shotIdx += this.boardSize;
+            this.checkY += this.tileSize;
+            if (
+              this.checkY >
+              this.boardStartY - this.tileSize + this.tileSize * this.boardSize
+            ) {
+              console.log('bounds met');
+              console.log('this.shotDirection before:', this.shotDirection);
+              this.shotDirection.splice(this.shotDirection.indexOf('down'), 1);
+              console.log('this.shotDirection after:', this.shotDirection);
+              this.shotIdx = this.botCurrentTarget.index;
+              console.log(
+                `*********************************************************CHANGING DIRECTION, shotIdx assigned: ${this.shotIdx}****`
+              );
+              this.checkX = this.botCurrentTarget.xPos;
+              this.checkY = this.botCurrentTarget.yPos;
+            } else {
+              console.log('was false');
+            }
+            break;
+          default:
+            console.log('error: ship direction cannot be assigned');
+        }
+        this.counter++;
+      } while (this.playerBoardArray[this.shotIdx].hit === true);
+
+      console.log('broke out of DO');
+
+      console.log('shot direction:', this.shotDirection);
+      this.playerBoardArray[this.shotIdx].hit = true;
+      x = this.playerBoardArray[this.shotIdx].xPos;
+      y = this.playerBoardArray[this.shotIdx].yPos;
+      // change what x is equal to
+      // change what y is equal to
+    } else {
+      // Assign random shot on board if no target is selected by bot.
+      this.shotIdx = random;
+      this.playerBoardArray[this.shotIdx].hit = true;
+      x = this.playerBoardArray[this.shotIdx].xPos;
+      y = this.playerBoardArray[this.shotIdx].yPos;
+    }
+    console.log('IDX', this.shotIdx);
+    // ADD here
+    const currentShip = this.playerBoardArray[this.shotIdx].shipType;
     switch (currentShip) {
       case 'carrier':
         shipArray = this.playerCarrier;
@@ -1330,170 +1477,22 @@ export default class Game extends Phaser.Scene {
         console.log('error: no ship type detected in computerShot');
     }
 
-    if (this.botTrackShip === true) {
-      // Pick a random direction to fire in a line (when a ship is hit but not sunk).
-      console.log('this.botShotDirection', this.botShotDirection);
-      if (this.botShotDirection === '') {
-        this.checkX = this.botCurrentTarget.xPos;
-        this.checkY = this.botCurrentTarget.yPos;
-        console.log('shotDir', this.shotDirection);
-        this.directionIdx = Phaser.Math.Between(0, this.shotDirection.length - 1);
-        this.botShotDirection = this.shotDirection[this.directionIdx];
-        console.log('this.idx', this.directionIdx);
-      }
-
-      console.log(`Entering DO - ${this.counter}`);
-      do {
-        console.log('shot dir length', this.shotDirection.length);
-        // Once a direction is removed, find new direction.
-        console.log('Saved dir length: ', this.currentDirections.length);
-        console.log('test, ', typeof this.shotDirection.length);
-        if (this.shotDirection.length < this.currentDirections) {
-          this.directionIdx = Phaser.Math.Between(0, this.shotDirection.length - 1);
-          this.currentDirections--;
-        }
-        console.log(
-          `*****************${
-            this.shotDirection[this.directionIdx]
-          }*****************`
-        );
-        switch (this.shotDirection[this.directionIdx]) {
-          case 'left':
-            this.shotIdx--;
-            this.checkX -= this.tileSize;
-            if (this.checkX < this.boardStartX) {
-              console.log('bounds met');
-              // this.botTrackShip = false;
-              this.shotIdx++;
-              // this.checkX = this.botCurrentTarget.xPos;
-              console.log('this.shotDirection before:', this.shotDirection);
-              this.shotDirection.splice(this.shotDirection.indexOf('left'), 1);
-              console.log('this.shotDirection after:', this.shotDirection);
-              this.botShotDirection = '';
-              console.log(
-                '*****************************************************CHANGING DIRECTION****'
-              );
-              // this.botTrackShip = false;
-              this.shotIdx = random;
-            } else {
-              console.log('was false');
-            }
-            break;
-          case 'right':
-            this.shotIdx++;
-            this.checkX += this.tileSize;
-            if (
-              this.checkX >
-              this.boardStartX - this.tileSize + this.tileSize * this.boardSize
-            ) {
-              console.log('bounds met');
-              // this.botTrackShip = false;
-              this.shotIdx--;
-              // this.checkX = this.botCurrentTarget.xPos;
-              console.log('this.shotDirection before:', this.shotDirection);
-              this.shotDirection.splice(this.shotDirection.indexOf('right'), 1);
-              console.log('this.shotDirection after:', this.shotDirection);
-              this.botShotDirection = '';
-              console.log(
-                '*********************************************************CHANGING DIRECTION****'
-              );
-              // this.botTrackShip = false;
-              console.log('shot direct array, ', this.shotDirection);
-              this.shotIdx = random;
-            } else {
-              console.log('was false');
-            }
-            break;
-          case 'up':
-            this.shotIdx -= this.boardSize;
-            this.checkY -= this.tileSize;
-            if (this.checkY < this.boardStartY) {
-              console.log('bounds met');
-              this.shotIdx += this.boardSize;
-              this.checkY += this.tileSize;
-              // this.shotIdx =
-              console.log('this.shotDirection before:', this.shotDirection);
-              this.shotDirection.splice(this.shotDirection.indexOf('up'), 1);
-              console.log('this.shotDirection after:', this.shotDirection);
-              this.botShotDirection = '';
-              console.log(
-                '*********************************************************CHANGING DIRECTION****'
-              );
-              this.shotIdx = random;
-            } else {
-              console.log('was false');
-            }
-            break;
-          case 'down':
-            this.shotIdx += this.boardSize;
-            this.checkY += this.tileSize;
-            if (
-              this.checkY >
-              this.boardStartY - this.tileSize + this.tileSize * this.boardSize
-            ) {
-              console.log('bounds met');
-              this.shotIdx -= this.boardSize;
-              this.checkY -= this.tileSize;
-              // this.shotIdx =
-              console.log('this.shotDirection before:', this.shotDirection);
-              this.shotDirection.splice(this.shotDirection.indexOf('down'), 1);
-              console.log('this.shotDirection after:', this.shotDirection);
-              this.botShotDirection = '';
-              console.log(
-                '*********************************************************CHANGING DIRECTION****'
-              );
-              this.shotIdx = random;
-            } else {
-              console.log('was false');
-            }
-            break;
-          default:
-            console.log('error: ship direction cannot be assigned');
-        }
-        this.counter++;
-        console.log('TILE SIZE:::', this.tileSize);
-        console.log(
-          `~~~~~~~~~~~~~~~~~~~~~~~<(${
-            this.playerBoardArray[this.shotIdx].id
-          })>~~~~~~~~~~~~~~~~~~~~~~~`
-        );
-        console.log(
-          `RIGHT   checkX:${this.checkX}, cond:${
-            this.boardStartX - this.tileSize + this.tileSize * this.boardSize
-          }`
-        );
-        console.log(`LEFT   checkX:${this.checkX}, cond:${this.boardStartX}`);
-        console.log(`UP   checkY:${this.checkY}, cond:${this.boardStartY}`);
-      } while (this.playerBoardArray[this.shotIdx].hit === true);
-      console.log('broke out of DO');
-
-      console.log('shot direction:', this.shotDirection);
-      this.playerBoardArray[this.shotIdx].hit = true;
-      x = this.playerBoardArray[this.shotIdx].xPos;
-      y = this.playerBoardArray[this.shotIdx].yPos;
-      // change what x is equal to
-      // change what y is equal to
-    } else {
-      this.shotIdx = random;
-      this.playerBoardArray[this.shotIdx].hit = true;
-      x = this.playerBoardArray[this.shotIdx].xPos;
-      y = this.playerBoardArray[this.shotIdx].yPos;
-    }
-
     if (this.playerBoardArray[this.shotIdx].ship === true) {
       // check if the ship is hit in every square.
-
       const notSunk = shipArray.some((element) => !element.hit === true);
       this.playerContainer.add(this.add.sprite(x, y, 'marker-hit').setScale(1.0));
       if (notSunk === false) {
         shipSprite.setTexture(`sunk-${shipTexture}`);
         for (let i = 0; i < shipArray.length; i++) shipArray[i].sunk = true;
         this.botTrackShip = false;
+        this.shotDirection = ['right', 'left', 'down', 'up'];
+        this.botCurrentTarget = [];
       }
     } else if (this.playerBoardArray[this.shotIdx].ship === false) {
       this.playerContainer.add(this.add.sprite(x, y, 'marker-miss').setScale(1.0));
     }
-    this.gameOver = this.isGameOver(); // check for gameover.
+    // Check for gameover.
+    this.gameOver = this.isGameOver();
     if (this.gameOver) {
       this.computerBoardArray = [];
       this.playerBoardArray = [];
@@ -1507,7 +1506,6 @@ export default class Game extends Phaser.Scene {
   cScene(currentPlayer) {
     this.cameras.main.fadeOut(500, 0, 0, 0);
     this.playerContainer.visible = false;
-
     this.computerContainer.visible = false;
     this.computerMarkers.visible = true;
     currentPlayer = this.pName;
@@ -1517,25 +1515,40 @@ export default class Game extends Phaser.Scene {
       this.gamePadActive = true;
     });
   }
+  /*
+  checkSunk() {
+    const shipArray = [
+      this.playerCarrier,
+      this.playerBattleship,
+      this.playerCruiser,
+      this.playerSubmarine,
+      this.playerDestroyer,
+    ];
+    let result = '';
+    let notSunk = true;
+    for (let i = 0; i < shipArray.length; i++) {
+      notSunk = shipArray.some((element) => !element.hit === true);
+      if (notSunk === false) {
+        result = shipArray[i];
+      }
+    }
+    return result;
+  }
+  */
 
   isGameOver() {
-    // check if player won
+    // check if there is a winner.
     if (
-      this.computerBattleship[0].sunk === true &&
-      this.computerCarrier[0].sunk === true &&
-      this.computerCruiser[0].sunk === true &&
-      this.computerSubmarine[0].sunk === true &&
-      this.computerDestroyer[0].sunk === true
-    ) {
-      return true;
-    }
-    // check if computer won
-    if (
-      this.playerBattleship[0].sunk === true &&
-      this.playerCarrier[0].sunk === true &&
-      this.playerCruiser[0].sunk === true &&
-      this.playerSubmarine[0].sunk === true &&
-      this.playerDestroyer[0].sunk === true
+      (this.computerBattleship[0].sunk === true &&
+        this.computerCarrier[0].sunk === true &&
+        this.computerCruiser[0].sunk === true &&
+        this.computerSubmarine[0].sunk === true &&
+        this.computerDestroyer[0].sunk === true) ||
+      (this.playerBattleship[0].sunk === true &&
+        this.playerCarrier[0].sunk === true &&
+        this.playerCruiser[0].sunk === true &&
+        this.playerSubmarine[0].sunk === true &&
+        this.playerDestroyer[0].sunk === true)
     ) {
       return true;
     }
