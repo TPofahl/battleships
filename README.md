@@ -51,7 +51,6 @@ Link to the active game:
 
 ## Issues
 * Certain screen sizes on desktop cause the player's directional pad to intersect with other parts of the gamepad.
-* The Bot does not respond to hitting a players ship. The Bot will always fire at random.
 * Board size can only be set in even increments.
 * Changing browser size on will not adjust the game. Needs to be refreshed from the browser.
 * Cannot change quantity of ships placed.

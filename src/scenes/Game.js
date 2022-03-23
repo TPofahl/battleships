@@ -44,7 +44,7 @@ export default class Game extends Phaser.Scene {
     this.playerSunk = [];
     this.playerMarkers = [];
     // how long a board is shown for after a shot, before scene fade.
-    this.duration = 1800;
+    this.duration = 2000;
   }
 
   init(data) {
@@ -662,6 +662,8 @@ export default class Game extends Phaser.Scene {
           this.computerBoardArray = [];
           this.playerBoardArray = [];
           this.gameCount++;
+          this.shotDirection = ['right', 'left', 'down', 'up'];
+          this.botTrackShip = false;
           this.scene.start('game-over', { winner: this.pName });
           return;
         }
@@ -1278,7 +1280,6 @@ export default class Game extends Phaser.Scene {
     let x;
     let y;
     // Check if any ships are hit, but not sunk.
-    console.log(this.playerBoardArray);
     const isShipHit = this.playerBoardArray.find(
       (element) =>
         // eslint-disable-next-line implicit-arrow-linebreak
@@ -1288,20 +1289,19 @@ export default class Game extends Phaser.Scene {
     // This only applies when there is no current target.
     if (isShipHit && this.botCurrentTarget.length === 0) {
       this.botCurrentTarget = isShipHit;
-      // random = this.botCurrentTarget.index;
       this.shotIdx = this.botCurrentTarget.index;
+      this.checkX = this.botCurrentTarget.xPos;
+      this.checkY = this.botCurrentTarget.yPos;
       // Control for bot to shoot randomly or track.
       this.botTrackShip = true;
     } else {
       do {
         random = Phaser.Math.Between(0, this.playerBoardArray.length - 1);
-        // this.shotIdx = random;
       } while (this.playerBoardArray[random].hit === true);
     }
 
     if (this.botTrackShip === true) {
-      // Pick a random direction to fire in a line (when a ship is hit but not sunk).
-      console.log('this.botShotDirection', this.botShotDirection);
+      // Pick a random direction to fire in a line(when a ship is hit but not sunk).
       if (this.botShotDirection === '') {
         this.checkX = this.botCurrentTarget.xPos;
         this.checkY = this.botCurrentTarget.yPos;
@@ -1309,132 +1309,112 @@ export default class Game extends Phaser.Scene {
         this.botShotDirection = this.shotDirection[this.directionIdx];
       }
 
-      console.log(`Entering DO - ${this.counter}`);
       do {
-        console.log('shot dir length', this.shotDirection.length);
         // Once a direction is removed, find new direction.
-        console.log(
-          `CURRENT--- DIR: ${
-            this.shotDirection[this.directionIdx]
-          }, this.shotDirection.length: ${
-            this.shotDirection.length
-          }, this.currentDirections ${this.currentDirections}`
-        );
         if (this.shotDirection.length < this.currentDirections) {
           this.directionIdx = Phaser.Math.Between(0, this.shotDirection.length - 1);
           this.currentDirections--;
         }
-        console.log(
-          `*****************${
-            this.shotDirection[this.directionIdx]
-          }*****************`
-        );
         switch (this.shotDirection[this.directionIdx]) {
           case 'left':
             this.shotIdx--;
             this.checkX -= this.tileSize;
-            if (this.checkX < this.boardStartX) {
-              console.log('bounds met');
-              console.log('this.shotDirection before:', this.shotDirection);
+            // Prevent searching for a ship that was hit on the playerBoardArray,
+            // with an index that does not exist.
+            if (this.shotIdx < 0) {
+              this.checkX = this.boardStartX - 1;
+            }
+            if (
+              this.checkX < this.boardStartX ||
+              (this.playerBoardArray[this.shotIdx].hit === true &&
+                this.playerBoardArray[this.shotIdx].shipType !==
+                  this.botCurrentTarget.shipType)
+            ) {
               this.shotDirection.splice(this.shotDirection.indexOf('left'), 1);
-              console.log('this.shotDirection after:', this.shotDirection);
               this.shotIdx = this.botCurrentTarget.index;
-              console.log(
-                `*********************************************************CHANGING DIRECTION, shotIdx assigned: ${this.shotIdx}****`
-              );
               this.checkX = this.botCurrentTarget.xPos;
               this.checkY = this.botCurrentTarget.yPos;
-            } else {
-              /*
-              if (this.shotIdx < this.playerBoardArray.length) {
-                console.log('IDX WAS LESS THAN BOARD LENGTH');
-                this.shotIdx = 0;
-              }
-              */
-              console.log('was false');
             }
             break;
           case 'right':
             this.shotIdx++;
             this.checkX += this.tileSize;
+            // Prevent searching for a ship that was hit on the playerBoardArray,
+            // with an index that does not exist.
+            if (this.shotIdx > this.playerBoardArray.length) {
+              this.checkX =
+                this.boardStartX -
+                this.tileSize +
+                this.tileSize * this.boardSize +
+                1;
+            }
             if (
               this.checkX >
-              this.boardStartX - this.tileSize + this.tileSize * this.boardSize
+                this.boardStartX - this.tileSize + this.tileSize * this.boardSize ||
+              (this.playerBoardArray[this.shotIdx].hit === true &&
+                this.playerBoardArray[this.shotIdx].shipType !==
+                  this.botCurrentTarget.shipType)
             ) {
-              console.log('bounds met');
-              console.log('this.shotDirection before:', this.shotDirection);
               this.shotDirection.splice(this.shotDirection.indexOf('right'), 1);
-              console.log('this.shotDirection after:', this.shotDirection);
-              console.log('shot direct array, ', this.shotDirection);
               this.shotIdx = this.botCurrentTarget.index;
-              console.log(
-                `*********************************************************CHANGING DIRECTION, shotIdx assigned: ${this.shotIdx}****`
-              );
               this.checkX = this.botCurrentTarget.xPos;
               this.checkY = this.botCurrentTarget.yPos;
-            } else {
-              /*
-              if (this.shotIdx > this.playerBoardArray.length) {
-                console.log('IDX WAS GREATER THAN BOARD LENGTH');
-                this.shotIdx = this.playerBoardArray.length - 1;
-              }
-              */
-              console.log('was false');
             }
             break;
           case 'up':
             this.shotIdx -= this.boardSize;
             this.checkY -= this.tileSize;
-            if (this.checkY < this.boardStartY) {
-              console.log('bounds met');
-              console.log('this.shotDirection before:', this.shotDirection);
+            // Prevent searching for a ship that was hit on the playerBoardArray,
+            // with an index that does not exist.
+            if (this.shotIdx < 0) {
+              this.checkY = this.boardStartY - 1;
+            }
+            if (
+              this.checkY < this.boardStartY ||
+              (this.playerBoardArray[this.shotIdx].hit === true &&
+                this.playerBoardArray[this.shotIdx].shipType !==
+                  this.botCurrentTarget.shipType)
+            ) {
               this.shotDirection.splice(this.shotDirection.indexOf('up'), 1);
-              console.log('this.shotDirection after:', this.shotDirection);
               this.shotIdx = this.botCurrentTarget.index;
-              console.log(
-                `*********************************************************CHANGING DIRECTION, shotIdx assigned: ${this.shotIdx}****`
-              );
               this.checkX = this.botCurrentTarget.xPos;
               this.checkY = this.botCurrentTarget.yPos;
-            } else {
-              console.log('was false');
             }
             break;
           case 'down':
             this.shotIdx += this.boardSize;
             this.checkY += this.tileSize;
+            // Prevent searching for a ship that was hit on the playerBoardArray,
+            // with an index that does not exist.
+            if (this.shotIdx > this.playerBoardArray.length) {
+              this.checkY =
+                this.boardStartY -
+                this.tileSize +
+                this.tileSize * this.boardSize +
+                1;
+            }
             if (
               this.checkY >
-              this.boardStartY - this.tileSize + this.tileSize * this.boardSize
+                this.boardStartY - this.tileSize + this.tileSize * this.boardSize ||
+              (this.playerBoardArray[this.shotIdx].hit === true &&
+                this.playerBoardArray[this.shotIdx].shipType !==
+                  this.botCurrentTarget.shipType)
             ) {
-              console.log('bounds met');
-              console.log('this.shotDirection before:', this.shotDirection);
               this.shotDirection.splice(this.shotDirection.indexOf('down'), 1);
-              console.log('this.shotDirection after:', this.shotDirection);
               this.shotIdx = this.botCurrentTarget.index;
-              console.log(
-                `*********************************************************CHANGING DIRECTION, shotIdx assigned: ${this.shotIdx}****`
-              );
-              this.checkX = this.botCurrentTarget.xPos;
-              this.checkY = this.botCurrentTarget.yPos;
-            } else {
-              console.log('was false');
             }
             break;
           default:
             console.log('error: ship direction cannot be assigned');
         }
         this.counter++;
+        this.checkX = this.botCurrentTarget.xPos;
+        this.checkY = this.botCurrentTarget.yPos;
       } while (this.playerBoardArray[this.shotIdx].hit === true);
 
-      console.log('broke out of DO');
-
-      console.log('shot direction:', this.shotDirection);
       this.playerBoardArray[this.shotIdx].hit = true;
       x = this.playerBoardArray[this.shotIdx].xPos;
       y = this.playerBoardArray[this.shotIdx].yPos;
-      // change what x is equal to
-      // change what y is equal to
     } else {
       // Assign random shot on board if no target is selected by bot.
       this.shotIdx = random;
@@ -1442,8 +1422,7 @@ export default class Game extends Phaser.Scene {
       x = this.playerBoardArray[this.shotIdx].xPos;
       y = this.playerBoardArray[this.shotIdx].yPos;
     }
-    console.log('IDX', this.shotIdx);
-    // ADD here
+
     const currentShip = this.playerBoardArray[this.shotIdx].shipType;
     switch (currentShip) {
       case 'carrier':
@@ -1491,6 +1470,9 @@ export default class Game extends Phaser.Scene {
     } else if (this.playerBoardArray[this.shotIdx].ship === false) {
       this.playerContainer.add(this.add.sprite(x, y, 'marker-miss').setScale(1.0));
     }
+    this.shotIdx = this.botCurrentTarget.index;
+    this.checkX = this.botCurrentTarget.xPos;
+    this.checkY = this.botCurrentTarget.yPos;
     // Check for gameover.
     this.gameOver = this.isGameOver();
     if (this.gameOver) {
@@ -1498,6 +1480,8 @@ export default class Game extends Phaser.Scene {
       this.playerBoardArray = [];
       this.gamePadActive = true;
       this.gameCount++;
+      this.shotDirection = ['right', 'left', 'down', 'up'];
+      this.botTrackShip = false;
       this.scene.start('game-over', { winner: 'computer' });
     }
     this.time.delayedCall(this.duration, this.cScene, ['computer'], this);
@@ -1515,29 +1499,8 @@ export default class Game extends Phaser.Scene {
       this.gamePadActive = true;
     });
   }
-  /*
-  checkSunk() {
-    const shipArray = [
-      this.playerCarrier,
-      this.playerBattleship,
-      this.playerCruiser,
-      this.playerSubmarine,
-      this.playerDestroyer,
-    ];
-    let result = '';
-    let notSunk = true;
-    for (let i = 0; i < shipArray.length; i++) {
-      notSunk = shipArray.some((element) => !element.hit === true);
-      if (notSunk === false) {
-        result = shipArray[i];
-      }
-    }
-    return result;
-  }
-  */
 
   isGameOver() {
-    // check if there is a winner.
     if (
       (this.computerBattleship[0].sunk === true &&
         this.computerCarrier[0].sunk === true &&
