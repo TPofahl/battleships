@@ -1,7 +1,7 @@
 import Phaser from 'phaser';
 
 let gameStart = false;
-let gameBoard = 10;
+let gameBoard = 8;
 
 export default class MainMenu extends Phaser.Scene {
   constructor() {

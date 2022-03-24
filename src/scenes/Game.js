@@ -1272,7 +1272,6 @@ export default class Game extends Phaser.Scene {
   }
 
   computerShot() {
-    console.log('PBOARD length:', this.playerBoardArray.length);
     let random;
     let shipArray;
     let shipTexture;
