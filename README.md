@@ -2,15 +2,17 @@
   <img src="public/assets/title-battleships.svg" width="500" height=100">
 </p> 
 
-Battleships is a game that was started in the 1931, and was known as the "Paper and Pencil" game following World War I. The first board game was released by Milton Bradley (now called [Hasbro](https://corporate.hasbro.com/en-us)). The first electronic battleship was created in 1967.
+
+Battleships is a game that was started in 1931, and was known as the "Paper and Pencil" game following World War I. The first board game was released by Milton Bradley (now called [Hasbro](https://corporate.hasbro.com/en-us)). The first electronic battleship was created in 1967.
 
 ## Features
-			- Mobile browser game
-			- Responsiveness
-			- Scalable to different browser sizes
-			- Large browser support
-			- Replay without browser refresh
-			- Single player (vs. bot)
+	- Mobile browser game
+	- Responsiveness
+	- Scalable to different browser sizes
+	- Large browser support
+	- Replay without browser refresh
+	- Single player (vs. bot)
+	- Changeable board size
 
 <p>
 	This game is meant for <strong style="color: #EC5113">mobile</strong> browsers, but can be played on desktop. There is only <strong style="color: #EC5113">single player</strong> (vs. bot) mode. The game starts with allowing the player to select a board size. the board sizes can range from <strong style="color: #EC5113">6x6</strong> tiles to <strong style="color: #EC5113">12x12</strong>. Once started, the player will transition to the game scene. In this scene, ships are randomly placed for both the player and computer. The player can pick up ships, rotate, and place them before starting the game. There are 5 ships in the game, ranging from 2-5 grid spaces long.
@@ -51,8 +53,6 @@ Link to the active game:
 
 ## Issues
 * Certain screen sizes on desktop cause the player's directional pad to intersect with other parts of the gamepad.
-* The Bot does not respond to hitting a players ship. The Bot will always fire at random.
-* Board size is set to even spaces only.
-* Changing browser size on PC will not stretch the game. Needs to be refreshed from the browser.
+* Board size can only be set in even increments.
+* Changing browser size on will not adjust the game. Needs to be refreshed from the browser.
 * Cannot change quantity of ships placed.
-* Single-player only.

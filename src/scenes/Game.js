@@ -7,6 +7,8 @@ export default class Game extends Phaser.Scene {
     this.arrowSize = 0;
     this.computerBoardArray = [];
     this.playerBoardArray = [];
+    this.boardStartX = 0;
+    this.boardStartY = 0;
 
     this.computerCarrier = [];
     this.computerSubmarine = [];
@@ -24,13 +26,25 @@ export default class Game extends Phaser.Scene {
     this.gamePadActive = true;
     this.playerContainer = [];
     this.computerContainer = [];
+    // Used for enemy bot logic
+    this.botCurrentTarget = [];
+    this.botShotDirection = '';
+    this.directionIdx = 0;
+    this.botTrackShip = false;
+    this.shotDirection = ['right', 'left', 'down', 'up'];
+    this.currentDirections = 4;
+    this.shotIdx = 0;
+    this.checkX = 0;
+    this.checkY = 0;
+
+    this.counter = 0;
 
     this.computerSunk = [];
     this.computerMarkers = [];
     this.playerSunk = [];
     this.playerMarkers = [];
     // how long a board is shown for after a shot, before scene fade.
-    this.duration = 1800;
+    this.duration = 2000;
   }
 
   init(data) {
@@ -38,7 +52,7 @@ export default class Game extends Phaser.Scene {
     this.pName = data.playerName; // from 'MainMenu' scene
     this.screenWidth = data.screenWidth;
     this.screenHeight = data.screenHeight;
-    this.tileSize = Math.round((this.screenHeight * 0.5) / this.boardSize); // increments of 2 only.
+    this.tileSize = Math.round((this.screenHeight * 0.5) / this.boardSize);
     this.spriteOffset = this.tileSize / 2;
   }
 
@@ -174,6 +188,8 @@ export default class Game extends Phaser.Scene {
     // Find top-left water tile position
     const boardStartX = (this.tileSize + (this.screenWidth - boardLength)) / 2;
     const boardStartY = this.tileSize / 2 + 50;
+    this.boardStartX = boardStartX;
+    this.boardStartY = boardStartY;
     let playerBoardStartY = boardStartY;
     let computerBoardStartY = boardStartY;
     const playerBoardY = playerBoardStartY;
@@ -193,7 +209,6 @@ export default class Game extends Phaser.Scene {
     let texture;
     this.isShot = false;
     // starting position of the gamepad images
-    // const gamePadStartY = playerBoardStartY + this.tileSize * this.boardSize + 25;
     const gamePadStartY = 120 + this.tileSize * this.boardSize;
     const gamePadStartX = this.screenWidth / 2;
 
@@ -646,6 +661,8 @@ export default class Game extends Phaser.Scene {
           this.computerBoardArray = [];
           this.playerBoardArray = [];
           this.gameCount++;
+          this.shotDirection = ['right', 'left', 'down', 'up'];
+          this.botTrackShip = false;
           this.scene.start('game-over', { winner: this.pName });
           return;
         }
@@ -1246,7 +1263,6 @@ export default class Game extends Phaser.Scene {
       this.cameras.main.fadeOut(500, 0, 0, 0);
       this.isPlayerTurn = !this.isPlayerTurn;
       this.playerContainer.visible = false;
-
       this.computerContainer.visible = false;
       this.computerMarkers.visible = true;
       currentPlayer = this.pName; // Use name from MainMenu
@@ -1256,14 +1272,166 @@ export default class Game extends Phaser.Scene {
   }
 
   computerShot() {
+    console.log('PBOARD length:', this.playerBoardArray.length);
     let random;
     let shipArray;
     let shipTexture;
     let shipSprite;
-    do {
-      random = Phaser.Math.Between(0, this.playerBoardArray.length - 1);
-    } while (this.playerBoardArray[random].hit === true);
-    const currentShip = this.playerBoardArray[random].shipType;
+    let x;
+    let y;
+    // Check if any ships are hit, but not sunk.
+    const isShipHit = this.playerBoardArray.find(
+      (element) =>
+        // eslint-disable-next-line implicit-arrow-linebreak
+        element.ship === true && element.sunk === false && element.hit === true
+    );
+    // When a ship is hit but bot sunk, make the tile the starting point for bot to sink the ship.
+    // This only applies when there is no current target.
+    if (isShipHit && this.botCurrentTarget.length === 0) {
+      this.botCurrentTarget = isShipHit;
+      this.shotIdx = this.botCurrentTarget.index;
+      this.checkX = this.botCurrentTarget.xPos;
+      this.checkY = this.botCurrentTarget.yPos;
+      // Control for bot to shoot randomly or track.
+      this.botTrackShip = true;
+    } else {
+      do {
+        random = Phaser.Math.Between(0, this.playerBoardArray.length - 1);
+      } while (this.playerBoardArray[random].hit === true);
+    }
+
+    if (this.botTrackShip === true) {
+      // Pick a random direction to fire in a line(when a ship is hit but not sunk).
+      if (this.botShotDirection === '') {
+        this.checkX = this.botCurrentTarget.xPos;
+        this.checkY = this.botCurrentTarget.yPos;
+        this.directionIdx = Phaser.Math.Between(0, this.shotDirection.length - 1);
+        this.botShotDirection = this.shotDirection[this.directionIdx];
+      }
+
+      do {
+        // Once a direction is removed, find new direction.
+        if (this.shotDirection.length < this.currentDirections) {
+          this.directionIdx = Phaser.Math.Between(0, this.shotDirection.length - 1);
+          this.currentDirections--;
+        }
+        switch (this.shotDirection[this.directionIdx]) {
+          case 'left':
+            this.shotIdx--;
+            this.checkX -= this.tileSize;
+            // Prevent searching for a ship that was hit on the playerBoardArray,
+            // with an index that does not exist.
+            if (
+              this.botCurrentTarget.yPos !==
+                this.playerBoardArray[this.shotIdx].yPos ||
+              this.shotIdx < 0
+            ) {
+              this.checkX = this.boardStartX - 1;
+            }
+            if (
+              this.checkX < this.boardStartX ||
+              (this.playerBoardArray[this.shotIdx].hit === true &&
+                this.playerBoardArray[this.shotIdx].shipType !==
+                  this.botCurrentTarget.shipType)
+            ) {
+              this.shotDirection.splice(this.shotDirection.indexOf('left'), 1);
+              this.shotIdx = this.botCurrentTarget.index;
+              this.checkX = this.botCurrentTarget.xPos;
+              this.checkY = this.botCurrentTarget.yPos;
+            }
+            break;
+          case 'right':
+            this.shotIdx++;
+            this.checkX += this.tileSize;
+            // Prevent searching for a ship that was hit on the playerBoardArray,
+            // with an index that does not exist.
+            if (
+              this.botCurrentTarget.yPos !==
+                this.playerBoardArray[this.shotIdx].yPos ||
+              this.shotIdx + 1 > this.playerBoardArray.length
+            ) {
+              this.checkX =
+                this.boardStartX -
+                this.tileSize +
+                this.tileSize * this.boardSize +
+                1;
+            }
+            if (
+              this.checkX >
+                this.boardStartX - this.tileSize + this.tileSize * this.boardSize ||
+              (this.playerBoardArray[this.shotIdx].hit === true &&
+                this.playerBoardArray[this.shotIdx].shipType !==
+                  this.botCurrentTarget.shipType)
+            ) {
+              this.shotDirection.splice(this.shotDirection.indexOf('right'), 1);
+              this.shotIdx = this.botCurrentTarget.index;
+              this.checkX = this.botCurrentTarget.xPos;
+              this.checkY = this.botCurrentTarget.yPos;
+            }
+            break;
+          case 'up':
+            this.shotIdx -= this.boardSize;
+            this.checkY -= this.tileSize;
+            // Prevent searching for a ship that was hit on the playerBoardArray,
+            // with an index that does not exist.
+            if (this.shotIdx < 0) {
+              this.checkY = this.boardStartY - 1;
+            }
+            if (
+              this.checkY < this.boardStartY ||
+              (this.playerBoardArray[this.shotIdx].hit === true &&
+                this.playerBoardArray[this.shotIdx].shipType !==
+                  this.botCurrentTarget.shipType)
+            ) {
+              this.shotDirection.splice(this.shotDirection.indexOf('up'), 1);
+              this.shotIdx = this.botCurrentTarget.index;
+              this.checkX = this.botCurrentTarget.xPos;
+              this.checkY = this.botCurrentTarget.yPos;
+            }
+            break;
+          case 'down':
+            this.shotIdx += this.boardSize;
+            this.checkY += this.tileSize;
+            // Prevent searching for a ship that was hit on the playerBoardArray,
+            // with an index that does not exist.
+            if (this.shotIdx + 1 > this.playerBoardArray.length) {
+              this.checkY =
+                this.boardStartY -
+                this.tileSize +
+                this.tileSize * this.boardSize +
+                1;
+            }
+            if (
+              this.checkY >
+                this.boardStartY - this.tileSize + this.tileSize * this.boardSize ||
+              (this.playerBoardArray[this.shotIdx].hit === true &&
+                this.playerBoardArray[this.shotIdx].shipType !==
+                  this.botCurrentTarget.shipType)
+            ) {
+              this.shotDirection.splice(this.shotDirection.indexOf('down'), 1);
+              this.shotIdx = this.botCurrentTarget.index;
+            }
+            break;
+          default:
+            console.log('error: ship direction cannot be assigned');
+        }
+        this.counter++;
+        this.checkX = this.botCurrentTarget.xPos;
+        this.checkY = this.botCurrentTarget.yPos;
+      } while (this.playerBoardArray[this.shotIdx].hit === true);
+
+      this.playerBoardArray[this.shotIdx].hit = true;
+      x = this.playerBoardArray[this.shotIdx].xPos;
+      y = this.playerBoardArray[this.shotIdx].yPos;
+    } else {
+      // Assign random shot on board if no target is selected by bot.
+      this.shotIdx = random;
+      this.playerBoardArray[this.shotIdx].hit = true;
+      x = this.playerBoardArray[this.shotIdx].xPos;
+      y = this.playerBoardArray[this.shotIdx].yPos;
+    }
+
+    const currentShip = this.playerBoardArray[this.shotIdx].shipType;
     switch (currentShip) {
       case 'carrier':
         shipArray = this.playerCarrier;
@@ -1295,26 +1463,33 @@ export default class Game extends Phaser.Scene {
       default:
         console.log('error: no ship type detected in computerShot');
     }
-    this.playerBoardArray[random].hit = true;
-    const x = this.playerBoardArray[random].xPos;
-    const y = this.playerBoardArray[random].yPos;
-    if (this.playerBoardArray[random].ship === true) {
+
+    if (this.playerBoardArray[this.shotIdx].ship === true) {
       // check if the ship is hit in every square.
       const notSunk = shipArray.some((element) => !element.hit === true);
       this.playerContainer.add(this.add.sprite(x, y, 'marker-hit').setScale(1.0));
       if (notSunk === false) {
         shipSprite.setTexture(`sunk-${shipTexture}`);
         for (let i = 0; i < shipArray.length; i++) shipArray[i].sunk = true;
+        this.botTrackShip = false;
+        this.shotDirection = ['right', 'left', 'down', 'up'];
+        this.botCurrentTarget = [];
       }
-    } else if (this.playerBoardArray[random].ship === false) {
+    } else if (this.playerBoardArray[this.shotIdx].ship === false) {
       this.playerContainer.add(this.add.sprite(x, y, 'marker-miss').setScale(1.0));
     }
-    this.gameOver = this.isGameOver(); // check for gameover.
+    this.shotIdx = this.botCurrentTarget.index;
+    this.checkX = this.botCurrentTarget.xPos;
+    this.checkY = this.botCurrentTarget.yPos;
+    // Check for gameover.
+    this.gameOver = this.isGameOver();
     if (this.gameOver) {
       this.computerBoardArray = [];
       this.playerBoardArray = [];
       this.gamePadActive = true;
       this.gameCount++;
+      this.shotDirection = ['right', 'left', 'down', 'up'];
+      this.botTrackShip = false;
       this.scene.start('game-over', { winner: 'computer' });
     }
     this.time.delayedCall(this.duration, this.cScene, ['computer'], this);
@@ -1323,7 +1498,6 @@ export default class Game extends Phaser.Scene {
   cScene(currentPlayer) {
     this.cameras.main.fadeOut(500, 0, 0, 0);
     this.playerContainer.visible = false;
-
     this.computerContainer.visible = false;
     this.computerMarkers.visible = true;
     currentPlayer = this.pName;
@@ -1335,23 +1509,17 @@ export default class Game extends Phaser.Scene {
   }
 
   isGameOver() {
-    // check if player won
     if (
-      this.computerBattleship[0].sunk === true &&
-      this.computerCarrier[0].sunk === true &&
-      this.computerCruiser[0].sunk === true &&
-      this.computerSubmarine[0].sunk === true &&
-      this.computerDestroyer[0].sunk === true
-    ) {
-      return true;
-    }
-    // check if computer won
-    if (
-      this.playerBattleship[0].sunk === true &&
-      this.playerCarrier[0].sunk === true &&
-      this.playerCruiser[0].sunk === true &&
-      this.playerSubmarine[0].sunk === true &&
-      this.playerDestroyer[0].sunk === true
+      (this.computerBattleship[0].sunk === true &&
+        this.computerCarrier[0].sunk === true &&
+        this.computerCruiser[0].sunk === true &&
+        this.computerSubmarine[0].sunk === true &&
+        this.computerDestroyer[0].sunk === true) ||
+      (this.playerBattleship[0].sunk === true &&
+        this.playerCarrier[0].sunk === true &&
+        this.playerCruiser[0].sunk === true &&
+        this.playerSubmarine[0].sunk === true &&
+        this.playerDestroyer[0].sunk === true)
     ) {
       return true;
     }
