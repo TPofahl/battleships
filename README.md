@@ -2,6 +2,7 @@
   <img src="public/assets/title-battleships.svg" width="500" height=100">
 </p> 
 
+
 Battleships is a game that was started in 1931, and was known as the "Paper and Pencil" game following World War I. The first board game was released by Milton Bradley (now called [Hasbro](https://corporate.hasbro.com/en-us)). The first electronic battleship was created in 1967.
 
 ## Features
@@ -31,7 +32,7 @@ Link to the active game:
 </p>
 
 <p>
-	<img src="public/assets/readPic.png" width="500" height="400">	
+	<img src="public/assets/readPic2.png" width="500" height="400">	
 </p>
 
 ## Note
