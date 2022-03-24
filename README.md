@@ -11,6 +11,7 @@ Battleships is a game that was started in 1931, and was known as the "Paper and 
 	- Large browser support
 	- Replay without browser refresh
 	- Single player (vs. bot)
+	- Changeable board size
 
 <p>
 	This game is meant for <strong style="color: #EC5113">mobile</strong> browsers, but can be played on desktop. There is only <strong style="color: #EC5113">single player</strong> (vs. bot) mode. The game starts with allowing the player to select a board size. the board sizes can range from <strong style="color: #EC5113">6x6</strong> tiles to <strong style="color: #EC5113">12x12</strong>. Once started, the player will transition to the game scene. In this scene, ships are randomly placed for both the player and computer. The player can pick up ships, rotate, and place them before starting the game. There are 5 ships in the game, ranging from 2-5 grid spaces long.
@@ -30,7 +31,7 @@ Link to the active game:
 </p>
 
 <p>
-	<img src="public/assets/readPic2.png" width="500" height="400">	
+	<img src="public/assets/readPic.png" width="500" height="400">	
 </p>
 
 ## Note
