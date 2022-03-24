@@ -52,7 +52,7 @@ export default class Game extends Phaser.Scene {
     this.pName = data.playerName; // from 'MainMenu' scene
     this.screenWidth = data.screenWidth;
     this.screenHeight = data.screenHeight;
-    this.tileSize = Math.round((this.screenHeight * 0.65) / this.boardSize);
+    this.tileSize = Math.round((this.screenHeight * 0.5) / this.boardSize);
     this.spriteOffset = this.tileSize / 2;
   }
 
