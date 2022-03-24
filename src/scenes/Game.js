@@ -52,7 +52,7 @@ export default class Game extends Phaser.Scene {
     this.pName = data.playerName; // from 'MainMenu' scene
     this.screenWidth = data.screenWidth;
     this.screenHeight = data.screenHeight;
-    this.tileSize = Math.round((this.screenHeight * 0.5) / this.boardSize); // increments of 2 only.
+    this.tileSize = Math.round((this.screenHeight * 0.65) / this.boardSize);
     this.spriteOffset = this.tileSize / 2;
   }
 
@@ -209,7 +209,6 @@ export default class Game extends Phaser.Scene {
     let texture;
     this.isShot = false;
     // starting position of the gamepad images
-    // const gamePadStartY = playerBoardStartY + this.tileSize * this.boardSize + 25;
     const gamePadStartY = 120 + this.tileSize * this.boardSize;
     const gamePadStartX = this.screenWidth / 2;
 
@@ -1273,6 +1272,7 @@ export default class Game extends Phaser.Scene {
   }
 
   computerShot() {
+    console.log('PBOARD length:', this.playerBoardArray.length);
     let random;
     let shipArray;
     let shipTexture;
@@ -1321,7 +1321,11 @@ export default class Game extends Phaser.Scene {
             this.checkX -= this.tileSize;
             // Prevent searching for a ship that was hit on the playerBoardArray,
             // with an index that does not exist.
-            if (this.shotIdx < 0) {
+            if (
+              this.botCurrentTarget.yPos !==
+                this.playerBoardArray[this.shotIdx].yPos ||
+              this.shotIdx < 0
+            ) {
               this.checkX = this.boardStartX - 1;
             }
             if (
@@ -1341,7 +1345,11 @@ export default class Game extends Phaser.Scene {
             this.checkX += this.tileSize;
             // Prevent searching for a ship that was hit on the playerBoardArray,
             // with an index that does not exist.
-            if (this.shotIdx > this.playerBoardArray.length) {
+            if (
+              this.botCurrentTarget.yPos !==
+                this.playerBoardArray[this.shotIdx].yPos ||
+              this.shotIdx + 1 > this.playerBoardArray.length
+            ) {
               this.checkX =
                 this.boardStartX -
                 this.tileSize +
@@ -1386,7 +1394,7 @@ export default class Game extends Phaser.Scene {
             this.checkY += this.tileSize;
             // Prevent searching for a ship that was hit on the playerBoardArray,
             // with an index that does not exist.
-            if (this.shotIdx > this.playerBoardArray.length) {
+            if (this.shotIdx + 1 > this.playerBoardArray.length) {
               this.checkY =
                 this.boardStartY -
                 this.tileSize +
