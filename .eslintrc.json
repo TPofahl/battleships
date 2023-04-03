@@ -9,8 +9,9 @@
     "airbnb-base"
   ],
   "rules": {
+    "eslint linebreak-style": ["error", "windows"],
     "prettier/prettier": ["error", {
-      "usePrettierrc": true
+      "usePrettierrc": false
     }],
     "comma-dangle": ["error", {
       "functions": "never",
