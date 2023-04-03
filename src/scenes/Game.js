@@ -20,7 +20,7 @@ export default class Game extends Phaser.Scene {
     this.playerBattleship = [];
     this.playerDestroyer = [];
     this.playerCruiser = [];
-
+    
     this.isShot = false;
     this.isPlayerTurn = true;
     this.gamePadActive = true;
@@ -52,7 +52,7 @@ export default class Game extends Phaser.Scene {
     this.pName = data.playerName; // from 'MainMenu' scene
     this.screenWidth = data.screenWidth;
     this.screenHeight = data.screenHeight;
-    this.tileSize = Math.round((this.screenHeight * 0.5) / this.boardSize);
+    this.tileSize = Math.round((this.screenHeight * 0.70) / this.boardSize);
     this.spriteOffset = this.tileSize / 2;
   }
 
